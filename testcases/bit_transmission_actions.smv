@@ -1,0 +1,72 @@
+AGENT main
+ACTION : {snd, rec, SR, none};
+
+INVISIBLEVAR
+    sender : Sender;
+    receiver : Receiver;
+
+--PROTOCOL
+--  TRUE: {snd, none};
+--END
+
+--SPECIFICATIONS
+--      SPEC AG((receiver.state=r0 | receiver.state=r1) -> AF sender.ack);
+--      SPEC EF(EG((receiver.state=r0 | receiver.state=r1) & !sender.ack));
+--      SPEC AF(sender.ack -> (sender KNOW (receiver.state=r0 | receiver.state=r1)));
+--      SPEC !E[TRUE BU 10..15 ((sender.bit=1 & sender.ack) -> (sender KNOW (receiver.state=r0)))];
+--      SPEC !EBG 10..15 ((sender.bit=1 & sender.ack) -> (sender SKNOW (receiver.state=r0)));
+--      SPEC ABG 10..15 (sender SKNOW (receiver.state=r0));
+--      SPEC AG((sender.bit=1 & sender.ack) -> (sender KNOW (receiver.state=r0)));
+--SPEC AF((receiver KNOW receiver.state=r0) | (receiver KNOW receiver.state=r1));
+--END
+
+JUSTICE ACT=SR;
+
+
+AGENT Sender
+VAR
+    bit : {0,1};
+    ack : boolean;
+
+ACTION : {sb0,sb1,none};
+
+INIT !ack;
+
+--Sender's protocol
+PROTOCOL
+	(bit=0 & !ack) : sb0;
+	(bit=1 & !ack) : sb1;
+	ack : none;
+END
+
+--Sender's evolution function
+ASSIGN
+next(ack) := case
+   (!ack & receiver.ACT=sendack & (main.ACT=SR | main.ACT=rec)) : TRUE;
+   1 : ack;   
+esac;
+
+
+AGENT Receiver
+VAR
+   state : {empty, r0, r1};
+
+ACTION : {none, sendack};
+
+INIT state=empty;
+
+--Receiver's protocol
+PROTOCOL 
+	(state=empty) : none;
+	(state=r0 | state=r1) : sendack;
+END
+
+--Receiver's evolution function
+ASSIGN
+next(state) := case
+   (sender.ACT=sb0 & state=empty & (main.ACT=SR | main.ACT=snd)) : r0;
+   (sender.ACT=sb1 & state=empty & (main.ACT=SR | main.ACT=snd)) : r1;
+   1 : state;
+esac;
+
+
