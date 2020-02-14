@@ -1107,6 +1107,67 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         return true;
     }
 
+    /*
+    // Premise: spec must be a NNF formula, whose logical connectives are only !, /\ and \/, and ! only preceded assertions
+    // Results: return true if in spec, all temporal operators and path quantifier EE are preceded by path quantifier AA;
+    //          return false otherwise
+    boolean specNeedExplain(Spec spec){
+        if(spec instanceof SpecBDD) return false;
+        SpecExp se=(SpecExp)spec;
+        Operator op=se.getOperator();
+        Spec[] child=se.getChildren();
+
+        if(op==Operator.NOT) return false; // spec=!f and f is an assertion
+        if(op==Operator.AND || op==Operator.OR){
+            return specNeedExplain(child[0]) || specNeedExplain(child[1]);
+        }
+        if(op==Operator.AA) return false;
+
+        // temporal operators and EE need to be explained
+        if(op.isTemporalOp()) return true;
+        if(op==Operator.EE) return true;
+
+        //op is other operator
+        return false;
+    }
+    */
+
+    // Premise: spec must be a NNF formula, whose logical connectives are only !, /\ and \/, and ! only preceded assertions
+    // Results: return true if spec is composition of operator op_to_explain and other operators, composed by /\ or \/
+    //          return false otherwise
+    boolean specNeedExplainEE(Spec spec){
+        if(spec instanceof SpecBDD) return false;
+        SpecExp se=(SpecExp)spec;
+        Operator op=se.getOperator();
+        Spec[] child=se.getChildren();
+
+        // operator op_to_explain need to be explained
+        if(op==Operator.EE) return true;
+
+        if(op==Operator.AND || op==Operator.OR) {
+            return specNeedExplainEE(child[0]) || specNeedExplainEE(child[1]);
+        }else if(op==Operator.NOT || op==Operator.AA) return false;
+        else return false;
+    }
+
+    // Premise: spec must be a NNF formula, whose logical connectives are only !, /\ and \/, and ! only preceded assertions
+    // Results: return true if spec is composition of temporal operators and other operators, composed by /\ or \/
+    //          return false otherwise
+    boolean specNeedExplainTemporalOp(Spec spec){
+        if(spec instanceof SpecBDD) return false;
+        SpecExp se=(SpecExp)spec;
+        Operator op=se.getOperator();
+        Spec[] child=se.getChildren();
+
+        // operator op_to_explain need to be explained
+        if(op.isTemporalOp()) return true;
+
+        if(op==Operator.AND || op==Operator.OR) {
+            return specNeedExplainTemporalOp(child[0]) || specNeedExplainTemporalOp(child[1]);
+        }else if(op==Operator.NOT || op==Operator.AA || op==Operator.EE) return false;
+        else return false;
+    }
+
     // witness() is used to generate the witness of a state formula
     public boolean witness(
             Spec spec,      // the state formula spec. under checked
@@ -1117,17 +1178,18 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         int pathNo = n.getAttribute("pathNo");
         int stateNo = n.getAttribute("stateNo");
 
-        if(spec instanceof SpecBDD){
+//        if(spec instanceof SpecBDD){
+        if(!specNeedExplainEE(spec) && !specNeedExplainTemporalOp(spec)){
             BDD bdd=spec.toBDD();
             if(!bdd.isOne()) graph.addNodeAnnotation(n.getId(),simplifySpecString(spec.toString(),false));
-        }else{ // now spec is an instance of SpecExp
+        }else{
+            // now spec is an instance of SpecExp and need to be explained
+            // spec should be the composition of propositional formula and Ef, composed by logical connectives /\ or \/
             SpecExp se = (SpecExp) spec;
             Operator op = se.getOperator();
             Spec[] child = se.getChildren();
 
-            if(op==Operator.AA || op==Operator.NOT){ // if spec = !f then f is an assertion
-                graph.addNodeAnnotation(n.getId(),simplifySpecString(spec.toString(),false));
-            }else if(op==Operator.AND){
+            if(op==Operator.AND){
                 boolean b1=witness(child[0],n);
                 boolean b2=witness(child[1],n);
                 return b1&&b2;
