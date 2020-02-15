@@ -15,7 +15,7 @@ boolean witness(Spec spec, Node n){
 			if(n|=f) witness(f,n); else witness(g,n);
 		}else if(spec=Ef){
 			witnessE(f,n);
-		}else return false;
+		}
 	} 
 }
 
@@ -28,8 +28,8 @@ boolean witnessE(Spec spec, Node n){
 		if(spec=f/\g){
 			witnessE(f,n);  witnessE(g,n);
 		}else if(spec=f\/g){ // if there exists one prop formula among f and g, explain it 
-			if(f is prop formula) {p=f; q=g;} else {p=g; q=f;}
-			if(n|=p) witnessE(p,n); else witness(q,n);
+			if(f is a prop formula) {p=f; q=g;} else {p=g; q=f;}
+			if(n|=p) witnessE(p,n); else witnessE(q,n);
 		}else if(spec=Ef){
 			witnessE(f,n);
 		}
@@ -72,15 +72,16 @@ boolean explainOnNode(Spec spec, Node n){
 		else // n|=g
 			return explainOnNode(g,n);
 	}
-	if(spec is a principally temporal formula) return true;
-	return fasle;	
+	if(spec is a principally temporal formula) return false;
+	return true;	
 }
 
 // Premises: path^pos |= spec
 // Results: attached necessary satisfied formulas at some nodes over the suffix path^startPos
 boolean explainPath(Spec spec, path, int pos){
 	if(!specNeedExplainEE(spec) && !specNeedExplainTemporalOp(spec)){
-		path[pos].A=path[pos].A union "spec";
+		//path[pos].A=path[pos].A union "spec";
+		witness(spec,path[pos]);
 	}else if(specNeedExplainEE(spec) && !specNeedExplainTemporalOp(spec)){
 		if(spec=f/\g){
 			explainPath(f,path,pos);

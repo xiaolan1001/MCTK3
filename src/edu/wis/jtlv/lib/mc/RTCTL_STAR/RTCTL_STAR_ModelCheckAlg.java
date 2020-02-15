@@ -1147,7 +1147,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         if(op==Operator.AND || op==Operator.OR) {
             return specNeedExplainEE(child[0]) || specNeedExplainEE(child[1]);
         }else if(op==Operator.NOT || op==Operator.AA) return false;
-        else return false;
+        else // op is temporal operator
+            return false;
     }
 
     // Premise: spec must be a NNF formula, whose logical connectives are only !, /\ and \/, and ! only preceded assertions
@@ -1165,10 +1166,12 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         if(op==Operator.AND || op==Operator.OR) {
             return specNeedExplainTemporalOp(child[0]) || specNeedExplainTemporalOp(child[1]);
         }else if(op==Operator.NOT || op==Operator.AA || op==Operator.EE) return false;
-        else return false;
+        else // op is other operator
+            return false;
     }
 
-    // witness() is used to generate the witness of a state formula
+    // Premises: spec is a NNF STATE formula; n |= spec
+    // Results: generate witnesses for state formula
     public boolean witness(
             Spec spec,      // the state formula spec. under checked
             Node n          // node n contains the state satisfying spec
@@ -1178,13 +1181,12 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         int pathNo = n.getAttribute("pathNo");
         int stateNo = n.getAttribute("stateNo");
 
-//        if(spec instanceof SpecBDD){
-        if(!specNeedExplainEE(spec) && !specNeedExplainTemporalOp(spec)){
+        if(!specNeedExplainEE(spec)){
+            // spec is a state formula composed by !, /\, \/ and AA, note that ! only restrict assertions
             BDD bdd=spec.toBDD();
             if(!bdd.isOne()) graph.addNodeAnnotation(n.getId(),simplifySpecString(spec.toString(),false));
-        }else{
-            // now spec is an instance of SpecExp and need to be explained
-            // spec should be the composition of propositional formula and Ef, composed by logical connectives /\ or \/
+        }else{ // specNeedExplainEE(spec)=true
+            // spec is a state formula composed by !, /\, \/, AA, EE
             SpecExp se = (SpecExp) spec;
             Operator op = se.getOperator();
             Spec[] child = se.getChildren();
@@ -1201,65 +1203,342 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 graph.addNodeAnnotation(n.getId(),simplifySpecString(spec.toString(),false));
                 graph.addNodeSpecForExplain(n.getId(),child[0]);
                 //return witnessE(child[0], n);
-            }else{
-                return false;
+                return true;
             }
+            return true;
         }
         return true;
     }
-/*
-    public boolean Witness_old(
-            Spec spec,              // the spec. under checked
-            BDD initState,          // a fair state satisfying spec
-            GraphExplainRTCTLs G,   // the graph that explains spec
-            int pathNo,             // pathNo is the No. of the current path
-            int stateNo             // stateNo is the No. of the current state
-    ) throws ModelCheckAlgException, ModelCheckException, SpecException, SMVParseException, ModuleException {
-        //System.out.println("A witness of " + spec);
-        if ((spec instanceof SpecBDD) || ((SpecExp) spec).getOperator() == Operator.AA || (!spec.hasTemporalOperators() && !spec.hasPathOperators())) {
-            //create a new node as the first state of the witness, f, not f, Ef
-            BDD fromState = initState.satOne(getDesign().moduleUnprimeVars(), false);
-            Node n = null;
-            String stateID = pathNo + "." + stateNo;
-            if (G.getNodeBDD(stateID) == null) {
-                n = G.addStateNode(++createdPathNumber, 0, fromState, null, 0); // create the first state 1.0 of G
-                G.addNodeSatSpec(createdPathNumber + "." + 0, spec, false);
-                n.setAttribute("ui.class", "initialState");
-            } else {//E(f | g) Call by TreeLikeModel
-                G.addNodeSatSpec(pathNo + "." + stateNo, spec, false);
-            }
 
-        } else {
+    // Premises: !specNeedExplainEE(spec) && specNeedExplainTemporalOp(spec); n|=E spec
+    // Results: return true if spec need to be explained over a new lasso path
+    // 			return false if it is enough to explain spec only over node n
+    boolean needCreatePath(Spec spec, Node n){
+        if(spec.isStateSpec()) return false;
+        //now spec is NOT a state formula
+
+        BDD state=graph.getNodeBDD(n.getId());
+
+        SpecExp se=(SpecExp)spec;
+        Operator op=se.getOperator();
+        Spec[] child=se.getChildren();
+
+        if(op==Operator.AND)
+            return needCreatePath(child[0],n) || needCreatePath(child[1],n);
+        else if(op==Operator.OR){
+            BDD f=SpecBDDMap.get(child[0]);
+            BDD g=SpecBDDMap.get(child[1]);
+            if(child[0].isPropSpec() && !state.and(f).isZero()) // f is prop formula && n|=f
+                return false;
+		    else if(child[1].isPropSpec() && !state.and(g).isZero()) // g is prop formula && n|=g
+		        return false;
+            if(!state.and(f).isZero()) //n|=f
+                return needCreatePath(child[0],n);
+            else // n|=g
+                return needCreatePath(child[1],n);
+        }else if(op.isTemporalOp()) // spec is a principally temporal formula
+            return true;
+        else // op==!, EE or AA
+            return false;
+    }
+
+    // Premises: !specNeedExplainEE(spec) && specNeedExplainTemporalOp(spec); n|=E spec; !needCreatePath(spec,n)
+    // Results: explain spec only over node n
+    boolean explainOnNode(Spec spec, Node n) throws ModelCheckException, SpecException, ModelCheckAlgException, SMVParseException, ModuleException {
+        if(spec.isStateSpec()) return witness(spec,n);
+        //now spec is NOT a state formula
+
+        BDD state=graph.getNodeBDD(n.getId());
+
+        SpecExp se=(SpecExp)spec;
+        Operator op=se.getOperator();
+        Spec[] child=se.getChildren();
+
+        if(op==Operator.AND)
+            return explainOnNode(child[0],n) || explainOnNode(child[1],n);
+        else if(op==Operator.OR){
+            BDD f=SpecBDDMap.get(child[0]);
+            BDD g=SpecBDDMap.get(child[1]);
+            if(child[0].isPropSpec() && !state.and(f).isZero()) // f is prop formula && n|=f
+                return witness(child[0],n);
+            else if(child[1].isPropSpec() && !state.and(g).isZero()) // g is prop formula && n|=g
+                return witness(child[1],n);
+            if(!state.and(f).isZero()) //n|=f
+                return explainOnNode(child[0],n);
+            else // n|=g
+                return explainOnNode(child[1],n);
+        }else if(op.isTemporalOp()) // spec is a principally temporal formula
+            return false;
+        else // op==!, EE or AA
+            return true;
+    }
+
+
+    // Premises: n |= E spec; spec is a NNF formula
+    // Results: if spec has to be explained over a path, then generate a new feasible lasso path pi from n, explain spec over pi;
+    //          otherwise, explain spec only on node n
+    public boolean witnessE(Spec spec,
+                            Node n) throws ModelCheckException, SpecException, ModelCheckAlgException, SMVParseException, ModuleException {
+        if(n==null) return false;
+        BDD fromState = n.getAttribute("BDD");
+        int pathNo = n.getAttribute("pathNo");
+        int stateNo = n.getAttribute("stateNo");
+        String fromNodeId = pathNo+"."+stateNo;
+        if (fromState == null || fromState.isZero()) return false;
+
+        if(!specNeedExplainEE(spec) && !specNeedExplainTemporalOp(spec)){
+            // spec is a state formula composed by !,/\,\/,AA
+            witness(spec, n);
+        }else if(specNeedExplainEE(spec)){
+            // spec is a formula composed by !,/\,\/,AA,EE,temporal operators
             SpecExp se = (SpecExp) spec;
             Operator op = se.getOperator();
             Spec[] child = se.getChildren();
-            if (op == Operator.EE) {
-                SMVModule design = (SMVModule) getDesign(); // with the composed tester...
-                BDD fromState = initState.satOne(design.moduleUnprimeVars(), false);
-                Node n = null;
-                String stateID = pathNo + "." + stateNo;
-                if (G.getNodeBDD(stateID) == null) {//Any nested E or A quantifiers.
-                    n = G.addStateNode(pathNo, stateNo, fromState, null, 0); // create the first state 1.0 of G1、G2
-                    n.setAttribute("ui.class", "initialState");
-                } else {
-                    G.addNodeSatSpec(pathNo + "." + stateNo, spec, false);
+
+            if(op==Operator.AND){
+                boolean b1=witnessE(child[0],n);
+                boolean b2=witnessE(child[1],n);
+                return b1&&b2;
+            }else if(op==Operator.OR){
+                Spec p,q;
+                if(child[0].isPropSpec()) {p=child[0]; q=child[1];} else {p=child[1]; q=child[0];}
+                BDD pBdd = SpecBDDMap.get(p);
+                if (!fromState.and(pBdd).isZero())
+                    return witnessE(p,n);
+                else return witnessE(q,n);
+            }else if(op==Operator.EE){
+                return witnessE(child[0],n);
+            }else return false;
+        }else{
+            // now !specNeedExplainEE(spec) && specNeedExplainTemporalOp(spec)
+            // spec is composed by !, \/, /\, AA, temporal operators
+            if(!needCreatePath(spec,n)){
+                return explainOnNode(spec,n);
+            }else{
+                // create a feasible lasso path pi from n such that pi|=spec; and then explainPath(spec, pi, 0);
+                // the tester of spec is not empty, and spec has NOT EE and AA operators
+                SMVModule DT = (SMVModule) getDesign(); // DT is the parallel composition of design and the tester of spec
+                BDD temp, fulfill;
+                int idx_addedIniRestrict=DT.restrictIni(fromState); // restrict the set of initial states to be fromState
+                BDD feasStates = DT.feasible(); // feasStates is the set of feasible states from fromState
+                DT.removeIniRestriction(idx_addedIniRestrict);
+
+                // saving to the previous restriction state
+                Vector<BDD> old_trans_restrictions = DT.getAllTransRestrictions();
+                //Lines 1-2 are handled by the caller. ("verify")
+                // Line 3
+                DT.restrictTrans(feasStates.and(Env.prime(feasStates)));
+                BDD s = fromState;
+                // Lines 5-6
+                while (true) {
+                    temp = DT.allSucc(s).and(DT.allPred(s).not());
+                    if (!temp.isZero())
+                        s = temp.satOne(DT.moduleUnprimeVars(), false);
+                    else break;
                 }
-                TreeLikeModel_old(child[0], G, pathNo, stateNo);
-            } else if (op == Operator.AND) {
-                Witness_old(child[0], initState, G, pathNo, stateNo);
-                Witness_old(child[1], initState, G, pathNo, stateNo);
-            } else if (op == Operator.OR) {
-                BDD c0 = SpecBDDMap.get(child[0]);
-                if (!initState.and(c0).isZero())
-                    Witness_old(child[0], initState, G, pathNo, stateNo);
+                // Line 7: Compute MSCS containing s.
+                BDD feas = DT.allSucc(s);
+                DT.removeAllTransRestrictions();
+                Vector<BDD> prefix = new Vector<BDD>();
+                BDD[] path = DT.shortestPath(fromState, feas);
+                for (int i = 0; i < path.length; i++)
+                    prefix.add(path[i]);
+
+                // //// Calculate "_period".
+                // Line 8: This has to come after line 9, because the way TS.tlv
+                // implements restriction.
+                DT.restrictTrans(feas.and(Env.prime(feas)));
+
+                // Line 10
+                Vector<BDD> period = new Vector<BDD>();
+                period.add(prefix.lastElement());
+
+                // Since the last item of the prefix is the first item of
+                // the period we don't need to print the last item of the prefix.
+                temp = prefix.remove(prefix.size() - 1);
+
+                // LXY: cache the labels of justices and strong fairnesses
+                Vector<Integer> vector_period_idx= new Vector<Integer>();
+                Vector<String> vector_fairness=new Vector<String>();  // for justice and strong fairness
+
+                // Lines 11-13
+                if (DT instanceof ModuleWithWeakFairness) {
+                    ModuleWithWeakFairness weakDes = (ModuleWithWeakFairness) DT;
+                    for (int i = 0; i < weakDes.justiceNum(); i++) {
+                        // Line 12, check if j[i] already satisfied
+                        fulfill = Env.FALSE();
+                        for (int j = 0; j < period.size(); j++) {
+                            fulfill = period.elementAt(j).and(weakDes.justiceAt(i))
+                                    .satOne(weakDes.moduleUnprimeVars(), false);
+                            // fulfill =
+                            // period.elementAt(j).and(design.justiceAt(i)).satOne();
+                            if (!fulfill.isZero())
+                                break;
+                        }
+                        // Line 13
+                        if (fulfill.isZero()) {
+                            BDD from = period.lastElement();
+                            BDD to = feas.and(weakDes.justiceAt(i));
+                            path = weakDes.shortestPath(from, to);
+                            // eliminate the edge since from is already in period
+                            for (int j = 1; j < path.length; j++)
+                                period.add(path[j]);
+
+                            //LXY
+                            vector_period_idx.add((Integer) period.size()-1);
+                            vector_fairness.add("Justice:"+simplifySpecString(weakDes.justiceAt(i).toString(),false));
+                        }
+                    }
+                }
+                // Lines 14-16
+                if (DT instanceof ModuleWithStrongFairness) {
+                    ModuleWithStrongFairness strongDes = (ModuleWithStrongFairness) DT;
+                    for (int i = 0; i < strongDes.compassionNum(); i++) {
+                        if (!feas.and(strongDes.pCompassionAt(i)).isZero()) {
+                            // check if C requirement i is already satisfied
+                            fulfill = Env.FALSE();
+                            for (int j = 0; j < period.size(); j++) {
+                                fulfill = period.elementAt(j).and(
+                                        strongDes.qCompassionAt(i)).satOne(
+                                        strongDes.moduleUnprimeVars(), false);
+                                // fulfill =
+                                // period.elementAt(j).and(design.qCompassionAt(i)).satOne();
+                                if (!fulfill.isZero()) {
+                                    //LXY
+                                    vector_period_idx.add((Integer)j);
+                                    vector_fairness.add("Compassion.q:"+simplifySpecString(strongDes.qCompassionAt(i).toString(),false));
+
+                                    break;
+                                }
+                            }
+
+                            if (fulfill.isZero()) {
+                                BDD from = period.lastElement();
+                                BDD to = feas.and(strongDes.qCompassionAt(i));
+                                path = strongDes.shortestPath(from, to);
+                                // eliminate the edge since from is already in period
+                                for (int j = 1; j < path.length; j++)
+                                    period.add(path[j]);
+
+                                //LXY
+                                vector_period_idx.add((Integer)period.size()-1);
+                                vector_fairness.add("Compassion.q:"+simplifySpecString(strongDes.qCompassionAt(i).toString(),false));
+                            }
+                        }
+                    }
+                }
+                //
+                // Close cycle
+                //
+                // A period of length 1 may be fair, but it might be the case that
+                // period[1] is not a successor of itself. The routine path
+                // will add nothing. To solve this
+                // case we add another state to _period, now it will be OK since
+                // period[1] and period[n] will not be equal.
+
+                // Line 17, but modified
+                if (!period.firstElement().and(period.lastElement()).isZero()) {
+                    // The first and last states are already equal, so we do not
+                    // need to extend them to complete a cycle, unless period is
+                    // a degenerate case of length = 1, which is not a successor of
+                    // self.
+                    if (period.size() == 1) {
+                        // Check if _period[1] is a successor of itself.
+                        if (period.firstElement().and(
+                                DT.succ(period.firstElement())).isZero()) {
+                            // period[1] is not a successor of itself: Add state to
+                            // period.
+                            period.add(DT.succ(period.firstElement()).satOne(
+                                    DT.moduleUnprimeVars(), false));
+                            // period.add(design.succ(period.firstElement()).satOne());
+
+                            // Close cycle.
+                            BDD from = period.lastElement();
+                            BDD to = period.firstElement();
+                            path = DT.shortestPath(from, to);
+                            // eliminate the edges since from and to are already in
+                            // period
+                            for (int i = 1; i < path.length - 1; i++) {
+                                period.add(path[i]);
+                            }
+                        }
+                    }
+                } else {
+                    BDD from = period.lastElement();
+                    BDD to = period.firstElement();
+                    path = DT.shortestPath(from, to);
+                    // eliminate the edges since from and to are already in period
+                    for (int i = 1; i < path.length - 1; i++) {
+                        period.add(path[i]);
+                    }
+                }
+
+                int loopNodeIdx=prefix.size();  // the index of the first node of period
+
+                // LXY: Now prefix and period are prepared, and there is a transition from the last element of period
+                // to the first element (its index is loopNodeIdx) of period
+
+                prefix.addAll(period);
+                // now prefix is the composition of prefix and period, and the first element of prefix is state n.s
+
+                String first_created_edgeId=null;
+                createdPathNumber++; // create a new path no matter the size of path
+                Edge e;
+
+                String pred_nid, cur_nid;
+                pred_nid = fromNodeId;
+                //graph.addNodeSatSpec(fromNodeId, spec, true);
+
+                Vector<String> trunkNodePath=new Vector<String>();   // the trunk node path will be created
+                trunkNodePath.add(fromNodeId);
+
+                for (int i = 1; i < prefix.size(); i++) {
+                    graph.addNode(createdPathNumber, i, prefix.get(i), "");
+                    cur_nid = createdPathNumber + "." + i;
+
+                    trunkNodePath.add(cur_nid);
+
+                    String edgeId=pred_nid + "->" + cur_nid;
+                    e = graph.addEdge(edgeId, pred_nid, cur_nid, true);
+                    if(first_created_edgeId==null) {
+                        first_created_edgeId=edgeId;
+                        e.addAttribute("ui.label",
+                                "Path" + createdPathNumber + "|=" + simplifySpecString(spec.toString(), false));
+                    }
+                    pred_nid = cur_nid;
+                }
+
+                //closing period
+                String to_nodeId=null;
+                if(loopNodeIdx==0) // the size of original prefix is 0
+                    to_nodeId=fromNodeId;
                 else
-                    Witness_old(child[1], initState, G, pathNo, stateNo);
+                    to_nodeId=createdPathNumber+"."+loopNodeIdx;
+                e = graph.addEdge(pred_nid+"->"+to_nodeId, pred_nid, to_nodeId, true);
+
+                // append the fairness annotations to the nodes of this path
+                for(int i=0; i<vector_period_idx.size(); i++){
+                    int idx=(int)vector_period_idx.get(i);
+                    String ann=vector_fairness.get(i);
+                    if(idx==0){
+                        graph.addNodeAnnotation(fromNodeId, ann);
+                    }else{//idx>0
+                        graph.addNodeAnnotation(createdPathNumber+"."+idx, ann);
+                    }
+                }
+
+                DT.setAllTransRestrictions(old_trans_restrictions);
+
+                trunkNodePaths.add(trunkNodePath);
+                loopNodeIndexes.add((Integer)loopNodeIdx);
+                int pathIndex = loopNodeIndexes.size()-1;
+                return explainPath(spec, pathIndex, 0);
             }
         }
         return true;
     }
-*/
 
+    /*
     //----- --------------------------------------------------------------------------------------------------
     // generating a witness of E spec from the node n
     //-------------------------------------------------------------------------------------------------------
@@ -1515,269 +1794,14 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         }
         return true;
     }
+    */
 
-    /*
-    //-------------------------------------------------------------------------------------------------------
-    // generating a witness/counterexample of spec from the created state pathNo.stateNo
-    //-------------------------------------------------------------------------------------------------------
-    public boolean TreeLikeModel_old(
-            Spec spec,              // the spec. under checked
-            GraphExplainRTCTLs G,   // the graph that explains spec
-            int pathNo,             // pathNo is the No. of the current path
-            int stateNo             // stateNo is the No. of the current state
-    ) throws ModelCheckAlgException, ModelCheckException, SpecException, SMVParseException, ModuleException {
-        System.out.println("TreeLikeModel---" + spec);
-//        for (Map.Entry<Spec, BDD> entry : SpecBDDMap.entrySet()) {
-//            System.out.println("key= " + entry.getKey() + " and value= " + entry.getValue());
-//        }
 
-//        for (Map.Entry<Spec, SMVModule> entry : SpecTesterMap.entrySet()) {
-//            System.out.println("key= " + entry.getKey() + " and value= " + entry.getValue());
-//        }
-
-        String stateID = pathNo + "." + stateNo;
-        BDD fromState = G.getNodeBDD(stateID);
-
-        if (fromState == null || fromState.isZero()) return false;
-        if ((spec instanceof SpecBDD) || (!spec.hasTemporalOperators() && !spec.hasPathOperators() && !spec.hasEpistemicOperators())) { // prop is an assertion
-            // generating a witness for an assertion
-            G.addNodeSatSpec(stateID, spec, false);
-            return true;
-        }
-        SpecExp origPropExp = (SpecExp) spec;
-        Operator op = origPropExp.getOperator();
-        Spec[] child = origPropExp.getChildren();
-        boolean Xf = testerIsEmpty(SpecTesterMap.get(spec));
-        if (Xf) {// fTester is empty
-            return Witness_old(spec, fromState, G, pathNo, stateNo);
-        } else if (!Xf && spec.hasCTLOperators()) { // including state formula
-            if (op == Operator.AND) {     //(g &(EX f))、(g &(EF f))、(g &(EBF f))...
-                TreeLikeModel_old(child[0], G, pathNo, stateNo);
-                TreeLikeModel_old(child[1], G, pathNo, stateNo);
-            } else if (op == Operator.OR) {//(g |(E f))
-                BDD c1 = SpecBDDMap.get(child[1]);
-                if (!fromState.and(c1).isZero())
-                    TreeLikeModel_old(child[1], G, pathNo, stateNo);
-                else
-                    TreeLikeModel_old(child[0], G, pathNo, stateNo);
-            }
-        }
-        if (!Xf && !spec.hasCTLOperators()) {// Xf, fUg
-            SMVModule designWithTester = (SMVModule) getDesign(); // with the composed tester...
-            BDD temp, fulfill;
-            BDD feasible = designWithTester.feasible();
-            // saving to the previous restriction state
-            Vector<BDD> old_trans_restrictions = designWithTester.getAllTransRestrictions();
-            //Lines 1-2 are handled by the caller. ("verify")
-            // Line 3
-            designWithTester.restrictTrans(feasible.and(Env.prime(feasible)));
-            BDD s = fromState;
-            // Lines 5-6
-            while (true) {
-                temp = designWithTester.allSucc(s).and(
-                        designWithTester.allPred(s).not());
-                if (!temp.isZero())
-                    s = temp.satOne(designWithTester.moduleUnprimeVars(), false);
-                    // s = temp.satOne();
-                else
-                    break;
-            }
-            // Line 7: Compute MSCS containing s.
-            BDD feas = designWithTester.allSucc(s);
-            designWithTester.removeAllTransRestrictions();
-            Vector<BDD> prefix = new Vector<BDD>();
-            BDD[] path = designWithTester.shortestPath(fromState,
-                    feas);
-            String prefix_last_nodeId;
-            String pred_nid, cur_nid;
-            Edge e;
-            boolean NotYetCreateEdge = true;
-            createdPathNumber++;
-            if (path.length >= 1) prefix.add(path[0]);
-            if (path.length <= 1) { // only include one state: fromState
-                G.addNodeSatSpec(stateID, spec, true);
-                prefix_last_nodeId = stateID;
-            } else { // path.length > 1
-                pred_nid = stateID;
-                G.addNodeSatSpec(stateID, spec, true);
-
-                for (int i = 1; i < path.length; i++) {
-                    cur_nid = createdPathNumber + "." + i;
-                    G.addNode(createdPathNumber, i, path[i], null);
-                    if (NotYetCreateEdge) {
-                        e = G.addEdge("Path #" + createdPathNumber + " |=" + simplifySpecString(spec.toString(), false), pred_nid, cur_nid, true);
-                        e.addAttribute("ui.label", e.getId());
-                        NotYetCreateEdge = false;
-                    } else {
-                        e = G.addEdge(pred_nid + "->" + cur_nid, pred_nid, cur_nid, true);
-                    }
-                    pred_nid = cur_nid;
-                    prefix.add(path[i]);
-                }
-                prefix_last_nodeId = pred_nid; // prefix_last_nodeId is the first state in period
-            }
-
-            // //// Calculate "_period".
-            // Line 8: This has to come after line 9, because the way TS.tlv
-            // implements restriction.
-            designWithTester.restrictTrans(feas.and(Env.prime(feas)));
-
-            // Line 10
-            Vector<BDD> period = new Vector<BDD>();
-            period.add(prefix.lastElement());
-
-            // Since the last item of the prefix is the first item of
-            // the period we don't need to print the last item of the prefix.
-            temp = prefix.remove(prefix.size() - 1);
-
-            // Lines 11-13
-            if (designWithTester instanceof ModuleWithWeakFairness) {
-                ModuleWithWeakFairness weakDes = (ModuleWithWeakFairness) designWithTester;
-                for (int i = 0; i < weakDes.justiceNum(); i++) {
-                    // Line 12, check if j[i] already satisfied
-                    fulfill = Env.FALSE();
-                    for (int j = 0; j < period.size(); j++) {
-                        fulfill = period.elementAt(j).and(weakDes.justiceAt(i))
-                                .satOne(weakDes.moduleUnprimeVars(), false);
-                        // fulfill =
-                        // period.elementAt(j).and(design.justiceAt(i)).satOne();
-                        if (!fulfill.isZero())
-                            break;
-                    }
-                    // Line 13
-                    if (fulfill.isZero()) {
-                        BDD from = period.lastElement();
-                        BDD to = feas.and(weakDes.justiceAt(i));
-                        path = weakDes.shortestPath(from, to);
-                        // eliminate the edge since from is already in period
-                        for (int j = 1; j < path.length; j++)
-                            period.add(path[j]);
-                    }
-                }
-            }
-            // Lines 14-16
-            if (designWithTester instanceof ModuleWithStrongFairness) {
-                ModuleWithStrongFairness strongDes = (ModuleWithStrongFairness) designWithTester;
-                for (int i = 0; i < strongDes.compassionNum(); i++) {
-                    if (!feas.and(strongDes.pCompassionAt(i)).isZero()) {
-                        // check if C requirement i is already satisfied
-                        fulfill = Env.FALSE();
-                        for (int j = 0; j < period.size(); j++) {
-                            fulfill = period.elementAt(j).and(
-                                    strongDes.qCompassionAt(i)).satOne(
-                                    strongDes.moduleUnprimeVars(), false);
-                            // fulfill =
-                            // period.elementAt(j).and(design.qCompassionAt(i)).satOne();
-                            if (!fulfill.isZero())
-                                break;
-                        }
-
-                        if (fulfill.isZero()) {
-                            BDD from = period.lastElement();
-                            BDD to = feas.and(strongDes.qCompassionAt(i));
-                            path = strongDes.shortestPath(from, to);
-                            // eliminate the edge since from is already in period
-                            for (int j = 1; j < path.length; j++)
-                                period.add(path[j]);
-                        }
-                    }
-                }
-            }
-            //
-            // Close cycle
-            //
-            // A period of length 1 may be fair, but it might be the case that
-            // period[1] is not a successor of itself. The routine path
-            // will add nothing. To solve this
-            // case we add another state to _period, now it will be OK since
-            // period[1] and period[n] will not be equal.
-
-            // Line 17, but modified
-            if (!period.firstElement().and(period.lastElement()).isZero()) {
-                // The first and last states are already equal, so we do not
-                // need to extend them to complete a cycle, unless period is
-                // a degenerate case of length = 1, which is not a successor of
-                // self.
-                if (period.size() == 1) {
-                    // Check if _period[1] is a successor of itself.
-                    if (period.firstElement().and(
-                            designWithTester.succ(period.firstElement())).isZero()) {
-                        // period[1] is not a successor of itself: Add state to
-                        // period.
-                        period
-                                .add(designWithTester
-                                        .succ(period.firstElement())
-                                        .satOne(
-                                                designWithTester
-                                                        .moduleUnprimeVars(), false));
-                        // period.add(design.succ(period.firstElement()).satOne());
-
-                        // Close cycle.
-                        BDD from = period.lastElement();
-                        BDD to = period.firstElement();
-                        path = designWithTester.shortestPath(from, to);
-                        // eliminate the edges since from and to are already in
-                        // period
-                        for (int i = 1; i < path.length - 1; i++) {
-                            period.add(path[i]);
-                        }
-                    }
-                }
-            } else {
-                BDD from = period.lastElement();
-                BDD to = period.firstElement();
-                path = designWithTester.shortestPath(from, to);
-                // eliminate the edges since from and to are already in period
-                for (int i = 1; i < path.length - 1; i++) {
-                    period.add(path[i]);
-                }
-            }
-            // LXY: Now period = { period[0]=prefix_last_node, ..., period[length-1]}, and
-            // there is a transition from period[length-1] to period[0]
-            pred_nid = prefix_last_nodeId;
-            int state_idx = prefix.size() + 1;
-            for (int i = 1; i <= period.size() - 1; i++) {
-                cur_nid = createdPathNumber + "." + state_idx;
-                G.addNode(createdPathNumber, state_idx, period.get(i), null, ++currLayer);
-                if (NotYetCreateEdge) {
-                    e = G.addEdge("Path #" + createdPathNumber + " |=" + simplifySpecString(spec.toString(), false), pred_nid, cur_nid, true);
-                    e.addAttribute("ui.label", e.getId());
-                    NotYetCreateEdge = false;
-                } else {
-                    G.addEdge(pred_nid + "->" + cur_nid, pred_nid, cur_nid, true);
-                }
-                state_idx++;
-                pred_nid = cur_nid;
-            }
-            if (NotYetCreateEdge) { // period only has period[0], i.e., prefix_last_node
-                e = G.addEdge("Path #" + createdPathNumber + " |= " + simplifySpecString(spec.toString(), false), pred_nid, prefix_last_nodeId, true);
-                e.addAttribute("ui.label", e.getId());
-                NotYetCreateEdge = false;
-            } else
-                G.addEdge(pred_nid + "->" + prefix_last_nodeId, pred_nid, prefix_last_nodeId, true); // close period
-
-            // Yaniv - the last one is for closing the cycle. He won't be printed.
-            period.add(period.firstElement());
-
-            // There is no need to have the last state of the period
-            // in the counterexample since it already appears in _period[1]
-            // if (period.size() > 1)
-            // temp = period.remove(period.size() -1);
-            // Copy prefix and period.
-            prefix.addAll(period);
-            returned_path = new BDD[prefix.size()];
-            prefix.toArray(returned_path);// a fair computation path of D || T
-            CycleStateNo = returned_path.length - period.size();//the position of the first state of period in path
-            designWithTester.setAllTransRestrictions(old_trans_restrictions);
-        }
-        return true;
-    }
-
-     */
-
+/*
     int NextStateID(int i) {
         return (i + 1) >= (returned_path.length - 1) ? CycleStateNo : (i + 1);
     }
+*/
 
     // return the index of the position of the path
     int at(int pathIndex, // the path is trunkNodePaths.get(pathIndex)
@@ -1808,248 +1832,117 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             return true;
     }
 
+    // Premises: path^pos |= spec
+    // Results: attached necessary satisfied formulas at some nodes over the suffix path^startPos
     public boolean explainPath(Spec spec,            // the spec to be explained
                                int pathIndex,        // the path is trunkNodePaths.get(pathIndex)
-                               int startPos          // spec is explained over the suffix of the path starting from the logical position pos
+                               int pos              // spec is explained over path^pos, the suffix of the path starting from the logical position pos
     ) throws ModelCheckException, SpecException, ModelCheckAlgException, SMVParseException, ModuleException {
         Vector<String> path=trunkNodePaths.get(pathIndex); if(path==null) return false;
         int loopIdx=loopNodeIndexes.get(pathIndex);
-        int startIdx=at(pathIndex,startPos);
+        int startIdx=at(pathIndex,pos);
         String snid=path.get(startIdx);
         Node sn=graph.getNode(snid);
         BDD startState=graph.getNodeBDD(snid);
 
         SMVModule tester=SpecTesterMap.get(spec); // the tester for spec
-//        if(testerIsEmpty(tester)) {  // the tester of spec is empty
-        if(spec.isStateSpec()){
-            witness(spec, graph.getNode(snid));
-        }else{ // the tester of spec is NOT empty
-            // now spec is not SpecBDD, must be SpecExp
+
+        if(!specNeedExplainEE(spec) && !specNeedExplainTemporalOp(spec)){
+            // spec is a state formula composed by !,/\,\/,AA
+            witness(spec,sn);
+        }else if(specNeedExplainEE(spec) && !specNeedExplainTemporalOp(spec)){
+            // spec is a state formula composed by !,/\,\/,EE,AA
             SpecExp se=(SpecExp)spec;
             Operator op=se.getOperator();
             Spec[] child=se.getChildren();
 
             if(op==Operator.AND){
-                boolean b1=explainPath(child[0],pathIndex,startPos);
-                boolean b2=explainPath(child[1],pathIndex,startPos);
-                return b1&&b2;
+                boolean b1=explainPath(child[0],pathIndex,pos);
+                return explainPath(child[1],pathIndex,pos) && b1;
             }else if(op==Operator.OR){
-                BDD c0 = SpecBDDMap.get(child[0]);
-                if (!startState.and(c0).isZero()) return witness(child[0],sn);
-                else return witness(child[1],sn);
-            }else{
-                // now spec is a principally temporal formula
-                if(op==Operator.NEXT){ //spec=X f
-                    BDD X=SpecBDDMap.get(spec);
-                    if(X==null || startState.and(X).isZero()) return false;
-                    int i=at(pathIndex,startPos+1);
-                    BDD nextState=graph.getNodeBDD(path.get(i));
-                    BDD Xf=SpecBDDMap.get(child[0]);
-                    if(Xf==null || nextState.and(Xf).isZero()) return false;
-
-                    graph.addEdgeAnnotation(snid+"->"+path.get(i), simplifySpecString(spec.toString(),false));
-                    return explainPath(child[0],pathIndex,startPos+1);
-
-                }else if(op==Operator.UNTIL){
-                    BDD X=SpecBDDMap.get(spec);
-                    BDD Xf=SpecBDDMap.get(child[0]);
-                    BDD Xg=SpecBDDMap.get(child[1]);
-                    if(X==null) return false;
-                    if(Xf==null) return false;
-                    if(Xg==null) return false;
-                    if(startState.and(X).isZero()) return false;
-
-                    boolean exp=true;  // exp=false then stop explaining f
-                    for(int p=startPos;;p++){
-                        int i=at(pathIndex, p);
-                        String nid=path.get(i);
-                        BDD nState=graph.getNodeBDD(nid); if(nState==null) return false;
-                        if(!nState.and(Xg).isZero()) { // |=g
-                            return explainPath(child[1],pathIndex,p);
-                        }else if(exp && !nState.and(Xf).isZero()){ // |=f
-                            explainPath(child[0],pathIndex,p);
-                            exp=needExplainNextPosition(pathIndex,startPos,p);
-                        }
-                    }
-                }else if(op==Operator.RELEASES){
-                    BDD X=SpecBDDMap.get(spec);
-                    BDD Xf=SpecBDDMap.get(child[0]);
-                    BDD Xg=SpecBDDMap.get(child[1]);
-                    if(X==null) return false;
-                    if(Xf==null) return false;
-                    if(Xg==null) return false;
-                    if(startState.and(X).isZero()) return false;
-
-                    boolean exp=true;  // exp=false then stop explaining f
-                    for(int p=startPos;;p++){
-                        int i=at(pathIndex, p);
-                        String nid=path.get(i);
-                        BDD nState=graph.getNodeBDD(nid); if(nState==null) return false;
-                        if(!nState.and(Xf.and(Xg)).isZero()) {  // |=f/\g
-                            boolean b1=explainPath(child[0],pathIndex,p); // explain f
-                            return b1 && explainPath(child[1],pathIndex,p); // explain g
-                        }else if(exp && !nState.and(Xg).isZero()){  // |=g
-                            explainPath(child[1],pathIndex,p); // explain g
-                            exp=needExplainNextPosition(pathIndex,startPos,p);
-                        }
-                    }
-
-                }else if(op==Operator.B_UNTIL){
-
-                }else if(op==Operator.B_RELEASES){
-
-                }
+                Spec p,q;
+                if(child[0].isPropSpec()) {p=child[0]; q=child[1];} else {p=child[1]; q=child[0];}
+                BDD pBdd = SpecBDDMap.get(p);
+                if (!startState.and(pBdd).isZero())
+                    return explainPath(p,pathIndex,pos);
+                else return explainPath(q,pathIndex,pos);
+            }else if(op==Operator.EE){
+                return witnessE(spec,sn);
+            }else{ // op==AA is impossible
                 return false;
             }
-        }
+        }else{
+            // spec is a principally temporal formula spec=Xf, fUg, fRg, fU a..b g, or f R a..b g
+            // explain spec according to its semantics over path^pos;
+            SpecExp se=(SpecExp)spec;
+            Operator op=se.getOperator();
+            Spec[] child=se.getChildren();
 
-        return true;
-    }
-/*
-    //----- --------------------------------------------------------------------------------------------------
-    // generating a annotation for subformula from the created state pathNo.stateNo
-    //-------------------------------------------------------------------------------------------------------
-    public boolean ExplainPath_old(
-            Spec subspec,              // the spec. under checked
-            GraphExplainRTCTLs G,   // the graph that explains spec
-            int pathNo,             // pathNo is the No. of the current path
-            int stateNo             // stateNo is the No. of the current state
-    ) throws ModelCheckAlgException, ModelCheckException, SpecException, SMVParseException, ModuleException {
-        System.out.println("ExplainPath--------" + subspec);
-//        for (Map.Entry<Spec, BDD> entry : STMap.entrySet()) {
-//            System.out.println("key= " + entry.getKey() + " and value= " + entry.getValue());
-//        }
+            if(op==Operator.NEXT){ //spec=X f
+                BDD X=SpecBDDMap.get(spec);
+                if(X==null || startState.and(X).isZero()) return false;
+                int i=at(pathIndex,pos+1);
+                BDD nextState=graph.getNodeBDD(path.get(i));
+                BDD Xf=SpecBDDMap.get(child[0]);
+                if(Xf==null || nextState.and(Xf).isZero()) return false;
 
-        String stateID = pathNo + "." + stateNo;
-        BDD fromState = G.getNodeBDD(stateID);
-        boolean Xf = testerIsEmpty(SpecTesterMap.get(subspec));
-        if (Xf || (subspec instanceof SpecBDD)||subspec.isStateSpec()) {// fTester is empty
-            return Witness_old(subspec, fromState, G, pathNo, stateNo);
-        }
-        SpecExp origPropExp = (SpecExp) subspec;
-        Operator op = origPropExp.getOperator();
-        Spec[] child = origPropExp.getChildren();
-        if (op == Operator.AND) {
-            ExplainPath_old(child[0], G, pathNo, stateNo);
-            ExplainPath_old(child[1], G, pathNo, stateNo);
-        } else if (op == Operator.OR) {
-            BDD c1 = SpecBDDMap.get(child[1]);
-            if (!fromState.and(c1).isZero())
-                ExplainPath_old(child[1], G, pathNo, stateNo);
-            else
-                ExplainPath_old(child[0], G, pathNo, stateNo);
-        } else if (op == Operator.NEXT) {
-            //直接在下一个状态上标记
-            BDD X0 = SpecBDDMap.get(child[0]);
-            int j = NextStateID(stateNo);
-            if (!returned_path[j].and(X0).isZero()) {
-                ExplainNode(child[0], G, pathNo, j);
-            }
-        } else if (op == Operator.UNTIL) {   //|| op == Operator.RELEASES) {
+                graph.addEdgeAnnotation(snid+"->"+path.get(i), simplifySpecString(spec.toString(),false));
+                return explainPath(child[0],pathIndex,pos+1);
 
-            BDD X0 = SpecBDDMap.get(child[0]), X1 = SpecBDDMap.get(child[1]);
-            int j = stateNo;
-            while (true) {
-                if (!returned_path[j].and(X1).isZero()) {
-                    ExplainNode(child[1], G, pathNo, j);
-                    break;
-                } else if (!returned_path[j].and(X0).isZero()) {
-                    ExplainNode(child[0], G, pathNo, j);
-                }
-                if ((stateNo < CycleStateNo && (j == (returned_path.length - 2))) || ((stateNo >= CycleStateNo) && (NextStateID(j) == stateNo)))
-                    break;
-                j = NextStateID(j);
-            }
-        } else if (op == Operator.RELEASES) {
-            BDD X0 = SpecBDDMap.get(child[0]), X1 = SpecBDDMap.get(child[1]);
-            int j = stateNo;
-            while (true) {
-                //System.out.println("j---"+j+"   stateNo---"+stateNo+"  returned_path.length---"+returned_path.length);
-                if (!returned_path[j].and(X0).isZero()) {
-                    ExplainNode(child[0], G, pathNo, j);
-                    break;
-                } else if (!returned_path[j].and(X1).isZero()) {
-                    ExplainNode(child[1], G, pathNo, j);
-                }
-                if ((stateNo < CycleStateNo && (j == (returned_path.length - 2))) || ((stateNo >= CycleStateNo) && (NextStateID(j) == stateNo)))
-                    break;
-                j = NextStateID(j);
-            }
+            }else if(op==Operator.UNTIL){
+                BDD X=SpecBDDMap.get(spec);
+                BDD Xf=SpecBDDMap.get(child[0]);
+                BDD Xg=SpecBDDMap.get(child[1]);
+                if(X==null) return false;
+                if(Xf==null) return false;
+                if(Xg==null) return false;
+                if(startState.and(X).isZero()) return false;
 
-        } else if (op == Operator.B_UNTIL) {
-            BDD X0 = SpecBDDMap.get(child[0]), X2 = SpecBDDMap.get(child[2]);
-            SpecRange range = (SpecRange) child[1];
-            int a = range.getFrom();
-            int b = range.getTo();
-            int j = 0, k = stateNo;
-            for (j = 0; j <= a - 1; j++) {
-                ExplainNode(child[0], G, pathNo, stateNo);
-                if ((k < CycleStateNo && (stateNo == (returned_path.length - 2))) || ((k >= CycleStateNo) && (NextStateID(stateNo) == k)))
-                    break;
-                stateNo = NextStateID(stateNo);
-            }
-            while (j <= a - 1) {
-                j++;
-                stateNo = NextStateID(stateNo);
-            }
-            for (j = a; j <= b; j++) {
-                if (!returned_path[stateNo].and(X2).isZero()) {
-                    ExplainNode(child[2], G, pathNo, stateNo);
-                    break;
-                } else if (!returned_path[stateNo].and(X0).isZero()) {
-                    ExplainNode(child[0], G, pathNo, stateNo);
+                boolean exp=true;  // exp=false then stop explaining f
+                for(int p=pos;;p++){
+                    int i=at(pathIndex, p);
+                    String nid=path.get(i);
+                    BDD nState=graph.getNodeBDD(nid); if(nState==null) return false;
+                    if(!nState.and(Xg).isZero()) { // |=g
+                        return explainPath(child[1],pathIndex,p);
+                    }else if(exp && !nState.and(Xf).isZero()){ // |=f
+                        explainPath(child[0],pathIndex,p);
+                        exp=needExplainNextPosition(pathIndex,pos,p);
+                    }
                 }
-                if ((k < CycleStateNo && (stateNo == (returned_path.length - 2))) || ((k >= CycleStateNo) && (NextStateID(stateNo) == k)))
-                    break;
-                stateNo = NextStateID(stateNo);
-            }
-        } else if (op == Operator.B_RELEASES) {
-            BDD X0 = SpecBDDMap.get(child[0]), X2 = SpecBDDMap.get(child[2]);
-            SpecRange range = (SpecRange) child[1];
-            int a = range.getFrom();
-            int b = range.getTo();
-            int j = 0, k = stateNo;
-            for (j = 0; j <= a - 1; j++) {
-                ExplainNode(child[2], G, pathNo, stateNo);
-                if ((k < CycleStateNo && (stateNo == (returned_path.length - 2))) || ((k >= CycleStateNo) && (NextStateID(stateNo) == k)))
-                    break;
-                stateNo = NextStateID(stateNo);
-            }
-            while (j <= a - 1) {
-                j++;
-                stateNo = NextStateID(stateNo);
-            }
-            for (j = a; j <= b; j++) {
-                if (!returned_path[stateNo].and(X0).isZero()) {
-                    ExplainNode(child[0], G, pathNo, stateNo);
-                    break;
-                } else if (!returned_path[stateNo].and(X2).isZero()) {
-                    ExplainNode(child[2], G, pathNo, stateNo);
+            }else if(op==Operator.RELEASES){
+                BDD X=SpecBDDMap.get(spec);
+                BDD Xf=SpecBDDMap.get(child[0]);
+                BDD Xg=SpecBDDMap.get(child[1]);
+                if(X==null) return false;
+                if(Xf==null) return false;
+                if(Xg==null) return false;
+                if(startState.and(X).isZero()) return false;
+
+                boolean exp=true;  // exp=false then stop explaining f
+                for(int p=pos;;p++){
+                    int i=at(pathIndex, p);
+                    String nid=path.get(i);
+                    BDD nState=graph.getNodeBDD(nid); if(nState==null) return false;
+                    if(!nState.and(Xf.and(Xg)).isZero()) {  // |=f/\g
+                        boolean b1=explainPath(child[0],pathIndex,p); // explain f
+                        return b1 && explainPath(child[1],pathIndex,p); // explain g
+                    }else if(exp && !nState.and(Xg).isZero()){  // |=g
+                        explainPath(child[1],pathIndex,p); // explain g
+                        exp=needExplainNextPosition(pathIndex,pos,p);
+                    }
                 }
-                if ((k < CycleStateNo && (stateNo == (returned_path.length - 2))) || ((k >= CycleStateNo) && (NextStateID(stateNo) == k)))
-                    break;
-                stateNo = NextStateID(stateNo);
-            }
+
+            }else if(op==Operator.B_UNTIL){
+
+            }else if(op==Operator.B_RELEASES){
+
+            }else
+                return true;
         }
         return true;
     }
-*/
 
-/*
-    public boolean ExplainNode(
-            Spec NodeSpec,              // the spec. under checked
-            GraphExplainRTCTLs G,   // the graph that explains spec
-            int pathNo,             // pathNo is the No. of the current path
-            int stateNo             // stateNo is the No. of the current state
-    ) {
-        if (NodeSpec instanceof SpecBDD) {
-            G.addNodeSatSpec(pathNo + "." + stateNo, NodeSpec, false);
-        } else {
-            G.addNodeSatSpec(pathNo + "." + stateNo, NodeSpec, true);
-        }
-        return true;
-    }
-*/
 
     @Override
     public AlgResultI postAlgorithm() throws AlgExceptionI {
