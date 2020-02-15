@@ -69,6 +69,19 @@ public class GraphExplainRTCTLs extends MultiGraph {
         return n;
     }
 
+    // add a transition from->to
+    public Edge addArc(String id, String from, String to, boolean directed){
+        Edge e = addEdge(id,from,to,directed);
+        if(e==null) return null;
+        //attach a sprite at this node
+        Sprite s = sman.addSprite("sprite-edge-"+id.replace(".","-"));
+        s.attachToEdge(id);
+        s.setPosition(0.5);
+        s.setAttribute("ui.label","");
+        e.setAttribute("sprite", s);
+        return e;
+    }
+
     public boolean setNodeBDD(String nodeId, BDD stateBDD) {
         Node n = getNode(nodeId); if(n==null) return false;
         n.setAttribute("BDD", stateBDD);
@@ -92,12 +105,15 @@ public class GraphExplainRTCTLs extends MultiGraph {
 
     public boolean addEdgeAnnotation(String edgeId, String annotation) {
         Edge e = getEdge(edgeId); if(e==null) return false;
-        if(annotation==null) return false;
-        String oldLabel=e.getAttribute("ui.label");
-        if(oldLabel==null || oldLabel.equals(""))
-            e.setAttribute("ui.label", annotation);
-        else
-            e.setAttribute("ui.label", oldLabel+", \n"+annotation);
+        Sprite s = e.getAttribute("sprite");
+
+        if(annotation!=null) {
+            String old_ann = s.getAttribute("ui.label");
+            if(old_ann==null || old_ann.equals(""))
+                s.setAttribute("ui.label",annotation);
+            else
+                s.setAttribute("ui.label", s.getAttribute("ui.label") + ", \n" + annotation);
+        }
         return true;
     }
 
