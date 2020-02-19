@@ -1,5 +1,6 @@
 package edu.wis.jtlv.lib.mc.RTCTL_STAR;
 
+import edu.wis.jtlv.env.Env;
 import edu.wis.jtlv.env.core.smv.SMVParseException;
 import edu.wis.jtlv.env.module.ModuleException;
 import edu.wis.jtlv.env.spec.SpecException;
@@ -27,11 +28,11 @@ public class ViewerExplainRTCTLs implements ViewerListener {
         System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
         graph = G;
         graph.addAttribute("ui.label", graph.getId());
-
+/*
         for (Node n: graph) {
             n.addAttribute("ui.label", n.getId());
         }
-
+*/
 
 //        for (Edge e: graph.getEachEdge()) {
 //            e.addAttribute("ui.label", e.getId());
@@ -48,7 +49,7 @@ public class ViewerExplainRTCTLs implements ViewerListener {
                         "sprite {size: 0px;text-size: 14; text-alignment: at-right; }"
         );
 
-        Viewer viewer = graph.display();
+        Viewer viewer = graph.display(true);
 
         // The default action when closing the view is to quit
         // the program.
@@ -86,14 +87,16 @@ public class ViewerExplainRTCTLs implements ViewerListener {
     }
 
     public void buttonPushed(String id) {
-        //Node n = graph.getNode(id);
+        //System.out.println(id);
+
+        Node n = graph.getNode(id);
         System.out.println("-------- State "+id+" --------");
-        String str = graph.getNodeSatSpec(id);
+        String str = graph.nodeGetSpec(id);
         if(str!=null && !str.equals("")) {
             System.out.println("--- satisfied formulas ---\n" + str);
             System.out.println("--- state details ---");
         }
-        System.out.println( graph.getNodeStateDetails(id));
+        System.out.println( Env.getOneBDDStateDetails(n.getAttribute("BDD"),"\n"));
         try {
             try {
                 graph.getChecker().explainOneNode(id);

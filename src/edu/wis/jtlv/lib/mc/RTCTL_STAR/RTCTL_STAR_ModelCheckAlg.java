@@ -23,6 +23,55 @@ import java.util.Vector;
 
 import static edu.wis.jtlv.env.Env.all_couples;
 
+class NodePath {
+    public Vector<String> nodes; // the list of node IDs of the node path
+    int loopIndex; // the first node's index of the period of the lasso node path; loopIndex==-1 denotes that the path is finite path
+
+    public NodePath(){
+        nodes = new Vector<String>();
+        loopIndex = -1;
+    }
+
+    public NodePath(Vector<String> nodeIdList, int loopIndex){
+        this.nodes = nodeIdList;
+        this.loopIndex = loopIndex;
+    }
+
+    // return the index of the position of the path
+    int at(int pos         // the logical position pos over the path
+    ) {
+        int i=-1;
+        if(pos<0) return -1;
+        else if(pos<nodes.size()) return pos;
+        else{//pos>=nodes.size()
+            return loopIndex+((pos-loopIndex)%(nodes.size()-loopIndex));
+        }
+    }
+
+    int size(){
+        return nodes.size();
+    }
+
+    String get(int index){
+        return nodes.get(index);
+    }
+
+    // premise: before calling this function, the position pos is already explained over path^startPos
+    // this function return false when the next position of the current position pos is already explained, return true otherwise
+    boolean needExplainNextPosition(int startPos, int pos){
+        int startIdx=at(startPos);
+        int idx=at(pos);
+        if((startIdx<loopIndex && idx==this.size()-1) ||
+                (startIdx>=loopIndex && at(pos+1)==startIdx))
+            return false;
+        else
+            return true;
+    }
+
+}
+
+
+
 public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     private Spec property;
 
@@ -36,8 +85,10 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     private int CycleStateNo = 0; //the position of the first state of period in path
     private BDD[] returned_path = null;// a fair computation path of D || T
 
-    private Vector<Vector<String>> trunkNodePaths=new Vector<Vector<String>>();  // the set of created trunk node paths
-    private Vector<Integer> loopNodeIndexes=new Vector<Integer>();  // the set of indexs of the loop node of these node paths
+//    private Vector<Vector<String>> trunkNodePaths=new Vector<Vector<String>>();  // the set of created trunk node paths
+//    private Vector<Integer> loopNodeIndexes=new Vector<Integer>();  // the set of indexs of the loop node of these node paths
+
+    private Vector<NodePath> trunkNodePaths = new Vector<NodePath>();
 
     private GraphExplainRTCTLs graph; //used for displaying witness graph
     boolean isShowGraph;
@@ -63,6 +114,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     public void setProperty(Spec property) {
         this.property = property;
     }
+
 
     /**
      * <p>
@@ -974,6 +1026,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             BDD initState = Init_unSat.satOne(getDesign().moduleUnprimeVars(), false);
             Node n = graph.addNode(1, 0, initState, "");
             n.setAttribute("ui.class", "initialState");
+            graph.nodeAddSpec("1.0",chkProp);
 
 //            boolean ok = Witness_old(chkProp, Init_unSat, graph, 1, 0);
             boolean ok = witness(chkProp, n);
@@ -1041,7 +1094,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         return null;
     }
 
-    public String simplifySpecString(String spec, boolean delTrue) {
+    public static String simplifySpecString(String spec, boolean delTrue) {
         String res = spec.replaceAll("main.", "");
         if (delTrue) {
             res = res.replace("#[TRUE], \n", "");
@@ -1135,7 +1188,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     // Premise: spec must be a NNF formula, whose logical connectives are only !, /\ and \/, and ! only preceded assertions
     // Results: return true if spec is composition of operator op_to_explain and other operators, composed by /\ or \/
     //          return false otherwise
-    boolean specNeedExplainEE(Spec spec){
+    static boolean specNeedExplainEE(Spec spec){
         if(spec instanceof SpecBDD) return false;
         SpecExp se=(SpecExp)spec;
         Operator op=se.getOperator();
@@ -1154,7 +1207,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     // Premise: spec must be a NNF formula, whose logical connectives are only !, /\ and \/, and ! only preceded assertions
     // Results: return true if spec is composition of temporal operators and other operators, composed by /\ or \/
     //          return false otherwise
-    boolean specNeedExplainTemporalOp(Spec spec){
+    static boolean specNeedExplainTemporalOp(Spec spec){
         if(spec instanceof SpecBDD) return false;
         SpecExp se=(SpecExp)spec;
         Operator op=se.getOperator();
@@ -1184,7 +1237,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         if(!specNeedExplainEE(spec)){
             // spec is a state formula composed by !, /\, \/ and AA, note that ! only restrict assertions
             BDD bdd=spec.toBDD();
-            if(!bdd.isOne()) graph.addNodeAnnotation(n.getId(),simplifySpecString(spec.toString(),false));
+            if(!bdd.isOne()) graph.nodeAddAnnotation(n.getId(),simplifySpecString(spec.toString(),false));
         }else{ // specNeedExplainEE(spec)=true
             // spec is a state formula composed by !, /\, \/, AA, EE
             SpecExp se = (SpecExp) spec;
@@ -1200,8 +1253,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 if (!state.and(c0).isZero()) return witness(child[0],n);
                 else return witness(child[1],n);
             }else if(op==Operator.EE){ // spec=Ef will be explained by clicking on the node n
-                graph.addNodeAnnotation(n.getId(),simplifySpecString(spec.toString(),false));
-                graph.addNodeSpecForExplain(n.getId(),child[0]);
+                graph.nodeAddAnnotation(n.getId(),simplifySpecString(spec.toString(),false));
+                graph.nodeAddSpec(n.getId(),child[0]);
                 //return witnessE(child[0], n);
                 return true;
             }
@@ -1217,7 +1270,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         if(spec.isStateSpec()) return false;
         //now spec is NOT a state formula
 
-        BDD state=graph.getNodeBDD(n.getId());
+        BDD state=graph.nodeGetBDD(n.getId());
 
         SpecExp se=(SpecExp)spec;
         Operator op=se.getOperator();
@@ -1248,7 +1301,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         if(spec.isStateSpec()) return witness(spec,n);
         //now spec is NOT a state formula
 
-        BDD state=graph.getNodeBDD(n.getId());
+        BDD state=graph.nodeGetBDD(n.getId());
 
         SpecExp se=(SpecExp)spec;
         Operator op=se.getOperator();
@@ -1502,7 +1555,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                     e = graph.addArc(edgeId, pred_nid, cur_nid, true);
                     if(first_created_edgeId==null) {
                         first_created_edgeId=edgeId;
-                        graph.addEdgeAnnotation(edgeId,
+                        graph.edgeAddAnnotation(edgeId,
                                 "Path" + createdPathNumber + "|=" + simplifySpecString(spec.toString(), false));
                     }
                     pred_nid = cur_nid;
@@ -1521,17 +1574,21 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                     int idx=(int)vector_period_idx.get(i);
                     String ann=vector_fairness.get(i);
                     if(idx==0){
-                        graph.addNodeAnnotation(fromNodeId, ann);
+                        graph.nodeAddAnnotation(fromNodeId, ann);
                     }else{//idx>0
-                        graph.addNodeAnnotation(createdPathNumber+"."+idx, ann);
+                        graph.nodeAddAnnotation(createdPathNumber+"."+idx, ann);
                     }
                 }
 
                 DT.setAllTransRestrictions(old_trans_restrictions);
 
-                trunkNodePaths.add(trunkNodePath);
-                loopNodeIndexes.add((Integer)loopNodeIdx);
-                int pathIndex = loopNodeIndexes.size()-1;
+                trunkNodePaths.add(new NodePath(trunkNodePath, loopNodeIdx));
+                int pathIndex = trunkNodePaths.size()-1;
+
+//                trunkNodePaths.add(trunkNodePath);
+//                loopNodeIndexes.add((Integer)loopNodeIdx);
+//                int pathIndex = loopNodeIndexes.size()-1;
+
                 return explainPath(spec, pathIndex, 0);
             }
         }
@@ -1803,12 +1860,13 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     }
 */
 
+/*
     // return the index of the position of the path
     int at(int pathIndex, // the path is trunkNodePaths.get(pathIndex)
            int pos         // the logical position pos over the path
     ) {
-        Vector<String> path=trunkNodePaths.get(pathIndex); if(path==null) return -1;
-        int loopIdx=(int)loopNodeIndexes.get(pathIndex);
+        Vector<String> path=trunkNodePaths.get(pathIndex).nodes; if(path==null) return -1;
+        int loopIdx=trunkNodePaths.get(pathIndex).loopIndex; //(int)loopNodeIndexes.get(pathIndex);
         int i=-1;
 
         if(pos<0) return -1;
@@ -1821,16 +1879,17 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     // premise: before calling this function, the position pos is already explained over path^startPos
     // this function return false when the next position of the current position pos is already explained, return true otherwise
     boolean needExplainNextPosition(int pathIndex, int startPos, int pos){
-        Vector<String> path=trunkNodePaths.get(pathIndex); if(path==null) return false;
-        int loopIdx=loopNodeIndexes.get(pathIndex);
+        NodePath path=trunkNodePaths.get(pathIndex); if(path==null) return false;
+        int loopIdx=trunkNodePaths.get(pathIndex).loopIndex; //loopNodeIndexes.get(pathIndex);
         int startIdx=at(pathIndex,startPos);
         int idx=at(pathIndex,pos);
-        if((startIdx<loopIdx && idx==path.size()-1) ||
+        if((startIdx<loopIdx && idx==path.nodes.size()-1) ||
                 (startIdx>=loopIdx && at(pathIndex,pos+1)==startIdx))
             return false;
         else
             return true;
     }
+ */
 
     // Premises: path^pos |= spec
     // Results: attached necessary satisfied formulas at some nodes over the suffix path^startPos
@@ -1838,12 +1897,12 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                                int pathIndex,        // the path is trunkNodePaths.get(pathIndex)
                                int pos              // spec is explained over path^pos, the suffix of the path starting from the logical position pos
     ) throws ModelCheckException, SpecException, ModelCheckAlgException, SMVParseException, ModuleException {
-        Vector<String> path=trunkNodePaths.get(pathIndex); if(path==null) return false;
-        int loopIdx=loopNodeIndexes.get(pathIndex);
-        int startIdx=at(pathIndex,pos);
+        NodePath path = trunkNodePaths.get(pathIndex); if(path==null) return false;
+
+        int startIdx=path.at(pos);
         String snid=path.get(startIdx);
         Node sn=graph.getNode(snid);
-        BDD startState=graph.getNodeBDD(snid);
+        BDD startState=graph.nodeGetBDD(snid);
 
         SMVModule tester=SpecTesterMap.get(spec); // the tester for spec
         boolean expEE=specNeedExplainEE(spec);
@@ -1876,12 +1935,12 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 if(op==Operator.NEXT){ //spec=X f
                     BDD X=SpecBDDMap.get(spec);
                     if(X==null || startState.and(X).isZero()) return false;
-                    int i=at(pathIndex,pos+1);
-                    BDD nextState=graph.getNodeBDD(path.get(i));
+                    int i=path.at(pos+1);
+                    BDD nextState=graph.nodeGetBDD(path.get(i));
                     BDD Xf=SpecBDDMap.get(child[0]);
                     if(Xf==null || nextState.and(Xf).isZero()) return false;
 
-                    graph.addEdgeAnnotation(snid+"->"+path.get(i), simplifySpecString(spec.toString(),false));
+                    graph.edgeAddAnnotation(snid+"->"+path.get(i), simplifySpecString(spec.toString(),false));
                     return explainPath(child[0],pathIndex,pos+1);
 
                 }else if(op==Operator.UNTIL){
@@ -1895,14 +1954,14 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
 
                     boolean exp=true;  // exp=false then stop explaining f
                     for(int p=pos;;p++){
-                        int i=at(pathIndex, p);
+                        int i=path.at(p);
                         String nid=path.get(i);
-                        BDD nState=graph.getNodeBDD(nid); if(nState==null) return false;
+                        BDD nState=graph.nodeGetBDD(nid); if(nState==null) return false;
                         if(!nState.and(Xg).isZero()) { // |=g
                             return explainPath(child[1],pathIndex,p);
                         }else if(exp && !nState.and(Xf).isZero()){ // |=f
                             explainPath(child[0],pathIndex,p);
-                            exp=needExplainNextPosition(pathIndex,pos,p);
+                            exp=path.needExplainNextPosition(pos,p);
                         }
                     }
                 }else if(op==Operator.RELEASES){
@@ -1916,15 +1975,15 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
 
                     boolean exp=true;  // exp=false then stop explaining f
                     for(int p=pos;;p++){
-                        int i=at(pathIndex, p);
+                        int i=path.at(p);
                         String nid=path.get(i);
-                        BDD nState=graph.getNodeBDD(nid); if(nState==null) return false;
+                        BDD nState=graph.nodeGetBDD(nid); if(nState==null) return false;
                         if(!nState.and(Xf.and(Xg)).isZero()) {  // |=f/\g
                             boolean b1=explainPath(child[0],pathIndex,p); // explain f
                             return b1 && explainPath(child[1],pathIndex,p); // explain g
                         }else if(exp && !nState.and(Xg).isZero()){  // |=g
                             explainPath(child[1],pathIndex,p); // explain g
-                            exp=needExplainNextPosition(pathIndex,pos,p);
+                            exp=path.needExplainNextPosition(pos,p);
                         }
                     }
 

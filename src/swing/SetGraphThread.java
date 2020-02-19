@@ -146,10 +146,10 @@ public class SetGraphThread implements Runnable, ViewerListener, ActionListener 
                 e.printStackTrace();
             }
         } else if (graph instanceof GraphExplainRTCTLs) {
-            str = ((GraphExplainRTCTLs) graph).getNodeSatSpec(id);
+            str = ((GraphExplainRTCTLs) graph).nodeGetSpec(id);
             if (str != null && !str.equals(""))
                 insertDocument(nodeConsole, "\n" + "[satisfies " + str + "]", Color.BLACK, 1);
-            insertDocument(nodeConsole, "\n" + ((GraphExplainRTCTLs) graph).getNodeStateDetails(id), Color.BLACK, 1);
+            insertDocument(nodeConsole, "\n" + ((GraphExplainRTCTLs) graph).nodeGetStateDetails(id), Color.BLACK, 1);
             try {
                 ((GraphExplainRTCTLs) graph).getChecker().explainOneNode(id);
             } catch (ModelCheckAlgException e) {
