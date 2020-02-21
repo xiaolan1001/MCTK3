@@ -1,6 +1,5 @@
 package edu.wis.jtlv.lib.mc.RTCTL_STAR;
 
-import edu.wis.jtlv.env.Env;
 import edu.wis.jtlv.env.core.smv.SMVParseException;
 import edu.wis.jtlv.env.module.ModuleException;
 import edu.wis.jtlv.env.spec.SpecException;
@@ -87,16 +86,10 @@ public class ViewerExplainRTCTLs implements ViewerListener {
     }
 
     public void buttonPushed(String id) {
-        //System.out.println(id);
-
         Node n = graph.getNode(id);
-        System.out.println("-------- State "+id+" --------");
-        String str = graph.nodeGetSpec(id);
-        if(str!=null && !str.equals("")) {
-            System.out.println("--- satisfied formulas ---\n" + str);
-            System.out.println("--- state details ---");
-        }
-        System.out.println( Env.getOneBDDStateDetails(n.getAttribute("BDD"),"\n"));
+        System.out.println("---------------- State "+id+" ----------------");
+        System.out.println(graph.nodeGetInfo(id,true));
+
         try {
             try {
                 graph.getChecker().explainOneNode(id);
