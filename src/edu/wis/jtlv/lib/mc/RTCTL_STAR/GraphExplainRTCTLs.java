@@ -177,7 +177,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
         if(specNum+annNum<=0) return;
 
         int labelHeight=40;
-        int z=(int)(labelHeight*(specNum+annNum)/2.0);
+        int z=(int)(labelHeight*(specNum+annNum)/2.0)-20;
         for(int i=1;i<=specNum;i++){
             Sprite s = n.getAttribute("spriteSpec"+i); if(s==null) return;
             s.setPosition(StyleConstants.Units.PX,30,30,z);
