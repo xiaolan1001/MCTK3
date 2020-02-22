@@ -89,7 +89,7 @@ public class SetGraphThread implements Runnable, ViewerListener, ActionListener 
                         "edge { size: 3px; shape: line; fill-color: blue; arrow-size: 5px, 6px; arrow-shape: arrow; text-size: 18;" +
                         "text-background-mode: rounded-box; text-background-color: #fff7bc; text-alignment: at-left; text-padding: 2;} " +
                         "edge.epistemicEdge { fill-color: gold; shape: cubic-curve;} " +
-                        "sprite {size: 0px;text-size: 20; text-alignment: at-right; }"
+                        "sprite {size: 0px;text-size: 20; text-alignment: at-right;}"
         );
 
         graph.setAutoCreate(false);

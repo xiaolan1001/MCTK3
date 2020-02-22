@@ -433,17 +433,17 @@ public class SpecExp implements Spec {
 		if (op == Operator.EU)
 			return "E[" + ch[0] + " U " + ch[1] + "]";
 		if (op == Operator.ABF)
-			return "AF[" + ch[0] + " " + ch[1] + "]";
+			return "ABF[" + ch[0] + " " + ch[1] + "]";
 		if (op == Operator.EBF)
-			return "EF[" + ch[0] + " " + ch[1] + "]";
+			return "EBF[" + ch[0] + " " + ch[1] + "]";
 		if (op == Operator.ABG)
-			return "AG[" + ch[0] + " " + ch[1] + "]";
+			return "ABG[" + ch[0] + " " + ch[1] + "]";
 		if (op == Operator.EBG)
-			return "EG[" + ch[0] + " " + ch[1] + "]";
+			return "EBG[" + ch[0] + " " + ch[1] + "]";
 		if (op == Operator.ABU)
-			return "A[" + ch[0] + " U " + ch[1] + " " + ch[2] + "]";
+			return "A[" + ch[0] + " BU " + ch[1] + " " + ch[2] + "]";
 		if (op == Operator.EBU)
-			return "E[" + ch[0] + " U " + ch[1] + " " + ch[2] + "]";
+			return "E[" + ch[0] + " BU " + ch[1] + " " + ch[2] + "]";
 
 		//special cases of path quantifiers of ATL* and CTL*
 		if (op == Operator.EE)
@@ -471,24 +471,24 @@ public class SpecExp implements Spec {
 
 		// epistemic
 		if (op == Operator.KNOW)
-			return "(" + ch[0] + " K " + ch[1] + ")";
+			return "(" + ch[0] + " KNOW " + ch[1] + ")";
 		if (op == Operator.NKNOW)
-			return "(" + ch[0] + " NK " + ch[1] + ")";
+			return "(" + ch[0] + " NKNOW " + ch[1] + ")";
 		if (op == Operator.SKNOW)
-			return "(" + ch[0] + " SKN " + ch[1] + ")";
+			return "(" + ch[0] + " SKNOW " + ch[1] + ")";
 		if (op == Operator.NSKNOW)
-			return "(" + ch[0] + " NSKN " + ch[1] + ")";
+			return "(" + ch[0] + " NSKNOW " + ch[1] + ")";
 
 		//special cases of RTLTL
 		if (op==Operator.B_FINALLY || op==Operator.B_GLOBALLY) {
 			String o="";
-			if(op==Operator.B_FINALLY) o="F"; else o="G";
+			if(op==Operator.B_FINALLY) o="BF"; else o="BG";
 			boolean b=false; if(ch[1] instanceof SpecExp){ SpecExp se=(SpecExp)ch[1]; if(!se.getOperator().isUnary()) b=true;}
 			return o+" " + ch[0] + " " + (b?"(":"") + ch[1] + (b?")":"");
 		}
 		if (op == Operator.B_UNTIL || op == Operator.B_RELEASES) {
 			String o="";
-			if(op == Operator.B_UNTIL) o="U"; else o="R";
+			if(op == Operator.B_UNTIL) o="BU"; else o="BR";
 
 			boolean b1=false; if(ch[0] instanceof SpecExp){ SpecExp se=(SpecExp)ch[0]; if(!se.getOperator().isUnary()) b1=true;}
 			boolean b2=false; if(ch[2] instanceof SpecExp){ SpecExp se=(SpecExp)ch[2]; if(!se.getOperator().isUnary()) b2=true;}

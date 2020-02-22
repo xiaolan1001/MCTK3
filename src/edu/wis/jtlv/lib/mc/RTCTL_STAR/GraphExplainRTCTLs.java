@@ -189,7 +189,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
         s.setAttribute("needExplained", needExplained);
 
         s.setAttribute("explained", false);
-        s.setAttribute("ui.label","|="+RTCTL_STAR_ModelCheckAlg.simplifySpecString(spec,false));
+        s.setAttribute("ui.label","⊨"+RTCTL_STAR_ModelCheckAlg.simplifySpecString(spec,false));
         s.attachToNode(nodeId);
 
         n.setAttribute("spriteSpec"+specNum, s);
@@ -307,6 +307,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
 
         Sprite s = sman.addSprite(edgeId.replace(".","+")+"-spriteEdgeSpec-"+(++specNum));
         s.setAttribute("spec",spec);
+        s.addAttribute("ui.style", "text-color:blue;");
 
         if(spec.isPropSpec() && spec.toBDD().isOne()) return true;  // do not explain TRUE
         boolean needExplained = !onlyShow &&
@@ -318,8 +319,8 @@ public class GraphExplainRTCTLs extends MultiGraph {
 
         s.setAttribute("explained", false);
         s.setAttribute("ui.label",
-                "Path"+(path.pathIndex+1)+((pos==0)?"":","+pos)
-                        +"|="+RTCTL_STAR_ModelCheckAlg.simplifySpecString(spec,false));
+                "path"+(path.pathIndex+1)+((pos==0)?"":","+pos)
+                        +"⊨"+RTCTL_STAR_ModelCheckAlg.simplifySpecString(spec,false));
         s.attachToEdge(edgeId);
 
         e.setAttribute("spriteSpec"+specNum, s);
