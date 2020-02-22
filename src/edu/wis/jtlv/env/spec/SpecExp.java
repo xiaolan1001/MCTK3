@@ -480,17 +480,20 @@ public class SpecExp implements Spec {
 			return "(" + ch[0] + " NSKN " + ch[1] + ")";
 
 		//special cases of RTLTL
-		if (op == Operator.B_FINALLY)
-//			return "(BF " + ch[0] + " " + ((SpecRange)ch[0]).getOriginSpec() + ")";
-			return "(F " + ch[0] + " " + ch[1] + ")";
-		if (op == Operator.B_GLOBALLY)
-//			return "(BG " + ch[0] + " " + ((SpecRange)ch[0]).getOriginSpec() + ")";
-			return "(G " + ch[0] + " " + ch[1] + ")";
-		if (op == Operator.B_UNTIL)
-//			return "("+((SpecRange)ch[0]).getOriginLeftSpec()+" BU " +ch[0]+ " " + ((SpecRange)ch[0]).getOriginSpec() + ")";
-			return "(" + ch[0] + " U " + ch[1] + " " + ch[2] + ")";
-		if (op == Operator.B_RELEASES)
-			return "(" + ch[0] + " R " + ch[1] + " " + ch[2] + ")";
+		if (op==Operator.B_FINALLY || op==Operator.B_GLOBALLY) {
+			String o="";
+			if(op==Operator.B_FINALLY) o="F"; else o="G";
+			boolean b=false; if(ch[1] instanceof SpecExp){ SpecExp se=(SpecExp)ch[1]; if(!se.getOperator().isUnary()) b=true;}
+			return o+" " + ch[0] + " " + (b?"(":"") + ch[1] + (b?")":"");
+		}
+		if (op == Operator.B_UNTIL || op == Operator.B_RELEASES) {
+			String o="";
+			if(op == Operator.B_UNTIL) o="U"; else o="R";
+
+			boolean b1=false; if(ch[0] instanceof SpecExp){ SpecExp se=(SpecExp)ch[0]; if(!se.getOperator().isUnary()) b1=true;}
+			boolean b2=false; if(ch[2] instanceof SpecExp){ SpecExp se=(SpecExp)ch[2]; if(!se.getOperator().isUnary()) b2=true;}
+			return (b1?"(":"") + ch[0] + (b1?") ":" ") + o + " " + ch[1] + (b2?" (":" ") + ch[2] + (b2?")":"");
+		}
 
 		// simple unary
 		if (op.isUnary()) {
