@@ -414,6 +414,131 @@ public class SpecExp implements Spec {
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
+
+	public String toString() {
+		if(this.isPropSpec()){
+			try {
+				return this.toBDD().toString();
+			} catch (SpecException e) {
+				e.printStackTrace();
+			}
+		}
+
+		Operator op = this.getOperator();
+		Spec[] ch = this.getChildren();
+
+		// special cases
+		if (op == Operator.AU)
+			return "A[" + ch[0] + " U " + ch[1] + "]";
+		if (op == Operator.EU)
+			return "E[" + ch[0] + " U " + ch[1] + "]";
+		if (op == Operator.ABF)
+			return "AF[" + ch[0] + " " + ch[1] + "]";
+		if (op == Operator.EBF)
+			return "EF[" + ch[0] + " " + ch[1] + "]";
+		if (op == Operator.ABG)
+			return "AG[" + ch[0] + " " + ch[1] + "]";
+		if (op == Operator.EBG)
+			return "EG[" + ch[0] + " " + ch[1] + "]";
+		if (op == Operator.ABU)
+			return "A[" + ch[0] + " U " + ch[1] + " " + ch[2] + "]";
+		if (op == Operator.EBU)
+			return "E[" + ch[0] + " U " + ch[1] + " " + ch[2] + "]";
+
+		//special cases of path quantifiers of ATL* and CTL*
+		if (op == Operator.EE)
+			return "E[" + ch[0] + "]";
+		if (op == Operator.AA)
+			return "A[" + ch[0] + "]";
+		if (op == Operator.CAN_ENFORCE) {
+			String agt_list = "";
+			if(ch.length>1) {
+				agt_list+=ch[0];
+				for (int i = 1; i < ch.length-1; i++)
+					agt_list+=","+ch[i];
+			}
+			return "<" + agt_list + "> " + ch[ch.length - 1];
+		}
+		if (op == Operator.CANNOT_AVOID) {
+			String agt_list = "";
+			if(ch.length>1) {
+				agt_list+=ch[0];
+				for (int i = 1; i < ch.length-1; i++)
+					agt_list+=","+ch[i];
+			}
+			return "[" + agt_list + "] " + ch[ch.length - 1];
+		}
+
+		// epistemic
+		if (op == Operator.KNOW)
+			return "(" + ch[0] + " K " + ch[1] + ")";
+		if (op == Operator.NKNOW)
+			return "(" + ch[0] + " NK " + ch[1] + ")";
+		if (op == Operator.SKNOW)
+			return "(" + ch[0] + " SKN " + ch[1] + ")";
+		if (op == Operator.NSKNOW)
+			return "(" + ch[0] + " NSKN " + ch[1] + ")";
+
+		//special cases of RTLTL
+		if (op == Operator.B_FINALLY)
+//			return "(BF " + ch[0] + " " + ((SpecRange)ch[0]).getOriginSpec() + ")";
+			return "(F " + ch[0] + " " + ch[1] + ")";
+		if (op == Operator.B_GLOBALLY)
+//			return "(BG " + ch[0] + " " + ((SpecRange)ch[0]).getOriginSpec() + ")";
+			return "(G " + ch[0] + " " + ch[1] + ")";
+		if (op == Operator.B_UNTIL)
+//			return "("+((SpecRange)ch[0]).getOriginLeftSpec()+" BU " +ch[0]+ " " + ((SpecRange)ch[0]).getOriginSpec() + ")";
+			return "(" + ch[0] + " U " + ch[1] + " " + ch[2] + ")";
+		if (op == Operator.B_RELEASES)
+			return "(" + ch[0] + " R " + ch[1] + " " + ch[2] + ")";
+
+		// simple unary
+		if (op.isUnary()) {
+			String o="";
+			switch (op){
+				case NOT: o="!"; break;
+				case FINALLY: o="F"; break;
+				case GLOBALLY: o="G"; break;
+				case HISTORICALLY: o="H"; break;
+				case NEXT: o="X"; break;
+				case NOT_PREV_NOT: o="Z"; break;
+				case ONCE: o="O"; break;
+				case PREV: o="Y"; break;
+				default: o="";
+			}
+
+			boolean b=false; if(ch[0] instanceof SpecExp){ SpecExp se=(SpecExp)ch[0]; if(!se.getOperator().isUnary()) b=true;}
+			return o + (b?"(":" ") + ch[0] + (b?")":"");
+		}
+		// simple binary AND, OR, XOR, XNOR, IFF,
+		//			IMPLIES, RELEASES, SINCE, TRIGGERED, UNTIL, ABF, ABG, EBF, EBG, AU,
+		//			EU, B_FINALLY, B_GLOBALLY, KNOW, NKNOW, SKNOW, NSKNOW
+		if (op.isBinary()) {
+			String o="";
+			switch (op){
+				case AND: o="&"; break;
+				case OR: o="|"; break;
+				case XOR: o="xor"; break;
+				case XNOR: o="xnor"; break;
+				case IFF: o="<->"; break;
+				case IMPLIES: o="->"; break;
+				case RELEASES: o="R"; break;
+				case SINCE: o="S"; break;
+				case TRIGGERED: o="T"; break;
+				default: o="";
+			}
+			//return "(" + ch[0] + " " + o + " " + ch[1] + ")";
+
+			boolean b1=false; if(ch[0] instanceof SpecExp){ SpecExp se=(SpecExp)ch[0]; if(!se.getOperator().isUnary()) b1=true;}
+			boolean b2=false; if(ch[1] instanceof SpecExp){ SpecExp se=(SpecExp)ch[1]; if(!se.getOperator().isUnary()) b2=true;}
+			return (b1?"(":"") + ch[0] + (b1?") ":" ") + o + (b2?" (":" ") + ch[1] + (b2?")":"");
+		}
+
+		return "[!#$! Cannot Identify Expression]";
+	}
+
+
+/*
 	public String toString() {
 		Operator op = this.getOperator();
 		Spec[] ch = this.getChildren();
@@ -495,6 +620,7 @@ public class SpecExp implements Spec {
 
 		return "[!#$! Cannot Identify Expression]";
 	}
+*/
 
 	/*
 	 * (non-Javadoc)

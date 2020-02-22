@@ -11,10 +11,6 @@ import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants;
 import org.graphstream.ui.spriteManager.Sprite;
 import org.graphstream.ui.spriteManager.SpriteManager;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 class GraphElementAttachedSpec{
     int type; // 0--for node; 1--for edge
     String id; // the id of the element( node or edge)
@@ -123,52 +119,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
         return n;
     }
 
-    public void nodeRefreshLabel(String nodeId){
-        Node n = getNode(nodeId); if(n==null) return;
-        String ann = n.getAttribute("additionAnnotation");
-        String nodeLabel="";
 
-        LinkedHashMap<String, GraphElementAttachedSpec> mapSpecs = n.getAttribute("mapSpecs");
-        if(mapSpecs==null) return;
-        Iterator iter = mapSpecs.entrySet().iterator();
-        while(iter.hasNext()){
-            Map.Entry entry = (Map.Entry) iter.next();
-            String strSpec = (String) entry.getKey();
-            GraphElementAttachedSpec specInfo= (GraphElementAttachedSpec) entry.getValue();
-
-            //for nodes
-            if(specInfo.type==0){
-                String ss = RTCTL_STAR_ModelCheckAlg.simplifySpecString(strSpec,false);
-                if(!ss.equals(""))
-                    if(nodeLabel.equals("")) nodeLabel=ss; else nodeLabel=nodeLabel+", \n"+ss;
-            }
-            //for edges
-            if(specInfo.type==1){
-                NodePath path=specInfo.path;
-                int pos=specInfo.pos;
-                String fromNodeId=path.get(path.at(pos));
-                String toNodeId=path.get(path.at(pos+1));
-                String edgeId=fromNodeId+"->"+toNodeId;
-                String edgeAnn="Path"+(path.pathIndex+1)+"|="+RTCTL_STAR_ModelCheckAlg.simplifySpecString(strSpec,false);
-                edgeAddAnnotation(edgeId,edgeAnn);
-            }
-        }
-
-
-        if(nodeLabel==null) nodeLabel="";
-        if(ann==null) ann="";
-
-        String strLabel="";
-        if(nodeLabel.equals("")) strLabel=ann;
-        else if(ann.equals("")) strLabel=nodeLabel;
-        else // strSpecs && ann are not empty
-            strLabel=nodeLabel+", \n"+ann;
-
-        Sprite s = n.getAttribute("sprite");
-        if(!strLabel.equals(s.getAttribute("ui.label")))
-            s.setAttribute("ui.label",strLabel);
-
-    }
 
     public void nodeLayoutSprites(String nodeId){
         Node n = getNode(nodeId); if(n==null) return;
@@ -238,7 +189,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
         s.setAttribute("needExplained", needExplained);
 
         s.setAttribute("explained", false);
-        s.setAttribute("ui.label","|="+RTCTL_STAR_ModelCheckAlg.simplifySpecString(spec.toString(),false));
+        s.setAttribute("ui.label","|="+RTCTL_STAR_ModelCheckAlg.simplifySpecString(spec,false));
         s.attachToNode(nodeId);
 
         n.setAttribute("spriteSpec"+specNum, s);
@@ -247,30 +198,6 @@ public class GraphExplainRTCTLs extends MultiGraph {
         nodeLayoutSprites(nodeId);
         return true;
     }
-
-    // Premises: spec is a NOT state formula and path^pos|=spec
-    // Results: spec is putted into the spec map of node path[pos], if spec need to be explained
-    public boolean nodeAddSpec(String nodeId,
-                               Spec spec,
-                               NodePath path,
-                               int pos
-    ) throws SpecException {
-        Node n = getNode(nodeId); if(n==null) return false;
-        if(spec==null) return false;
-
-        //Sprite s = n.getAttribute("sprite");
-        LinkedHashMap<String, GraphElementAttachedSpec> mapSpecs = n.getAttribute("mapSpecs");
-        if(mapSpecs==null) return false;
-
-        if(spec.isPropSpec() && spec.toBDD().isOne()) return true;  // do not explain TRUE
-        boolean needExplained = RTCTL_STAR_ModelCheckAlg.specNeedExplainEE(spec) || RTCTL_STAR_ModelCheckAlg.specNeedExplainTemporalOp(spec);
-        mapSpecs.put(spec.toString(), new GraphElementAttachedSpec(nodeId,spec, path, pos, needExplained,false));
-
-        n.setAttribute("mapSpecs", mapSpecs);
-        nodeRefreshLabel(nodeId);
-        return true;
-    }
-
 
     public int nodeGetPathNo(String nodeID) {
         Node n = getNode(nodeID); if(n==null) return -1;
@@ -293,7 +220,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
         return true;
     }
 
-    public String nodeGetSpecsInfo(String nodeID) {
+    public String nodeGetSpecsInfo(String nodeID) throws SpecException {
         Node n = getNode(nodeID); if(n==null) return "";
         int specNum = n.getAttribute("spriteSpecNumber");
         String ret="";
@@ -301,7 +228,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
             Sprite s=n.getAttribute("spriteSpec"+i);
             Spec spec=s.getAttribute("spec");
             String d=""; if(ret.equals("")) d=""; else d="\n";
-            ret+=d+RTCTL_STAR_ModelCheckAlg.simplifySpecString(spec.toString(),false);
+            ret+=d+RTCTL_STAR_ModelCheckAlg.simplifySpecString(spec,false);
         }
         return ret;
     }
@@ -319,7 +246,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
         return ret;
     }
 
-    public String nodeGetInfo(String nodeID, boolean withStateDetails) {
+    public String nodeGetInfo(String nodeID, boolean withStateDetails) throws SpecException {
         Node n=getNode(nodeID); if(n==null) return null;
         BDD state=nodeGetBDD(nodeID);
 
@@ -392,7 +319,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
         s.setAttribute("explained", false);
         s.setAttribute("ui.label",
                 "Path"+(path.pathIndex+1)+((pos==0)?"":","+pos)
-                        +"|="+RTCTL_STAR_ModelCheckAlg.simplifySpecString(spec.toString(),false));
+                        +"|="+RTCTL_STAR_ModelCheckAlg.simplifySpecString(spec,false));
         s.attachToEdge(edgeId);
 
         e.setAttribute("spriteSpec"+specNum, s);

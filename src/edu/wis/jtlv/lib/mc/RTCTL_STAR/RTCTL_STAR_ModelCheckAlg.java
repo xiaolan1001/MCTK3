@@ -1001,14 +1001,14 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
      * @see edu.wis.jtlv.lib.AlgI#doAlgorithm()
      */
     public AlgResultI doAlgorithm() throws AlgExceptionI, ModelCheckException, ModuleException, SMVParseException, SpecException {
-        System.out.println("The original property: " + simplifySpecString(property.toString(),false));
+        System.out.println("The original property: " + simplifySpecString(property,false));
         if (!property.isStateSpec()) {
             chkProp = NNF(new SpecExp(Operator.EE,
                     new SpecExp(Operator.NOT, property))); // newp = E !property
         } else { // the property is a state formula
             chkProp = NNF(new SpecExp(Operator.NOT, property)); // newp = !property
         }
-        System.out.println("The negative propperty: " + simplifySpecString(chkProp.toString(),false));
+        System.out.println("The negative propperty: " + simplifySpecString(chkProp,false));
         visibleVars = this.getRelevantVars(getDesign(), chkProp);
         // now chkProp is a state property
         SMVModule chkPropTester = null;
@@ -1024,7 +1024,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             design.setAllIniRestrictions(old_ini_restrictions);
             return new AlgResultString(true, "*** Property is TRUE ***");
         } else {
-            graph = new GraphExplainRTCTLs("A counterexample of " + simplifySpecString(property.toString(), false), this);
+            graph = new GraphExplainRTCTLs("A counterexample of " + simplifySpecString(property, false), this);
             graph.addAttribute("ui.title", graph.getId());
             // design with the composed tester...
             // create the initial node
@@ -1099,6 +1099,25 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         return null;
     }
 
+    public static String simplifySpecString(Spec spec, boolean delTrue) throws SpecException {
+        if(spec==null) return "";
+        String res="";
+        if(spec.isPropSpec()){
+            res=spec.toBDD().toString();
+        }else
+            res=spec.toString();
+
+        res = res.replaceAll("main.", "");
+        if (delTrue) {
+            res = res.replace("#[TRUE], \n", "");
+            res = res.replace("#[TRUE]", "");
+            res = res.replace("TRUE, \n", "");
+            res = res.replace("TRUE", "");
+        }
+        return res;
+    }
+
+/*
     public static String simplifySpecString(String spec, boolean delTrue) {
         String res = spec.replaceAll("main.", "");
         if (delTrue) {
@@ -1109,6 +1128,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         }
         return res;
     }
+*/
 
     public static BDDVarSet getRelevantVars(Module m, Spec p) {
         // p.releventVars();
@@ -1512,7 +1532,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
 
                             //LXY
                             vector_period_idx.add((Integer) period.size()-1);
-                            vector_fairness.add("Justice:"+simplifySpecString(weakDes.justiceAt(i).toString(),false));
+                            vector_fairness.add("Justice:"+simplifySpecString((Spec)weakDes.justiceAt(i),false));
                         }
                     }
                 }
@@ -1532,7 +1552,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                                 if (!fulfill.isZero()) {
                                     //LXY
                                     vector_period_idx.add((Integer)j);
-                                    vector_fairness.add("Compassion.q:"+simplifySpecString(strongDes.qCompassionAt(i).toString(),false));
+                                    vector_fairness.add("Compassion.q:"+simplifySpecString((Spec)strongDes.qCompassionAt(i),false));
 
                                     break;
                                 }
@@ -1548,7 +1568,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
 
                                 //LXY
                                 vector_period_idx.add((Integer)period.size()-1);
-                                vector_fairness.add("Compassion.q:"+simplifySpecString(strongDes.qCompassionAt(i).toString(),false));
+                                vector_fairness.add("Compassion.q:"+simplifySpecString((Spec)strongDes.qCompassionAt(i),false));
                             }
                         }
                     }

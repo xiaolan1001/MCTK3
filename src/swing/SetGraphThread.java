@@ -134,7 +134,7 @@ public class SetGraphThread implements Runnable, ViewerListener, ActionListener 
         //Node n = graph.getNode(id);
         //System.out.println("-------- State "+id+" --------");
         insertDocument(nodeConsole, "\n" + "-------- State " + id + " --------", Color.BLACK, 1);
-        String str;
+        String str = null;
         if (graph instanceof GraphExplainRTCTLK) {
             str = ((GraphExplainRTCTLK) graph).getNodeSatSpec(id);
             if (str != null && !str.equals(""))
@@ -146,7 +146,11 @@ public class SetGraphThread implements Runnable, ViewerListener, ActionListener 
                 e.printStackTrace();
             }
         } else if (graph instanceof GraphExplainRTCTLs) {
-            str = ((GraphExplainRTCTLs) graph).nodeGetInfo(id,true);
+            try {
+                str = ((GraphExplainRTCTLs) graph).nodeGetInfo(id,true);
+            } catch (SpecException e) {
+                e.printStackTrace();
+            }
             if (str != null && !str.equals(""))
                 insertDocument(nodeConsole, "\n" + "[satisfies " + str + "]", Color.BLACK, 1);
             insertDocument(nodeConsole, "\n" + ((GraphExplainRTCTLs) graph).nodeGetStateDetails(id), Color.BLACK, 1);
