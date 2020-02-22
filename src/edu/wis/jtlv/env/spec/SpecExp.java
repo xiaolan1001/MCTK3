@@ -528,6 +528,7 @@ public class SpecExp implements Spec {
 				case RELEASES: o="R"; break;
 				case SINCE: o="S"; break;
 				case TRIGGERED: o="T"; break;
+				case UNTIL: o="U"; break;
 				default: o="";
 			}
 			//return "(" + ch[0] + " " + o + " " + ch[1] + ")";
