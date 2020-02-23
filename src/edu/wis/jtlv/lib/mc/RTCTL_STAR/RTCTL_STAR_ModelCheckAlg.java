@@ -226,10 +226,10 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             x = tester.addVar("X" + (++field_id)); // boolean variable
             xBdd = x.getDomain().ithVar(1);
             c1 = sat(child[0], tester);
-            SpecBDDMap.put(child[0], c1);
-            SpecTesterMap.put(child[0], tester);
             BDD p_c1 = Env.prime(c1);
             tester.conjunctTrans(xBdd.imp(p_c1));
+            SpecBDDMap.put(child[0], c1);
+            SpecTesterMap.put(child[0], tester);
             return xBdd;
         }
         if (op == Operator.UNTIL) {
@@ -237,14 +237,14 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             xBdd = x.getDomain().ithVar(1);
             c1 = sat(child[0], tester);
             c2 = sat(child[1], tester);
-            SpecBDDMap.put(child[0], c1);
-            SpecBDDMap.put(child[1], c2);
-            SpecTesterMap.put(child[0], tester);
-            SpecTesterMap.put(child[1], tester);
             BDD p_x = Env.prime(xBdd);
             //tester.addInitial(xBdd.imp(c1.or(c2)));
             tester.conjunctTrans(xBdd.imp(c2.or(c1.and(p_x))));
             tester.addJustice(xBdd.imp(c2));
+            SpecBDDMap.put(child[0], c1);
+            SpecBDDMap.put(child[1], c2);
+            SpecTesterMap.put(child[0], tester);
+            SpecTesterMap.put(child[1], tester);
             return xBdd;
         }
         if (op == Operator.RELEASES) {
@@ -252,12 +252,12 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             xBdd = x.getDomain().ithVar(1);
             c1 = sat(child[0], tester);
             c2 = sat(child[1], tester);
+            BDD p_x = Env.prime(xBdd);
+            tester.conjunctTrans(xBdd.imp(c2.and(c1.or(p_x))));
             SpecBDDMap.put(child[0], c1);
             SpecBDDMap.put(child[1], c2);
             SpecTesterMap.put(child[0], tester);
             SpecTesterMap.put(child[1], tester);
-            BDD p_x = Env.prime(xBdd);
-            tester.conjunctTrans(xBdd.imp(c2.and(c1.or(p_x))));
             return xBdd;
         }
         if (op == Operator.B_UNTIL) {
@@ -343,10 +343,6 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         // now 0<=a<=b and !(a=0 and b=0
         c1 = sat(child[0], tester);
         c2 = sat(child[2], tester);
-        SpecBDDMap.put(child[0], c1);
-        SpecBDDMap.put(child[2], c2);
-        SpecTesterMap.put(child[0], tester);
-        SpecTesterMap.put(child[2], tester);
 
         if ((a == b) || (a == 0 && b > 0)) {
             l = tester.addVar("L" + field_id, 0, b);
@@ -380,6 +376,11 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 tester.conjunctTrans(xBdd.and(lGT0).imp(c2.or(c1.and(NxE1).and(NlElM1)))); // (x & l>0) -> (c2 | (c1 & x' & l'=l-1))
                 tester.conjunctTrans(xBdd.and(lE0).imp(c2)); // (x & l=0) -> c2
             }
+            SpecBDDMap.put(child[0], c1);
+            SpecBDDMap.put(child[2], c2);
+            SpecTesterMap.put(child[0], tester);
+            SpecTesterMap.put(child[2], tester);
+
             return xBdd.and(lEb); // x & l=b;
         } else { // 0<a<b
             l = tester.addVar("L" + field_id, 0, a);
@@ -431,6 +432,11 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             tester.conjunctTrans(xBdd.and(lGT0).and(wGT0).imp(c1.and(NxE1).and(NlElM1).and(NwEw))); // (x & l>0 & w>0) -> (c1 & x' & l'=l-1 & w'=w)
             tester.conjunctTrans(xBdd.and(lE0).and(wGT0).imp(c2.or(c1.and(NxE1).and(NlE0).and(NwEwM1)))); // (x & l=0 & w>0) -> (c2 | (c1 & x' & l'=0 & w'=w-1))
             tester.conjunctTrans(xBdd.and(lE0).and(wE0).imp(c2)); // (x & l=0 & w=0) -> c2
+
+            SpecBDDMap.put(child[0], c1);
+            SpecBDDMap.put(child[2], c2);
+            SpecTesterMap.put(child[0], tester);
+            SpecTesterMap.put(child[2], tester);
             return xBdd.and(lEa).and(wEbMa); // x & l=a & w=b-a;
         }
     }
@@ -465,10 +471,6 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         // now 0<=a<=b and !(a=0 and b=0)
         c1 = sat(child[0], tester);
         c2 = sat(child[2], tester);
-        SpecBDDMap.put(child[0], c1);
-        SpecBDDMap.put(child[2], c2);
-        SpecTesterMap.put(child[0], tester);
-        SpecTesterMap.put(child[2], tester);
 
         if ((a == b) || (a == 0 && b > 0)) {
             l = tester.addVar("L" + field_id, 0, b);
@@ -503,6 +505,10 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 tester.conjunctTrans(xBdd.and(lGT0).imp(c2.and(c1.or(NxE1.and(NlElM1))))); // (x & l>0) -> (c2 & (c1 | (x' & l'=l-1)))
                 tester.conjunctTrans(xBdd.and(lE0).imp(c2)); // (x & l=0) -> c2
             }
+            SpecBDDMap.put(child[0], c1);
+            SpecBDDMap.put(child[2], c2);
+            SpecTesterMap.put(child[0], tester);
+            SpecTesterMap.put(child[2], tester);
             return xBdd.and(lEb); // x & l=b;
         } else { // 0<a<b
             l = tester.addVar("L" + field_id, 0, a);
@@ -553,6 +559,10 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             tester.conjunctTrans(xBdd.and(lGT0).and(wGT0).imp(c1.or(NxE1.and(NlElM1).and(NwEw)))); // (x & l>0 & w>0) -> (c1 | (x' & l'=l-1 & w'=w))
             tester.conjunctTrans(xBdd.and(lE0).and(wGT0).imp(c2.and(c1.or(NxE1.and(NlE0).and(NwEwM1))))); // (x & l=0 & w>0) -> (c2 & (c1 | (x' & l'=0 & w'=w-1)))
             tester.conjunctTrans(xBdd.and(lE0).and(wE0).imp(c2)); // (x & l=0 & w=0) -> c2
+            SpecBDDMap.put(child[0], c1);
+            SpecBDDMap.put(child[2], c2);
+            SpecTesterMap.put(child[0], tester);
+            SpecTesterMap.put(child[2], tester);
             return xBdd.and(lEa).and(wEbMa); // x & l=a & w=b-a;
         }
     }
@@ -1117,6 +1127,17 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         return res;
     }
 
+    public static String simplifySpecString(String specStr, boolean delTrue) throws SpecException {
+        if(specStr==null) return "";
+        String res = specStr.replaceAll("main.", "");
+        if (delTrue) {
+            res = res.replace("#[TRUE], \n", "");
+            res = res.replace("#[TRUE]", "");
+            res = res.replace("TRUE, \n", "");
+            res = res.replace("TRUE", "");
+        }
+        return res;
+    }
 /*
     public static String simplifySpecString(String spec, boolean delTrue) {
         String res = spec.replaceAll("main.", "");
@@ -1182,10 +1203,18 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 SpecExp se=(SpecExp)spec;
                 Operator op=se.getOperator();
                 Spec[] child=se.getChildren();
-                // spec must be Ef
 
-                witnessE(child[0],n);
-
+                if(op==Operator.EE)
+                    witnessE(child[0],n);
+                else if(op==Operator.AND){
+                    witness(child[0],n);
+                    witness(child[1],n);
+                }else if(op==Operator.OR){
+                    BDD c0 = SpecBDDMap.get(child[0]);
+                    BDD state=graph.nodeGetBDD(nodeId);
+                    if (!state.and(c0).isZero()) witness(child[0],n);
+                    else witness(child[1],n);
+                }
                 s.setAttribute("explained",true);
             }
         }
@@ -1532,7 +1561,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
 
                             //LXY
                             vector_period_idx.add((Integer) period.size()-1);
-                            vector_fairness.add("Justice:"+simplifySpecString((Spec)weakDes.justiceAt(i),false));
+                            //vector_fairness.add("Justice:"+simplifySpecString(weakDes.justiceAt(i).toString(),false));
+                            vector_fairness.add("Justice"+(i+1));
                         }
                     }
                 }
@@ -1552,8 +1582,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                                 if (!fulfill.isZero()) {
                                     //LXY
                                     vector_period_idx.add((Integer)j);
-                                    vector_fairness.add("Compassion.q:"+simplifySpecString((Spec)strongDes.qCompassionAt(i),false));
-
+                                    //vector_fairness.add("Compassion.q:"+simplifySpecString(strongDes.qCompassionAt(i).toString(),false));
+                                    vector_fairness.add("Compassion.q"+(i+1));
                                     break;
                                 }
                             }
@@ -1568,7 +1598,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
 
                                 //LXY
                                 vector_period_idx.add((Integer)period.size()-1);
-                                vector_fairness.add("Compassion.q:"+simplifySpecString((Spec)strongDes.qCompassionAt(i),false));
+                                //vector_fairness.add("Compassion.q:"+simplifySpecString(strongDes.qCompassionAt(i).toString(),false));
+                                vector_fairness.add("Compassion.q"+(i+1));
                             }
                         }
                     }
