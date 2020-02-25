@@ -18,9 +18,9 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import org.graphstream.ui.spriteManager.Sprite;
 
-import java.util.*;
-
-import static edu.wis.jtlv.env.Env.all_couples;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Vector;
 
 class CacheSpecTesterInfo {
     Spec spec;
@@ -61,6 +61,17 @@ class RTCTLsTester{
 
     CacheSpecTesterInfo cacheGetSpec(String specStr){
         return cacheSpecsInfo.get(specStr);
+    }
+
+    BDD cacheGetSpecBdd(Spec spec){
+        BDD ret=null;
+        if(spec instanceof SpecBDD)
+            return ((SpecBDD)spec).getVal();
+        else { // spec is SpecExp
+            CacheSpecTesterInfo specInfo = this.cacheGetSpec(spec.toString());
+            if(specInfo!=null) return specInfo.specBdd;
+            else return null;
+        }
     }
 }
 
@@ -123,14 +134,13 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     private BDD chkBdd; // the BDD obtained by checking chkProp
     private BDDVarSet visibleVars;
 
+    private BDD feasibleStatesForWitnessE=null;
+
     private RTCTLsTester tester=null;
 
     private int tester_id = 0;
     private int field_id = 0;
     private int createdPathNumber = 0; // the number of the paths currently created
-    private int CycleStateNo = 0; //the position of the first state of period in path
-    private BDD[] returned_path = null;// a fair computation path of D || T
-
 
     private Vector<NodePath> trunkNodePaths = new Vector<NodePath>();
 
@@ -148,8 +158,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         return this.graph;
     }
 
-    private static HashMap<Spec, BDD> SpecBDDMap = new HashMap<Spec, BDD>(); //spec <-> BDD
-    private static HashMap<Spec, SMVModule> SpecTesterMap = new HashMap<>();//spec <-> Tester
+//    private static HashMap<Spec, BDD> SpecBDDMap = new HashMap<Spec, BDD>(); //spec <-> BDD
+//    private static HashMap<Spec, SMVModule> SpecTesterMap = new HashMap<>();//spec <-> Tester
 
     private static LinkedHashMap<String, CacheSpecTesterInfo> cacheSpecTesters; // <specStr, (spec, specBdd, specTester)>
 
@@ -210,11 +220,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     // Results: this.tester is created for spec; this.testerAuxVarNames contains the set of created aux variables
     public BDD sat(Spec spec)
             throws ModuleException, SMVParseException, ModelCheckException, ModelCheckAlgException, SpecException {
-        //System.out.println("spec------------"+spec);
         if (spec instanceof SpecBDD) {
-//            SpecBDDMap.put(spec, null);
-//            SpecTesterMap.put(spec, null);
-
             return ((SpecBDD) spec).getVal();
         }
         if (spec instanceof SpecRange || spec instanceof SpecAgentIdentifier) return null;
@@ -596,25 +602,25 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         BDD c1 = null, specBdd = null;
         if (op != Operator.EE) return null;
 
-        //SMVModule c1Tester = new SMVModule("Tester" + (++tester_id));
-        c1 = sat(child[0]);
-        if (!testerIsEmpty(c1Tester)) {
-            design.syncComposition(c1Tester);
-            design.restrictIni(c1);
-            BDD feas = design.feasible(); // feas = fair(D||T)
-            BDDVarSet auxVars = tester_getAuxVars_BDDVarSet(c1Tester);
-            specBdd = feas.and(c1).exist(auxVars); // specBdd = forsome auxVars.(feas(D||T) & c1)
-            //don't decompose Tester
-            //design.decompose(c1Tester);
-        } else { // fTester is empty
-            specBdd = c1.and(design.feasible()); // specBdd = feas & c1
+        c1 = sat(child[0]); // build the sub-tester of child[0]
+        specBdd = design.feasible().and(c1);
+/*
+        int oldTesterVariablesNumber = tester.module.getAll_couples().size(); // the set of tester variables before building the sub-tester for child[0]
+        c1 = sat(child[0]); // build the sub-tester of child[0]
+        if(tester.module.getAll_couples().size()<=oldTesterVariablesNumber){
+            // child[0] does not contain any temporal operator
+            specBdd = originalFeasibleStates.and(c1);
+        }else{
+            // child[0] contains temporal operator(s)
+            specBdd = design.feasible().and(c1);
         }
-
+*/
+        tester.cachePutSpec(spec,specBdd);
         return specBdd;
     }
 
     // return the set of states satisfying spec
-    // spec = AA c1
+    // spec = AA child[0]
     public BDD satAA(Spec spec) throws ModelCheckException, SMVParseException, ModuleException, ModelCheckAlgException, SpecException {
         SMVModule design = (SMVModule) getDesign();
         SpecExp se = (SpecExp) spec;
@@ -622,20 +628,25 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         Spec[] child = se.getChildren();
         BDD c1 = null, specBdd = null;
         if (op != Operator.AA) return null;
-        SMVModule negC1Tester = new SMVModule("Tester" + (++tester_id));
+
         BDD negC1 = null;
-        negC1 = sat(NNF(new SpecExp(Operator.NOT, child[0])), negC1Tester);
-        SpecBDDMap.put(child[0], negC1.not());
-        SpecTesterMap.put(child[0], negC1Tester);
-        if (!testerIsEmpty(negC1Tester)) {
-            design.syncComposition(negC1Tester);
-            BDD feas = design.feasible();
-            BDDVarSet auxVars = tester_getAuxVars_BDDVarSet(negC1Tester);
-            specBdd = feas.and(negC1).exist(auxVars).not(); // specBdd = ! forsome auxVars.(feasible(D||T(!c1)) & !c1)
-            //design.decompose(negC1Tester);
-        } else { // fTester is empty
-            specBdd = negC1.and(design.feasible()).not(); // specBdd = !(feasible(D) & !c1)
+        Spec negChild0 = NNF(new SpecExp(Operator.NOT, child[0]));
+        negC1 = sat(negChild0);
+        // specBdd = feas /\ !(feas /\ !child[0]) = feas /\ (!feas \/ !!child[0]) = feas /\ !!child[0] = feas /\ !negC1
+        specBdd = design.feasible().and(negC1.not());
+/*
+        int oldTesterVariablesNumber = tester.module.getAll_input_variables().size();
+        negC1 = sat(negChild0);
+        if(tester.module.getAll_couples().size()<=oldTesterVariablesNumber){
+            // child[0] does not contain any temporal operator
+            // specBdd = feas /\ !(feas /\ !child[0]) = feas /\ (!feas \/ !!child[0]) = feas /\ !!child[0] = feas /\ !negC1
+            specBdd = originalFeasibleStates.and(negC1.not());
+        }else{
+            // child[0] contains temporal operator(s)
+            specBdd = design.feasible().and(negC1.not());
         }
+*/
+        tester.cachePutSpec(spec,specBdd);
         return specBdd;
     }
 
@@ -1000,6 +1011,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     @Override
     public AlgResultI preAlgorithm() throws AlgExceptionI, SMVParseException, ModelCheckException, ModuleException {
         SMVModule design = (SMVModule) getDesign(); // without the composed tester...
+        if(tester!=null && tester.module!=null) design.decompose(tester.module);
+/*
         design.removeAllIniRestrictions();//reset IniRestrictions
         SpecBDDMap.clear();
         for (Map.Entry<Spec, SMVModule> entry : SpecTesterMap.entrySet()) {
@@ -1015,6 +1028,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         SpecTesterMap.clear();//reset SpecTesterMap
         //design.allSucc(design.initial());
         design.feasible().free();
+*/
         return null;
     }
 
@@ -1040,10 +1054,29 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         System.out.println("The negative propperty: " + simplifySpecString(chkProp,false));
         visibleVars = this.getRelevantVars(getDesign(), chkProp);
         // now chkProp is a state property
+
+        SMVModule design = (SMVModule) getDesign(); // now design does not contain the tester
+
+        int originalDesignVariablesNumber = design.getAll_couples().size();
+
         tester = new RTCTLsTester();
-        getDesign().syncComposition(tester.module); // the tester will be built in the following function sat()
+        design.syncComposition(tester.module); // the tester will be built in the following function sat()
         BDD chkBdd = sat(chkProp);
-        SMVModule design = (SMVModule) getDesign(); // with the composed tester...
+        // now design is the composition of the original model and the tester of the verified property
+/*
+        feasibleStatesComposedTester=design.feasible();
+        if(design.getAll_couples().size()<=originalDesignVariablesNumber){
+            // the property does not contain any temporal operator, and design is the original one
+            // feasibleStatesComposedTester is exactly the feasible states of the original model
+
+        }else {
+            // the property contains some temporal operators, and design is with the composed tester
+            // feasibleStatesComposedTester is the feasible states of the composition of the original model and the tester of the verified property
+
+
+        }
+*/
+
         // saving to the previous restriction state
         Vector<BDD> old_ini_restrictions = design.getAllIniRestrictions();
         design.restrictIni(chkBdd);
@@ -1051,6 +1084,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         BDD Init_unSat = feas.and(design.initial()).and(chkBdd);
         // the initial_condition seems redundant
         if (Init_unSat.isZero()) {
+            design.decompose(tester.module);
             design.setAllIniRestrictions(old_ini_restrictions);
             return new AlgResultString(true, "*** Property is TRUE ***");
         } else {
@@ -1076,6 +1110,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             } else {
                 returned_msg = "*** Property is NOT VALID ***\n ";
             }
+            //design.decompose(tester.module); // delay the decomposition of tester to reserve the tester during showing the counterexample
             return new AlgResultString(false, returned_msg);
         }
     }
@@ -1230,9 +1265,9 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                     witness(child[0],n);
                     witness(child[1],n);
                 }else if(op==Operator.OR){
-                    BDD c0 = SpecBDDMap.get(child[0]);
+                    BDD lc = tester.cacheGetSpecBdd(child[0]); if(lc==null) return false; //SpecBDDMap.get(child[0]);
                     BDD state=graph.nodeGetBDD(nodeId);
-                    if (!state.and(c0).isZero()) witness(child[0],n);
+                    if (!state.and(lc).isZero()) witness(child[0],n);
                     else witness(child[1],n);
                 }
                 s.setAttribute("explained",true);
@@ -1346,8 +1381,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 witness(child[0],n);
                 witness(child[1],n);
             }else if(op==Operator.OR){
-                BDD c0 = SpecBDDMap.get(child[0]);
-                if (!state.and(c0).isZero()) witness(child[0],n);
+                BDD lc=tester.cacheGetSpecBdd(child[0]); if(lc==null) return false;
+                if (!state.and(lc).isZero()) witness(child[0],n);
                 else witness(child[1],n);
             }else if(op==Operator.EE){ // spec=Ef will be explained by clicking on the node n
                 graph.nodeAddSpec(n.getId(),spec);
@@ -1416,13 +1451,13 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         if(op==Operator.AND)
             return needCreatePath(child[0],n) || needCreatePath(child[1],n);
         else if(op==Operator.OR){
-            BDD f=SpecBDDMap.get(child[0]);
-            BDD g=SpecBDDMap.get(child[1]);
-            if(child[0].isPropSpec() && !state.and(f).isZero()) // f is prop formula && n|=f
+            BDD lc=tester.cacheGetSpecBdd(child[0]); if(lc==null) return false;  //SpecBDDMap.get(child[0]);
+            BDD rc=tester.cacheGetSpecBdd(child[1]); if(rc==null) return false;  //SpecBDDMap.get(child[1]);
+            if(child[0].isPropSpec() && !state.and(lc).isZero()) // f is prop formula && n|=f
                 return false;
-		    else if(child[1].isPropSpec() && !state.and(g).isZero()) // g is prop formula && n|=g
+		    else if(child[1].isPropSpec() && !state.and(rc).isZero()) // g is prop formula && n|=g
 		        return false;
-            if(!state.and(f).isZero()) //n|=f
+            if(!state.and(lc).isZero()) //n|=f
                 return needCreatePath(child[0],n);
             else // n|=g
                 return needCreatePath(child[1],n);
@@ -1449,15 +1484,15 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         if(op==Operator.AND)
             return explainOnNode(child[0],n) || explainOnNode(child[1],n);
         else if(op==Operator.OR){
-            BDD f=SpecBDDMap.get(child[0]);
-            BDD g=SpecBDDMap.get(child[1]);
-            if(child[0].isPropSpec() && !state.and(f).isZero()) // f is prop formula && n|=f
+            BDD lc=tester.cacheGetSpecBdd(child[0]); if(lc==null) return false;  //SpecBDDMap.get(child[0]);
+            BDD rc=tester.cacheGetSpecBdd(child[1]); if(rc==null) return false;  //SpecBDDMap.get(child[1]);
+            if(child[0].isPropSpec() && !state.and(lc).isZero()) // f is prop formula && n|=f
                 //return witness(child[0],n);
                 graph.nodeAddSpec(n.getId(),child[0]);
-            else if(child[1].isPropSpec() && !state.and(g).isZero()) // g is prop formula && n|=g
+            else if(child[1].isPropSpec() && !state.and(rc).isZero()) // g is prop formula && n|=g
                 //return witness(child[1],n);
                 graph.nodeAddSpec(n.getId(),child[1]);
-            if(!state.and(f).isZero()) //n|=f
+            if(!state.and(lc).isZero()) //n|=f
                 return explainOnNode(child[0],n);
             else // n|=g
                 return explainOnNode(child[1],n);
@@ -1473,6 +1508,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     public boolean witnessE(Spec spec,
                             Node n) throws ModelCheckException, SpecException, ModelCheckAlgException, SMVParseException, ModuleException {
         if(n==null) return false;
+        BDD feasibleStates=null;
         BDD fromState = n.getAttribute("BDD");
         int pathNo = n.getAttribute("pathNo");
         int stateNo = n.getAttribute("stateNo");
@@ -1496,7 +1532,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             }else if(op==Operator.OR){
                 Spec p,q;
                 if(child[0].isPropSpec()) {p=child[0]; q=child[1];} else {p=child[1]; q=child[0];}
-                BDD pBdd = SpecBDDMap.get(p);
+                BDD pBdd = tester.cacheGetSpecBdd(p); if(pBdd==null) return false; // SpecBDDMap.get(p);
                 if (!fromState.and(pBdd).isZero())
                     return witnessE(p,n);
                 else return witnessE(q,n);
@@ -1514,16 +1550,15 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 // the tester of spec is not empty, and spec has NOT EE and AA operators
                 SMVModule DT = (SMVModule) getDesign(); // DT is the parallel composition of design and the tester of spec
                 BDD temp, fulfill;
-                //TODO there is problem for the following code, because the starting states contains the initial states of original model
-                int idx_addedIniRestrict=DT.restrictIni(fromState); // restrict the set of initial states to be fromState
-                BDD feasStates = DT.feasible(); // feasStates is the set of feasible states from fromState
-                DT.removeIniRestriction(idx_addedIniRestrict);
+
+                if(feasibleStatesForWitnessE==null) feasibleStatesForWitnessE = DT.feasible();
+                // feasibleStatesForWitnessE is the set of feasible states of the composition of the original model and the tester
 
                 // saving to the previous restriction state
                 Vector<BDD> old_trans_restrictions = DT.getAllTransRestrictions();
                 //Lines 1-2 are handled by the caller. ("verify")
                 // Line 3
-                DT.restrictTrans(feasStates.and(Env.prime(feasStates)));
+                DT.restrictTrans(feasibleStatesForWitnessE.and(Env.prime(feasibleStatesForWitnessE)));
                 BDD s = fromState;
                 // Lines 5-6
                 while (true) {
@@ -1581,9 +1616,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                                 period.add(path[j]);
 
                             //LXY
-                            vector_period_idx.add((Integer) period.size()-1);
-                            //vector_fairness.add("Justice:"+simplifySpecString(weakDes.justiceAt(i).toString(),false));
-                            vector_fairness.add("Justice"+(i+1));
+                            //vector_period_idx.add((Integer) period.size()-1);
+                            //vector_fairness.add("Justice"+(i+1));
                         }
                     }
                 }
@@ -1602,9 +1636,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                                 // period.elementAt(j).and(design.qCompassionAt(i)).satOne();
                                 if (!fulfill.isZero()) {
                                     //LXY
-                                    vector_period_idx.add((Integer)j);
-                                    //vector_fairness.add("Compassion.q:"+simplifySpecString(strongDes.qCompassionAt(i).toString(),false));
-                                    vector_fairness.add("Compassion.q"+(i+1));
+                                    //vector_period_idx.add((Integer)j);
+                                    //vector_fairness.add("Compassion.q"+(i+1));
                                     break;
                                 }
                             }
@@ -1618,9 +1651,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                                     period.add(path[j]);
 
                                 //LXY
-                                vector_period_idx.add((Integer)period.size()-1);
-                                //vector_fairness.add("Compassion.q:"+simplifySpecString(strongDes.qCompassionAt(i).toString(),false));
-                                vector_fairness.add("Compassion.q"+(i+1));
+                                //vector_period_idx.add((Integer)period.size()-1);
+                                //vector_fairness.add("Compassion.q"+(i+1));
                             }
                         }
                     }
@@ -2027,9 +2059,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         Node sn=graph.getNode(snid);
         BDD startState=graph.nodeGetBDD(snid);
 
-        SMVModule tester=SpecTesterMap.get(spec); // the tester for spec
-        boolean expEE=specNeedExplainEE(spec);
-        boolean expTempOp=specNeedExplainTemporalOp(spec);
+        //SMVModule tester=SpecTesterMap.get(spec); // the tester for spec
 
         if(spec.isStateSpec()){
             // spec is a state formula
@@ -2048,7 +2078,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 boolean fNeedExplain = specNeedExplainEE(child[0]) || specNeedExplainTemporalOp(child[0]);
                 Spec p,q;
                 if(!fNeedExplain) {p=child[0]; q=child[1];} else {p=child[1]; q=child[0];}
-                BDD pBdd = SpecBDDMap.get(p);
+                BDD pBdd = tester.cacheGetSpecBdd(p); if(pBdd==null) return false; // SpecBDDMap.get(p);
                 if (!startState.and(pBdd).isZero())
                     return explainPath(p,path,pos);
                 else return explainPath(q,path,pos);
@@ -2057,11 +2087,11 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 // explain spec according to its semantics over path^pos;
 
                 if(op==Operator.NEXT){ //spec=X f
-                    BDD X=SpecBDDMap.get(spec);
+                    BDD X=tester.cacheGetSpecBdd(spec); if(X==null) return false; // SpecBDDMap.get(spec);
                     if(X==null || startState.and(X).isZero()) return false;
                     int ni=path.at(pos+1);
                     BDD nextState=graph.nodeGetBDD(path.get(ni));
-                    BDD Xf=SpecBDDMap.get(child[0]);
+                    BDD Xf=tester.cacheGetSpecBdd(child[0]); if(Xf==null) return false; //SpecBDDMap.get(child[0]);
                     if(Xf==null || nextState.and(Xf).isZero()) return false;
 
                     String firstEdgeId=snid+"->"+path.get(ni);
@@ -2072,13 +2102,16 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                     else graph.edgeAddSpec(eid, child[0], path, pos + 1, false);
                     //return explainPath(child[0],path,pos+1);
                 }else if(op==Operator.UNTIL){
-                    BDD X=SpecBDDMap.get(spec);
-                    BDD Xf=SpecBDDMap.get(child[0]);
-                    BDD Xg=SpecBDDMap.get(child[1]);
+                    BDD X=tester.cacheGetSpecBdd(spec); if(X==null) return false; //SpecBDDMap.get(spec);
+                    BDD Xf=tester.cacheGetSpecBdd(child[0]); if(Xf==null) return false; //SpecBDDMap.get(child[0]);
+                    BDD Xg=tester.cacheGetSpecBdd(child[1]); if(Xg==null) return false; //SpecBDDMap.get(child[1]);
                     if(X==null) return false;
                     if(Xf==null) return false;
                     if(Xg==null) return false;
                     if(startState.and(X).isZero()) return false;
+
+                    String firstEdgeId=snid+"->"+path.get(path.at(pos+1));
+                    graph.edgeAddSpec(firstEdgeId,spec,path,pos,true);
 
                     boolean exp=true;  // exp=false then stop explaining f
                     for(int p=pos;;p++){
@@ -2099,13 +2132,16 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                         }
                     }
                 }else if(op==Operator.RELEASES){
-                    BDD X=SpecBDDMap.get(spec);
-                    BDD Xf=SpecBDDMap.get(child[0]);
-                    BDD Xg=SpecBDDMap.get(child[1]);
+                    BDD X=tester.cacheGetSpecBdd(spec); if(X==null) return false; //SpecBDDMap.get(spec);
+                    BDD Xf=tester.cacheGetSpecBdd(child[0]); if(Xf==null) return false; //SpecBDDMap.get(child[0]);
+                    BDD Xg=tester.cacheGetSpecBdd(child[1]); if(Xg==null) return false; //SpecBDDMap.get(child[1]);
                     if(X==null) return false;
                     if(Xf==null) return false;
                     if(Xg==null) return false;
                     if(startState.and(X).isZero()) return false;
+
+                    String firstEdgeId=snid+"->"+path.get(path.at(pos+1));
+                    graph.edgeAddSpec(firstEdgeId,spec,path,pos,true);
 
                     boolean exp=true;  // exp=false then stop explaining f
                     for(int p=pos;;p++){
