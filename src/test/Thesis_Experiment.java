@@ -163,7 +163,7 @@ public class Thesis_Experiment {
         to_parse = "RTCTL*SPEC (s.bit=1) -> (F (r.state=r1 & (r.Act=sack & A F s.ack=1)))";
         to_parse = "RTCTL*SPEC A G (s.bit -> A F r.state=r1)";
         to_parse = "RTCTL*SPEC (A G (s.bit)) | (A G (s.bit -> A F r.state=r1))";
-        to_parse = "RTCTL*SPEC A BG 5..12 (s.bit -> A BF 5..10 r.state=r1)";
+        //to_parse = "RTCTL*SPEC A BG 5..12 (s.bit -> A BF 5..10 r.state=r1)";
 
         Spec[] all_specs = Env.loadSpecString(to_parse);
         AlgRunnerThread runner;

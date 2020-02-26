@@ -1463,9 +1463,30 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 return needCreatePath(child[0],n);
             else // n|=g
                 return needCreatePath(child[1],n);
-        }else if(op.isTemporalOp()) // spec is a principally temporal formula
-            return true;
-        else // op==!, EE or AA
+        }else if(op.isTemporalOp()) { // spec is a principally temporal formula
+            if(op==Operator.UNTIL){
+                BDD g=tester.cacheGetSpecBdd(child[1]);
+                if(!state.and(g).isZero()) return needCreatePath(child[1],n); else return true; // n|=g
+            }else if(op==Operator.RELEASES){
+                BDD f=tester.cacheGetSpecBdd(child[0]);
+                BDD g=tester.cacheGetSpecBdd(child[1]);
+                if(!state.and(f.and(g)).isZero()) return needCreatePath(child[0],n) || needCreatePath(child[1],n); else return true; // n|=f/\g
+            }else if(op==Operator.B_UNTIL){
+                SpecRange range = (SpecRange) child[1];
+                int a = range.getFrom();
+                BDD g=tester.cacheGetSpecBdd(child[2]); // spec=f U 0..b g
+                if(a==0 && !state.and(g).isZero()) return needCreatePath(child[2],n); else return true; // a=0 & n|=g
+            }else if(op==Operator.B_RELEASES){
+                SpecRange range = (SpecRange) child[1];
+                int a = range.getFrom();
+                int b = range.getTo();
+                BDD f=tester.cacheGetSpecBdd(child[0]);
+                BDD g=tester.cacheGetSpecBdd(child[2]);
+                if(a==0 && b==0 && !state.and(g).isZero()) return needCreatePath(child[2],n); // a=b=0 & n|=g
+                else if(a==0 && b>0 && !state.and(f.and(g)).isZero())return needCreatePath(child[0],n) || needCreatePath(child[2],n); // a=0 & b>0 & n|=f/\g
+                else return true;
+            }else return true;
+        }else // op==!, EE or AA
             return false;
     }
 
@@ -1474,7 +1495,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     boolean explainOnNode(Spec spec, Node n) throws ModelCheckException, SpecException, ModelCheckAlgException, SMVParseException, ModuleException {
         if(spec.isStateSpec())
             //return witness(spec,n);
-            graph.nodeAddSpec(n.getId(),spec);
+            return graph.nodeAddSpec(n.getId(),spec);
         //now spec is NOT a state formula
 
         BDD state=graph.nodeGetBDD(n.getId());
@@ -1498,9 +1519,30 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 return explainOnNode(child[0],n);
             else // n|=g
                 return explainOnNode(child[1],n);
-        }else if(op.isTemporalOp()) // spec is a principally temporal formula
-            return false;
-        else // op==!, EE or AA
+        }else if(op.isTemporalOp()) { // spec is a principally temporal formula
+            if(op==Operator.UNTIL){
+                BDD g=tester.cacheGetSpecBdd(child[1]);
+                if(!state.and(g).isZero()) return witnessE(child[1],n); else return false;// n|=g
+            }else if(op==Operator.RELEASES){
+                BDD f=tester.cacheGetSpecBdd(child[0]);
+                BDD g=tester.cacheGetSpecBdd(child[1]);
+                if(!state.and(f.and(g)).isZero()) return witnessE(child[0],n) && witnessE(child[1],n); else return false; // n|=f/\g
+            }else if(op==Operator.B_UNTIL){
+                SpecRange range = (SpecRange) child[1];
+                int a = range.getFrom();
+                BDD g=tester.cacheGetSpecBdd(child[2]); // spec=f U 0..b g
+                if(a==0 && !state.and(g).isZero()) return witnessE(child[2],n); else return false; // a=0 & n|=g
+            }else if(op==Operator.B_RELEASES){
+                SpecRange range = (SpecRange) child[1];
+                int a = range.getFrom();
+                int b = range.getTo();
+                BDD f=tester.cacheGetSpecBdd(child[0]);
+                BDD g=tester.cacheGetSpecBdd(child[2]);
+                if(a==0 && b==0 && !state.and(g).isZero()) return witnessE(child[2],n); // a=b=0 & n|=g
+                else if(a==0 && b>0 && !state.and(f.and(g)).isZero()) return witnessE(child[0],n) && witnessE(child[2],n); // a=0 & b>0 & n|=f/\g
+                else return false;
+            }else return false;
+        }else // op==!, EE or AA
             return true;
     }
 
