@@ -87,16 +87,12 @@ public class ViewerExplainRTCTLs implements ViewerListener {
 
     public void buttonPushed(String id) {
         Node n = graph.getNode(id);
-        System.out.println("---------------- State "+id+" ----------------");
-        try {
-            System.out.println(graph.nodeGetInfo(id,true));
-        } catch (SpecException e) {
-            e.printStackTrace();
-        }
 
         try {
             try {
                 graph.getChecker().explainOneNode(id);
+                System.out.println("---------------- State "+id+" ----------------");
+                System.out.println(graph.nodeGetInfo(id,true));
             } catch (ModelCheckException e) {
                 e.printStackTrace();
             } catch (SpecException e) {

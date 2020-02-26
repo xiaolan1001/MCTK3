@@ -113,11 +113,11 @@ class NodePath {
 
     // premise: before calling this function, the position pos is already explained over path^startPos
     // this function return false when the next position of the current position pos is already explained, return true otherwise
-    boolean needExplainNextPosition(int startPos, int pos){
+    boolean needExplainNextPosition(int startPos, int curPos){
         int startIdx=at(startPos);
-        int idx=at(pos);
+        int idx=at(curPos);
         if((startIdx<loopIndex && idx==this.size()-1) ||
-                (startIdx>=loopIndex && at(pos+1)==startIdx))
+                (startIdx>=loopIndex && at(curPos+1)==startIdx))
             return false;
         else
             return true;
@@ -2110,24 +2110,22 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                     if(Xg==null) return false;
                     if(startState.and(X).isZero()) return false;
 
-                    String firstEdgeId=snid+"->"+path.get(path.at(pos+1));
-                    graph.edgeAddSpec(firstEdgeId,spec,path,pos,true);
+                    graph.edgeAddSpec(path.get(path.at(pos))+"->"+path.get(path.at(pos+1)),spec,path,pos,true);
 
+                    String curNid,nextNid;
                     boolean exp=true;  // exp=false then stop explaining f
                     for(int p=pos;;p++){
-                        int i=path.at(p);
-                        String nid=path.get(i);
-                        BDD nState=graph.nodeGetBDD(nid); if(nState==null) return false;
+                        curNid=path.get(path.at(p));
+                        nextNid=path.get(path.at(p+1));
+                        BDD curState=graph.nodeGetBDD(curNid); if(curState==null) return false;
                         String eid = path.get(path.at(p))+"->"+path.get(path.at(p+1));
-                        if(!nState.and(Xg).isZero()) { // |=g
+                        if(!curState.and(Xg).isZero()) { // |=g
                             if(child[1].isStateSpec()) graph.nodeAddSpec(path.get(path.at(p)),child[1]);
                             else graph.edgeAddSpec(eid,child[1],path,p,false);
                             return true;
-                            //return explainPath(child[1],path,p);
-                        }else if(exp && !nState.and(Xf).isZero()){ // |=f
+                        }else if(exp && !curState.and(Xf).isZero()){ // |=f
                             if(child[0].isStateSpec()) graph.nodeAddSpec(path.get(path.at(p)),child[0]);
                             else graph.edgeAddSpec(eid,child[0],path,p,false);
-                            //explainPath(child[0],path,p);
                             exp=path.needExplainNextPosition(pos,p);
                         }
                     }
@@ -2143,31 +2141,75 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                     String firstEdgeId=snid+"->"+path.get(path.at(pos+1));
                     graph.edgeAddSpec(firstEdgeId,spec,path,pos,true);
 
+                    String curNid,nextNid;
                     boolean exp=true;  // exp=false then stop explaining f
                     for(int p=pos;;p++){
-                        int i=path.at(p);
-                        String nid=path.get(i);
-                        BDD nState=graph.nodeGetBDD(nid); if(nState==null) return false;
-                        String eid = path.get(path.at(p))+"->"+path.get(path.at(p+1));
-                        if(!nState.and(Xf.and(Xg)).isZero()) {  // |=f/\g
+                        curNid=path.get(path.at(p));
+                        nextNid=path.get(path.at(p+1));
+                        BDD curState=graph.nodeGetBDD(curNid); if(curState==null) return false;
+                        String eid = curNid+"->"+nextNid;
+                        if(!curState.and(Xf.and(Xg)).isZero()) {  // |=f/\g
                             if(child[0].isStateSpec()) graph.nodeAddSpec(path.get(path.at(p)),child[0]);
                             else graph.edgeAddSpec(eid,child[0],path,p,false);
                             if(child[1].isStateSpec()) graph.nodeAddSpec(path.get(path.at(p)),child[1]);
                             else graph.edgeAddSpec(eid,child[1],path,p,false);
                             return true;
-                            //boolean b1=explainPath(child[0],path,p); // explain f
-                            //return b1 && explainPath(child[1],path,p); // explain g
-                        }else if(exp && !nState.and(Xg).isZero()){  // |=g
+                        }else if(exp && !curState.and(Xg).isZero()){  // |=g
                             if(child[1].isStateSpec()) graph.nodeAddSpec(path.get(path.at(p)),child[1]);
                             else graph.edgeAddSpec(eid,child[1],path,p,false);
-                            // explainPath(child[1],path,p); // explain g
                             exp=path.needExplainNextPosition(pos,p);
                         }
                         if(!exp) return true;
                     }
 
                 }else if(op==Operator.B_UNTIL){
+                    BDD lc = null, rc = null;
+                    SpecRange range = (SpecRange) child[1];
+                    int a = range.getFrom(), b = range.getTo();
+                    if(a<0) throw new ModelCheckException("The lower bound of " + spec + "cannot be less than 0.");
+                    if(b<0) throw new ModelCheckException("The upper bound of " + spec + "cannot be less than 0.");
+                    if(a>b) throw new ModelCheckException("The lower bound of " + spec + "cannot be larger than the upper bound.");
 
+                    BDD X=tester.cacheGetSpecBdd(spec); if(X==null || (X!=null && startState.and(X).isZero())) return false; // X is exactly the bdd of child[2]
+                    BDD Xf=tester.cacheGetSpecBdd(child[0]); if(Xf==null) return false;
+                    BDD Xg=tester.cacheGetSpecBdd(child[2]); if(Xg==null) return false;
+
+                    graph.edgeAddSpec(path.get(path.at(pos))+"->"+path.get(path.at(pos+1)), spec,path,pos,true);
+
+                    String curNid, nextNid;
+                    boolean exp=true;
+                    for(int p=pos; p<pos+a && exp; p++){
+                        curNid=path.get(path.at(p));
+                        nextNid=path.get(path.at(p+1));
+                        BDD curState=graph.nodeGetBDD(curNid);
+                        if(curState.and(Xf).isZero()) return false;
+                        if(child[0].isStateSpec()) graph.nodeAddSpec(curNid,child[0]);
+                        else graph.edgeAddSpec(curNid+"->"+nextNid,child[0],path,p,false);
+                        exp=path.needExplainNextPosition(pos,p);
+                    }
+
+                    // show the lower and upper bounds of the spec
+                    graph.nodeAddAnnotation(path.get(path.at(pos+a)),"lower bound "+a+" of "+simplifySpecString(spec,true));
+                    graph.nodeAddAnnotation(path.get(path.at(pos+b)),"upper bound "+b+" of "+simplifySpecString(spec,true));
+
+                    exp=true;
+                    for(int p=pos+a; p<=pos+b; p++){
+                        curNid=path.get(path.at(p));
+                        nextNid=path.get(path.at(p+1));
+                        BDD curState=graph.nodeGetBDD(curNid);
+                        if(!curState.and(Xg).isZero()){
+                            if(child[2].isStateSpec()) graph.nodeAddSpec(curNid,child[2]);
+                            else graph.edgeAddSpec(curNid+"->"+nextNid,child[2],path,p,false);
+                            return true;
+                        }else{
+                            if(exp) {
+                                if (child[0].isStateSpec()) graph.nodeAddSpec(snid, child[0]);
+                                else graph.edgeAddSpec(curNid + "->" + nextNid, child[0], path, p, false);
+                            }
+                            exp=path.needExplainNextPosition(pos,p);
+                        }
+                    }
+                    return true;
                 }else if(op==Operator.B_RELEASES){
 
                 }else
@@ -2176,115 +2218,6 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         }
         return true;
     }
-
-/*
-    // Premises: path^pos |= spec
-    // Results: attached necessary satisfied formulas at some nodes over the suffix path^startPos
-    public boolean explainPath(Spec spec,            // the spec to be explained
-                               int pathIndex,        // the path is trunkNodePaths.get(pathIndex)
-                               int pos              // spec is explained over path^pos, the suffix of the path starting from the logical position pos
-    ) throws ModelCheckException, SpecException, ModelCheckAlgException, SMVParseException, ModuleException {
-        NodePath path = trunkNodePaths.get(pathIndex); if(path==null) return false;
-
-        int startIdx=path.at(pos);
-        String snid=path.get(startIdx);
-        Node sn=graph.getNode(snid);
-        BDD startState=graph.nodeGetBDD(snid);
-
-        SMVModule tester=SpecTesterMap.get(spec); // the tester for spec
-        boolean expEE=specNeedExplainEE(spec);
-        boolean expTempOp=specNeedExplainTemporalOp(spec);
-
-        if(spec.isStateSpec()){
-            // spec is a state formula
-            return witness(spec,sn);
-        }else{
-            // spec is NOT a state formula
-            SpecExp se=(SpecExp)spec;
-            Operator op=se.getOperator();
-            Spec[] child=se.getChildren();
-
-            if(op==Operator.AND){
-                boolean b1=explainPath(child[0],pathIndex,pos);
-                return b1 && explainPath(child[1],pathIndex,pos);
-            }else if(op==Operator.OR){ //spec=f OR g
-                boolean fNeedExplain = specNeedExplainEE(child[0]) || specNeedExplainTemporalOp(child[0]);
-                Spec p,q;
-                if(!fNeedExplain) {p=child[0]; q=child[1];} else {p=child[1]; q=child[0];}
-                BDD pBdd = SpecBDDMap.get(p);
-                if (!startState.and(pBdd).isZero())
-                    return explainPath(p,pathIndex,pos);
-                else return explainPath(q,pathIndex,pos);
-            }else{
-                // spec is a principally temporal formula spec=Xf, fUg, fRg, fU a..b g, or f R a..b g
-                // explain spec according to its semantics over path^pos;
-
-                if(op==Operator.NEXT){ //spec=X f
-                    BDD X=SpecBDDMap.get(spec);
-                    if(X==null || startState.and(X).isZero()) return false;
-                    int i=path.at(pos+1);
-                    BDD nextState=graph.nodeGetBDD(path.get(i));
-                    BDD Xf=SpecBDDMap.get(child[0]);
-                    if(Xf==null || nextState.and(Xf).isZero()) return false;
-
-                    graph.edgeAddAnnotation(snid+"->"+path.get(i), simplifySpecString(spec.toString(),false));
-                    return explainPath(child[0],pathIndex,pos+1);
-
-                }else if(op==Operator.UNTIL){
-                    BDD X=SpecBDDMap.get(spec);
-                    BDD Xf=SpecBDDMap.get(child[0]);
-                    BDD Xg=SpecBDDMap.get(child[1]);
-                    if(X==null) return false;
-                    if(Xf==null) return false;
-                    if(Xg==null) return false;
-                    if(startState.and(X).isZero()) return false;
-
-                    boolean exp=true;  // exp=false then stop explaining f
-                    for(int p=pos;;p++){
-                        int i=path.at(p);
-                        String nid=path.get(i);
-                        BDD nState=graph.nodeGetBDD(nid); if(nState==null) return false;
-                        if(!nState.and(Xg).isZero()) { // |=g
-                            return explainPath(child[1],pathIndex,p);
-                        }else if(exp && !nState.and(Xf).isZero()){ // |=f
-                            explainPath(child[0],pathIndex,p);
-                            exp=path.needExplainNextPosition(pos,p);
-                        }
-                    }
-                }else if(op==Operator.RELEASES){
-                    BDD X=SpecBDDMap.get(spec);
-                    BDD Xf=SpecBDDMap.get(child[0]);
-                    BDD Xg=SpecBDDMap.get(child[1]);
-                    if(X==null) return false;
-                    if(Xf==null) return false;
-                    if(Xg==null) return false;
-                    if(startState.and(X).isZero()) return false;
-
-                    boolean exp=true;  // exp=false then stop explaining f
-                    for(int p=pos;;p++){
-                        int i=path.at(p);
-                        String nid=path.get(i);
-                        BDD nState=graph.nodeGetBDD(nid); if(nState==null) return false;
-                        if(!nState.and(Xf.and(Xg)).isZero()) {  // |=f/\g
-                            boolean b1=explainPath(child[0],pathIndex,p); // explain f
-                            return b1 && explainPath(child[1],pathIndex,p); // explain g
-                        }else if(exp && !nState.and(Xg).isZero()){  // |=g
-                            explainPath(child[1],pathIndex,p); // explain g
-                            exp=path.needExplainNextPosition(pos,p);
-                        }
-                    }
-
-                }else if(op==Operator.B_UNTIL){
-
-                }else if(op==Operator.B_RELEASES){
-
-                }else
-                    return true;
-            }
-        }
-        return true;
-    }
-*/
 
 
     @Override
