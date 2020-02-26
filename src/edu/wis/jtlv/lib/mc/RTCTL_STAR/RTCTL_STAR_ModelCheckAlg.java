@@ -1079,13 +1079,15 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
 
         // saving to the previous restriction state
         Vector<BDD> old_ini_restrictions = design.getAllIniRestrictions();
-        design.restrictIni(chkBdd);
+        int chkBdd_idx = design.restrictIni(chkBdd);
         BDD feas = design.feasible();// feas = the feasible states of D||T from design.init /\ chkBdd
         BDD Init_unSat = feas.and(design.initial()).and(chkBdd);
         // the initial_condition seems redundant
+        design.removeIniRestriction(chkBdd_idx);
+        design.setAllIniRestrictions(old_ini_restrictions);
         if (Init_unSat.isZero()) {
             design.decompose(tester.module);
-            design.setAllIniRestrictions(old_ini_restrictions);
+
             return new AlgResultString(true, "*** Property is TRUE ***");
         } else {
             graph = new GraphExplainRTCTLs("A counterexample of " + simplifySpecString(property, false), this);
@@ -2159,18 +2161,18 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                             else graph.edgeAddSpec(eid,child[1],path,p,false);
                             exp=path.needExplainNextPosition(pos,p);
                         }
+                        // if !exp, it means that f/\g does not hold at all nodes of the path, then stop explaining g
                         if(!exp) return true;
                     }
 
                 }else if(op==Operator.B_UNTIL){
-                    BDD lc = null, rc = null;
                     SpecRange range = (SpecRange) child[1];
                     int a = range.getFrom(), b = range.getTo();
                     if(a<0) throw new ModelCheckException("The lower bound of " + spec + "cannot be less than 0.");
                     if(b<0) throw new ModelCheckException("The upper bound of " + spec + "cannot be less than 0.");
                     if(a>b) throw new ModelCheckException("The lower bound of " + spec + "cannot be larger than the upper bound.");
 
-                    BDD X=tester.cacheGetSpecBdd(spec); if(X==null || (X!=null && startState.and(X).isZero())) return false; // X is exactly the bdd of child[2]
+                    BDD X=tester.cacheGetSpecBdd(spec); if(X==null || (X!=null && startState.and(X).isZero())) return false;
                     BDD Xf=tester.cacheGetSpecBdd(child[0]); if(Xf==null) return false;
                     BDD Xg=tester.cacheGetSpecBdd(child[2]); if(Xg==null) return false;
 
@@ -2189,28 +2191,106 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                     }
 
                     // show the lower and upper bounds of the spec
-                    graph.nodeAddAnnotation(path.get(path.at(pos+a)),"lower bound "+a+" of "+simplifySpecString(spec,true));
-                    graph.nodeAddAnnotation(path.get(path.at(pos+b)),"upper bound "+b+" of "+simplifySpecString(spec,true));
+                    graph.nodeAddAnnotation(path.get(path.at(pos+a)),"lower bound "+a+" of "+simplifySpecString(spec,false));
+                    graph.nodeAddAnnotation(path.get(path.at(pos+b)),"upper bound "+b+" of "+simplifySpecString(spec,false));
 
                     exp=true;
                     for(int p=pos+a; p<=pos+b; p++){
                         curNid=path.get(path.at(p));
                         nextNid=path.get(path.at(p+1));
                         BDD curState=graph.nodeGetBDD(curNid);
-                        if(!curState.and(Xg).isZero()){
+                        if(!curState.and(Xg).isZero()){ // explain g
                             if(child[2].isStateSpec()) graph.nodeAddSpec(curNid,child[2]);
                             else graph.edgeAddSpec(curNid+"->"+nextNid,child[2],path,p,false);
                             return true;
-                        }else{
-                            if(exp) {
-                                if (child[0].isStateSpec()) graph.nodeAddSpec(snid, child[0]);
-                                else graph.edgeAddSpec(curNid + "->" + nextNid, child[0], path, p, false);
-                            }
+                        }else if(exp && !curState.and(Xf).isZero()){ // explain f
+                            if (child[0].isStateSpec()) graph.nodeAddSpec(curNid, child[0]);
+                            else graph.edgeAddSpec(curNid + "->" + nextNid, child[0], path, p, false);
                             exp=path.needExplainNextPosition(pos,p);
                         }
                     }
                     return true;
+
                 }else if(op==Operator.B_RELEASES){
+                    SpecRange range = (SpecRange) child[1];
+                    int a = range.getFrom(), b = range.getTo();
+                    if(a<0) throw new ModelCheckException("The lower bound of " + spec + "cannot be less than 0.");
+                    if(b<0) throw new ModelCheckException("The upper bound of " + spec + "cannot be less than 0.");
+                    if(a>b) throw new ModelCheckException("The lower bound of " + spec + "cannot be larger than the upper bound.");
+
+                    BDD X=tester.cacheGetSpecBdd(spec); if(X==null || (X!=null && startState.and(X).isZero())) return false;
+                    BDD Xf=tester.cacheGetSpecBdd(child[0]); if(Xf==null) return false;
+                    BDD Xg=tester.cacheGetSpecBdd(child[2]); if(Xg==null) return false;
+
+                    graph.edgeAddSpec(path.get(path.at(pos))+"->"+path.get(path.at(pos+1)), spec,path,pos,true);
+
+                    // search f
+                    String curNid, nextNid;
+                    int fPos=-1;
+                    boolean exp=true;
+                    for(int p=pos;p<pos+a && fPos==-1 && exp;p++){
+                        curNid=path.get(path.at(p));
+                        BDD curState=graph.nodeGetBDD(curNid);
+                        if(!curState.and(Xf).isZero()) fPos=p;
+                        exp=path.needExplainNextPosition(pos,p);
+                    }
+                    if(fPos!=-1){
+                        //found f in [0,a-1] and explain it
+                        curNid=path.get(path.at(fPos));
+                        nextNid=path.get(path.at(fPos+1));
+                        if(child[0].isStateSpec()) graph.nodeAddSpec(curNid,child[0]);
+                        else graph.edgeAddSpec(curNid+"->"+nextNid,child[0],path,fPos,false);
+                        return true;
+                    }
+
+                    // f is alway false in [0,a-1]
+                    Spec neg_f = NNF(new SpecExp(Operator.NOT, child[0])); // neg_f = !f
+                    SMVModule design = (SMVModule)getDesign();
+                    int oldDesignVariablesNum=design.getAll_couples().size();
+                    BDD neg_f_bdd = sat(neg_f);
+                    if(design.getAll_couples().size()>oldDesignVariablesNum){
+                        // the tester for neg_f is NOT empty, refesh the set of feasible states
+                        feasibleStatesForWitnessE = design.feasible();
+                    }else {
+                        // the tester for neg_f is empty
+                        if (feasibleStatesForWitnessE == null) feasibleStatesForWitnessE = design.feasible();
+                    }
+                    neg_f_bdd = neg_f_bdd.and(feasibleStatesForWitnessE);
+
+                    // explain !f at all positions in [0,a-1]
+                    exp=true;
+                    for(int p=pos; p<pos+a && exp; p++){
+                        curNid=path.get(path.at(p));
+                        nextNid=path.get(path.at(p+1));
+                        BDD curState=graph.nodeGetBDD(curNid);
+                        if(curState.and(neg_f_bdd).isZero()) return false;
+                        if(neg_f.isStateSpec()) graph.nodeAddSpec(curNid,neg_f);
+                        else graph.edgeAddSpec(curNid+"->"+nextNid,neg_f,path,p,false);
+                        exp=path.needExplainNextPosition(pos,p);
+                    }
+
+                    // show the lower and upper bounds of the spec
+                    graph.nodeAddAnnotation(path.get(path.at(pos+a)),"lower bound "+a+" of "+simplifySpecString(spec,false));
+                    graph.nodeAddAnnotation(path.get(path.at(pos+b)),"upper bound "+b+" of "+simplifySpecString(spec,false));
+
+                    exp=true;
+                    for(int p=pos+a; p<=pos+b; p++){
+                        curNid=path.get(path.at(p));
+                        nextNid=path.get(path.at(p+1));
+                        BDD curState=graph.nodeGetBDD(curNid);
+                        if(!curState.and(Xf).isZero() && !curState.and(Xg).isZero()){  // explain f/\g
+                            if(child[0].isStateSpec()) graph.nodeAddSpec(curNid,child[0]);
+                            else graph.edgeAddSpec(curNid+"->"+nextNid,child[0],path,p,false);
+                            if(child[2].isStateSpec()) graph.nodeAddSpec(curNid,child[2]);
+                            else graph.edgeAddSpec(curNid+"->"+nextNid,child[2],path,p,false);
+                            return true;
+                        }else if(exp && !curState.and(Xg).isZero()){ // explain g
+                            if (child[2].isStateSpec()) graph.nodeAddSpec(curNid, child[2]);
+                            else graph.edgeAddSpec(curNid + "->" + nextNid, child[2], path, p, false);
+                            exp=path.needExplainNextPosition(pos,p);
+                        }
+                    }
+                    return true;
 
                 }else
                     return true;
