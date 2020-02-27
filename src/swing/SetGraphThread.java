@@ -43,7 +43,7 @@ public class SetGraphThread implements Runnable, ViewerListener, ActionListener 
         this.graph = graph;
         this.indexJFrame = indexJFrame;
         // 创建一个新窗口
-        newJFrame = new JFrame("Counter-example for " + spec);
+        newJFrame = new JFrame("Counterexample for " + spec);
         newJFrame.setSize((int) (indexJFrame.width * 0.6f), (int) (indexJFrame.height * 0.7f));
         // 把新窗口的位置设置到 relativeWindow 窗口的中心
         newJFrame.setLocationRelativeTo(this.indexJFrame);

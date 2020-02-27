@@ -143,7 +143,8 @@ public class Thesis_Experiment {
         runtime.gc();
         long beginMemory =runtime.freeMemory();// 开始时的剩余内存
 
-        String filename="testcases/btp_delay.smv";
+        String filename="testcases/btp_tr.smv";
+        //filename="testcases/bit_transmission_actions.smv";
         Env.loadModule(filename);
         System.out.print("========= Loading Modules of "); System.out.print(filename); System.out.println(" ==========");
         SMVModule main = (SMVModule) Env.getModule("main");
@@ -160,10 +161,11 @@ public class Thesis_Experiment {
         //to_parse = "SPEC AF sender.ack;";
         to_parse = "RTCTL*SPEC A( BG 7..12 ( (sender.bit=1 U receiver.state=r1) | A(X sender.ack=1)) )";
         to_parse = "RTCTL*SPEC (s.bit=1) -> (BF 5..12 (r.state=r1 & X(r.Act=sack & A F s.ack=1)))";
-        to_parse = "RTCTL*SPEC (s.bit=1) -> (F (r.state=r1 & (r.Act=sack & A F s.ack=1)))";
-        to_parse = "RTCTL*SPEC A G (s.bit -> A F r.state=r1)";
-        to_parse = "RTCTL*SPEC (A G (s.bit)) | (A G (s.bit -> A F r.state=r1))";
-        //to_parse = "RTCTL*SPEC A BG 5..12 (s.bit -> A BF 5..10 r.state=r1)";
+        //to_parse = "RTCTL*SPEC (s.bit=1) -> (F (r.state=r1 & (r.act=sack & A F s.ack=1)))";
+        //to_parse = "RTCTL*SPEC A G (s.bit -> A F r.state=r1)";
+        //to_parse = "RTCTL*SPEC (A G (s.bit)) | (A G (s.bit -> A F r.state=r1))";
+        to_parse = "RTCTL*SPEC A G  (s.bit -> A BF 5..8 r.state=r1)";
+        to_parse = "RTCTL*SPEC s.bit -> BF 3..6 (r.state=r1 & r.act=sack & A X F s.ack)";
 
         Spec[] all_specs = Env.loadSpecString(to_parse);
         AlgRunnerThread runner;

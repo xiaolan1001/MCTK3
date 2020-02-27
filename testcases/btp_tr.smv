@@ -1,0 +1,44 @@
+MODULE main
+VAR
+  act : {snd, rec, SR, none};
+  s : Sender(act, r.act);
+  r : Receiver(act, s.act);
+
+--JUSTICE act=SR;
+
+MODULE Sender(envact, recact)
+VAR
+  act : {sb0,sb1,none};
+  bit : {0,1};
+  ack : boolean;
+INIT !ack;
+--Sender's protocol
+TRANS (bit=0 & !ack) -> (act=sb0);
+TRANS (bit=1 & !ack) -> (act=sb1);
+TRANS ack -> (act=none);
+--Sender's evolution function
+ASSIGN
+  next(ack) := case
+    (!ack & recact=sack & (envact=SR | envact=rec)) : TRUE;
+    TRUE : ack;
+  esac;
+  next(bit) := bit;
+
+MODULE Receiver(envact, sndact)
+VAR
+  act : {none, sack};
+  state : {empty, r0, r1};
+INIT state=empty;
+--Receiver's protocol
+TRANS (state=empty) -> (act=none);
+TRANS (state=r0 | state=r1) -> (act=sack);
+--Receiver's evolution function
+ASSIGN
+  next(state) := case
+    (sndact=sb0 & state=empty & (envact=SR | envact=snd)) : r0;
+    (sndact=sb1 & state=empty & (envact=SR | envact=snd)) : r1;
+    TRUE : state;
+  esac;
+
+
+RTCTL*SPEC (A G (s.bit)) | (A G (s.bit -> A F r.state=r1));

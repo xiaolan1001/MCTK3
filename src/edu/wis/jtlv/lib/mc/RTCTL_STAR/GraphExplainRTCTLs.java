@@ -156,6 +156,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
 
         Sprite s = sman.addSprite(nodeId.replace(".","+")+"-spriteNodeAnnotation-"+(++annNum));
         s.setAttribute("ui.label",annotation);
+        s.addAttribute("ui.style", "text-color:gray;");
         s.attachToNode(nodeId);
         n.setAttribute("spriteAnnotation"+annNum, s);
         n.setAttribute("spriteAnnotationNumber",annNum);
@@ -276,12 +277,13 @@ public class GraphExplainRTCTLs extends MultiGraph {
 
     // add a transition from->to
     public Edge addArc(String id, String from, String to, boolean directed){
-        Edge e = addEdge(id,from,to,directed);
-        if(e==null) return null;
-
-        e.setAttribute("spriteSpecNumber",0);
-        e.setAttribute("spriteAnnotationNumber",0);
-
+        Edge e = getEdge(id);
+        if(e==null) {
+            e = addEdge(id, from, to, directed);
+            if(e==null) return null;
+            e.setAttribute("spriteSpecNumber",0);
+            e.setAttribute("spriteAnnotationNumber",0);
+        }
         return e;
     }
 
@@ -345,6 +347,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
 
         Sprite s = sman.addSprite(edgeId.replace(".","+")+"-spriteEdgeAnnotation-"+(++annNum));
         s.setAttribute("ui.label",annotation);
+        s.addAttribute("ui.style", "text-color:gray;");
         s.attachToNode(edgeId);
         n.setAttribute("spriteAnnotation"+annNum, s);
         n.setAttribute("spriteAnnotationNumber",annNum);
