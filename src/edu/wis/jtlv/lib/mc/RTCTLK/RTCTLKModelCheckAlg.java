@@ -14,14 +14,14 @@ import net.sf.javabdd.BDD;
 import net.sf.javabdd.BDDVarSet;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
-import swing.VerifyJPanel;
+import swing.VerificationActionListener;
 
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Queue;
 import java.util.Vector;
 
-import static swing.IndexJFrame.verifyPanel;
+import static swing.mainJFrame.verifyPanel;
 
 public class RTCTLKModelCheckAlg extends CTLModelCheckAlg{
     // variables for counterexamples generation
@@ -42,9 +42,9 @@ public class RTCTLKModelCheckAlg extends CTLModelCheckAlg{
     @Override
     public AlgResultI preAlgorithm() throws AlgExceptionI {
         if (getProperty() == null)
-            VerifyJPanel.insertDocument(verifyPanel.ctext,  "\n Cannot model check a null specification.", Color.RED,1);
+            VerificationActionListener.insertDocument(verifyPanel.outputText,  "\n Cannot model check a null specification.", VerificationActionListener.outputFontSize, Color.RED,1);
         else if (!getProperty().isRTCTLKSpec())
-            VerifyJPanel.insertDocument(verifyPanel.ctext,  "\nCannot model check non RTCTLK specification: " + getProperty(), Color.RED,1);
+            VerificationActionListener.insertDocument(verifyPanel.outputText,  "\nCannot model check non RTCTLK specification: " + getProperty(), VerificationActionListener.outputFontSize, Color.RED,1);
         return null;
     }
 

@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import static swing.IndexJFrame.editorPanel;
+import static swing.mainJFrame.editorPanel;
 
 
 public class SetFont implements ActionListener {
@@ -17,12 +17,12 @@ public class SetFont implements ActionListener {
 	JComboBox fontValue;
 	JComboBox styleValue;
 	JComboBox sizeValue;
-	IndexJFrame indexJFrame;
-	public SetFont(IndexJFrame indexJFrame)
+	mainJFrame indexJFrame;
+	public SetFont(mainJFrame indexJFrame)
 	{
 		this.indexJFrame=indexJFrame;
 		setFontDialog=new JDialog(this.indexJFrame);
-		setFontDialog.setTitle("Font Settings");//×ÖÌåÉèÖÃ
+		setFontDialog.setTitle("Font Settings");//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		fontValue=new JComboBox();
 		styleValue=new JComboBox();
 		sizeValue=new JComboBox();
@@ -32,9 +32,9 @@ public class SetFont implements ActionListener {
 	
 	public void init()
 	{
-		JLabel font=new JLabel("Font");//×ÖÌå
-		JLabel style=new JLabel("Type");//ÀàÐÍ
-		JLabel size=new JLabel("Size");//´óÐ¡
+		JLabel font=new JLabel("Font");//ï¿½ï¿½ï¿½ï¿½
+		JLabel style=new JLabel("Type");//ï¿½ï¿½ï¿½ï¿½
+		JLabel size=new JLabel("Size");//ï¿½ï¿½Ð¡
 		
 		for(int i=0;i<fontValues.length;i++)
 		{
@@ -71,7 +71,7 @@ public class SetFont implements ActionListener {
 		setFontDialog.add("West",names);
 		setFontDialog.add("Center", values);
 		setFontDialog.add("South", contral);
-		setFontDialog.setLocation(IndexJFrame.width/3, IndexJFrame.height/3);
+		setFontDialog.setLocation(mainJFrame.width/3, mainJFrame.height/3);
 		setFontDialog.setSize(240, 210);
 		setFontDialog.setVisible(true);
 	}

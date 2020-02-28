@@ -23,11 +23,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import static swing.VerifyJPanel.insertDocument;
+import static swing.VerificationActionListener.insertDocument;
 
 public class SetGraphThread implements Runnable, ViewerListener, ActionListener {
     MultiGraph graph;
-    IndexJFrame indexJFrame;
+    mainJFrame indexJFrame;
     JFrame newJFrame;
     JTextPane nodeConsole = new JTextPane();
 
@@ -39,7 +39,7 @@ public class SetGraphThread implements Runnable, ViewerListener, ActionListener 
     JMenuItem copy = new JMenuItem("Copy(C)"), clear = new JMenuItem("Clear");
     protected boolean loop = true;
 
-    public SetGraphThread(String spec, MultiGraph graph, IndexJFrame indexJFrame) {
+    public SetGraphThread(String spec, MultiGraph graph, mainJFrame indexJFrame) {
         this.graph = graph;
         this.indexJFrame = indexJFrame;
         // 创建一个新窗口
@@ -47,7 +47,7 @@ public class SetGraphThread implements Runnable, ViewerListener, ActionListener 
         newJFrame.setSize((int) (indexJFrame.width * 0.6f), (int) (indexJFrame.height * 0.7f));
         // 把新窗口的位置设置到 relativeWindow 窗口的中心
         newJFrame.setLocationRelativeTo(this.indexJFrame);
-        Image logoIcon = new ImageIcon(IndexJFrame.class.getResource("/swing/Icons/logo.png")).getImage();
+        Image logoIcon = new ImageIcon(mainJFrame.class.getResource("/swing/Icons/logo.png")).getImage();
         newJFrame.setIconImage(logoIcon);
         // 点击窗口关闭按钮, 执行销毁窗口操作（如果设置为 EXIT_ON_CLOSE, 则点击新窗口关闭按钮后, 整个进程将结束）
         newJFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -59,7 +59,7 @@ public class SetGraphThread implements Runnable, ViewerListener, ActionListener 
         Viewer viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
         ViewPanel viewPanel = (ViewPanel) viewer.addDefaultView(false);
         graphJPanel = viewPanel;
-        insertDocument(nodeConsole, "Node detail...", Color.BLUE, 1);
+        insertDocument(nodeConsole, "Node detail...", VerificationActionListener.outputFontSize, Color.BLUE, 1);
         GraphNodeJSP.setRightComponent(nodeScroll);
         GraphNodeJSP.setLeftComponent(graphJPanel);
         //重新绘制
@@ -133,13 +133,13 @@ public class SetGraphThread implements Runnable, ViewerListener, ActionListener 
     public void buttonPushed(String id) {
         //Node n = graph.getNode(id);
         //System.out.println("-------- State "+id+" --------");
-        insertDocument(nodeConsole, "\n" + "-------- State " + id + " --------", Color.BLACK, 1);
+        insertDocument(nodeConsole, "\n" + "-------- State " + id + " --------", VerificationActionListener.outputFontSize, Color.BLACK, 1);
         String str = null;
         if (graph instanceof GraphExplainRTCTLK) {
             str = ((GraphExplainRTCTLK) graph).getNodeSatSpec(id);
             if (str != null && !str.equals(""))
-                insertDocument(nodeConsole, "\n" + "[satisfies " + str + "]", Color.BLACK, 1);
-            insertDocument(nodeConsole, "\n" + ((GraphExplainRTCTLK) graph).getNodeStateDetails(id), Color.BLACK, 1);
+                insertDocument(nodeConsole, "\n" + "[satisfies " + str + "]", VerificationActionListener.outputFontSize, Color.BLACK, 1);
+            insertDocument(nodeConsole, "\n" + ((GraphExplainRTCTLK) graph).getNodeStateDetails(id), VerificationActionListener.outputFontSize, Color.BLACK, 1);
             try {
                 ((GraphExplainRTCTLK) graph).getChecker().explainOneGraphNode(((GraphExplainRTCTLK) graph), id);
             } catch (ModelCheckAlgException e) {
@@ -152,8 +152,8 @@ public class SetGraphThread implements Runnable, ViewerListener, ActionListener 
                 e.printStackTrace();
             }
             if (str != null && !str.equals(""))
-                insertDocument(nodeConsole, "\n" + "[satisfies " + str + "]", Color.BLACK, 1);
-            insertDocument(nodeConsole, "\n" + ((GraphExplainRTCTLs) graph).nodeGetStateDetails(id), Color.BLACK, 1);
+                insertDocument(nodeConsole, "\n" + "[satisfies " + str + "]", VerificationActionListener.outputFontSize, Color.BLACK, 1);
+            insertDocument(nodeConsole, "\n" + ((GraphExplainRTCTLs) graph).nodeGetStateDetails(id), VerificationActionListener.outputFontSize, Color.BLACK, 1);
             try {
                 ((GraphExplainRTCTLs) graph).getChecker().explainOneNode(id);
             } catch (ModelCheckAlgException e) {
@@ -183,7 +183,7 @@ public class SetGraphThread implements Runnable, ViewerListener, ActionListener 
             clipboard.setContents(content, null);
         } else if (e.getSource() == clear) {
             nodeConsole.setText("");
-            insertDocument(nodeConsole, "Node detail...", Color.BLUE, 1);
+            insertDocument(nodeConsole, "Node detail...", VerificationActionListener.outputFontSize, Color.BLUE, 1);
         }
     }
 }

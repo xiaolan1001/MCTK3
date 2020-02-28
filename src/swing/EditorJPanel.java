@@ -17,7 +17,7 @@ import java.awt.event.*;
 
 
 public class EditorJPanel implements KeyListener, ActionListener, ChangeListener{
-    IndexJFrame indexJFrame;
+    mainJFrame indexJFrame;
     static JTextPane rowNumber;
     static JTextPane textModel=new JTextPane();
     JScrollPane rowScroll,textScroll;
@@ -31,7 +31,7 @@ public class EditorJPanel implements KeyListener, ActionListener, ChangeListener
     BoundedRangeModel model;
 
     Font  DeFont=new Font("TimesRoman",0,18);;
-    public EditorJPanel(IndexJFrame indexJFrame)
+    public EditorJPanel(mainJFrame indexJFrame)
     {
         this.indexJFrame=indexJFrame;
         clipboard=Toolkit.getDefaultToolkit().getSystemClipboard();

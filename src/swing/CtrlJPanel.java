@@ -18,7 +18,7 @@ import static swing.EditorJPanel.textModel;
 
 public class CtrlJPanel implements ActionListener{
 
-	IndexJFrame indexJFrame;
+	mainJFrame indexJFrame;
 	FileOperation fileOperation;
 	JMenuBar menubar;
 	public static UndoManager uo;
@@ -30,7 +30,7 @@ public class CtrlJPanel implements ActionListener{
 			 undoButton,redoButton,cutButton,copyButton,
 			 pasteButton,frontButton,compileButton,helpButton;
 
-	public CtrlJPanel(IndexJFrame indexJFrame)
+	public CtrlJPanel(mainJFrame indexJFrame)
 	{
 		this.indexJFrame=indexJFrame;
 		fileOperation=new FileOperation(indexJFrame);
@@ -121,7 +121,7 @@ public class CtrlJPanel implements ActionListener{
 		about.addActionListener(this);
 
 		toolBar.setLayout(new FlowLayout(FlowLayout.LEFT));
-		Icon newIcon = new ImageIcon(IndexJFrame.class.getResource("/swing/Icons/new.png"));
+		Icon newIcon = new ImageIcon(mainJFrame.class.getResource("/swing/Icons/new.png"));
 		Icon openIcon=new ImageIcon(CtrlJPanel.class.getResource("/swing/Icons/open.png"));
 		Icon saveIcon=new ImageIcon(CtrlJPanel.class.getResource("/swing/Icons/save.png"));
 		Icon saveAsIcon=new ImageIcon(CtrlJPanel.class.getResource("/swing/Icons/saveas.png"));
@@ -299,7 +299,10 @@ public class CtrlJPanel implements ActionListener{
 			}.start();//start this thread
 		} else if(e.getActionCommand().equals("About")||e.getSource()==helpButton){
 			Object[] options = {"OK"};
-			JOptionPane.showOptionDialog(indexJFrame, "Developer:\n    Luo Xiangyu & Liang Sen\nEmail:\n    luoxy@163.com\n    liangsen@hqu.edu.cn\nVersion:2.0.0(Beta)",
+			JOptionPane.showOptionDialog(indexJFrame, "MCTK 2.0.0 : A Symbolic Model Checker for Branching Time Logic RTCTL*\n" +
+							"Developers:\n" +
+							"    Xiangyu Luo, Huaqiao University, luoxy@hqu.edu.cn\n" +
+							"    Sen Liang, Huaqiao University, liangsen@hqu.edu.cn",
 					"About",JOptionPane.YES_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
 		}
 	}

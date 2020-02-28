@@ -10,11 +10,11 @@ import static swing.EditorJPanel.textModel;
 
 public class FileOperation {
     JFileChooser filechoose = new JFileChooser();
-    IndexJFrame indexJFrame;
+    mainJFrame indexJFrame;
     String src="";
     String fileName;
 
-    public FileOperation(IndexJFrame indexJFrame) {
+    public FileOperation(mainJFrame indexJFrame) {
         this.indexJFrame = indexJFrame;
         filechoose.setAcceptAllFileFilterUsed(false);
         filechoose.addChoosableFileFilter(new MyFileFilter("SMV Code(.smv)", ".smv"));//����ļ�������
