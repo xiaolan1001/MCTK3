@@ -28,9 +28,9 @@ import static swing.mainJFrame.editorPanel;
 
 public class VerificationActionListener implements ActionListener {
 
-    public static int buttonFontSize = 12;
-    public static int inputFontSize = 12;
-    public static int outputFontSize = 12;
+    public static int buttonFontSize = 13;
+    public static int inputFontSize = 13;
+    public static int outputFontSize = 13;
 
     public static int specInputLineHeight =40;
 
@@ -47,15 +47,14 @@ public class VerificationActionListener implements ActionListener {
     JPanel specsPanel;
     JTextArea specTextArea = new JTextArea();// 文本窗格
     JButton addButton, delButton, verifyButton;
-    JCheckBox selectCheckBox;
 
-    public JTextPane outputText;// Console of verificatin
+    public JTextPane outputTextPane;// Console of verification
     JScrollPane buttonsSpecsScrollPane, outputScrollPane;
     public static JSplitPane mainSplitPane;
-    Icon plusIcon = new ImageIcon(CtrlJPanel.class.getResource("/swing/Icons/plusm.gif"));
-    Icon minIcon = new ImageIcon(CtrlJPanel.class.getResource("/swing/Icons/minusm.gif"));
-    Icon witIcon = new ImageIcon(CtrlJPanel.class.getResource("/swing/Icons/witm.gif"));
-    Icon verIcon = new ImageIcon(CtrlJPanel.class.getResource("/swing/Icons/verm.gif"));
+    Icon plusIcon = new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/plusm.gif"));
+    Icon minIcon = new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/minusm.gif"));
+    Icon witIcon = new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/witm.gif"));
+    Icon verIcon = new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/verm.gif"));
     final String atltips = "Please input a RTCTL*SPEC...";
     SMVModule main;//read the smv model only once.
     private Statistic getStat; //get the time consuming, memory, etc.
@@ -97,9 +96,9 @@ public class VerificationActionListener implements ActionListener {
         buttonsSpecsPanel.add(specsPanel);
         buttonsSpecsScrollPane = new JScrollPane(buttonsSpecsPanel);
 
-        outputText = new JTextPane();
-        outputScrollPane = new JScrollPane(outputText);
-        insertDocument(outputText, "Verification information...", outputFontSize, Color.BLUE, 1);
+        outputTextPane = new JTextPane();
+        outputScrollPane = new JScrollPane(outputTextPane);
+        insertDocument(outputTextPane, "Verification information...", outputFontSize, Color.BLUE, 1);
         outputScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
         menuItemCopy = new JMenuItem("Copy(C)");
@@ -109,9 +108,9 @@ public class VerificationActionListener implements ActionListener {
         jPopMenu.add(menuItemClear);
         menuItemCopy.addActionListener(this);
         menuItemClear.addActionListener(this);
-        outputText.add(jPopMenu);
-        outputText.setBorder(null);
-        outputText.addMouseListener(new MyMouseListener());
+        outputTextPane.add(jPopMenu);
+        outputTextPane.setBorder(null);
+        outputTextPane.addMouseListener(new MyMouseListener());
 
         witnessPanel = new JPanel(new BorderLayout());//初始化
         mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -121,7 +120,7 @@ public class VerificationActionListener implements ActionListener {
         mainSplitPane.setDividerLocation(950);
 
         buttonsSpecsPanel.setOpaque(true);
-        outputText.setOpaque(true);
+        outputTextPane.setOpaque(true);
         buttonsSpecsScrollPane.setOpaque(true);
         outputScrollPane.setOpaque(true);
         mainSplitPane.setOpaque(true);
@@ -162,12 +161,12 @@ public class VerificationActionListener implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == menuItemCopy) {
-            String temp = outputText.getSelectedText();
+            String temp = outputTextPane.getSelectedText();
             StringSelection content = new StringSelection(temp);
             clipboard.setContents(content, null);
         } else if (e.getSource() == menuItemClear) {
-            outputText.setText("");
-            insertDocument(outputText, "Verification information...", outputFontSize, Color.BLUE, 1);
+            outputTextPane.setText("");
+            insertDocument(outputTextPane, "Verification information...", outputFontSize, Color.BLUE, 1);
         } else if (e.getSource() == addButton || e.getActionCommand().equals("atlADD")) {
             JTextArea specTextArea=insertSpecLine("",getClickedSourceIndex(e));
             specTextArea.requestFocus(true);
@@ -176,7 +175,7 @@ public class VerificationActionListener implements ActionListener {
         } else if (e.getSource() == verifyButton) {
             String specific = specTextArea.getText();
             if (atltips.equalsIgnoreCase(specific) || specific.equals("") || specific.trim().startsWith("--"))
-                insertDocument(outputText, "\n Sorry,please input a specification !", outputFontSize, Color.red, 2);
+                insertDocument(outputTextPane, "\n Sorry,please input a specification !", outputFontSize, Color.red, 2);
             else if (specific.endsWith(";"))
                 GRun("RTCTL*SPEC ".concat(specific), false);
             else
@@ -195,7 +194,7 @@ public class VerificationActionListener implements ActionListener {
         } else if (((JButton) e.getSource()).getText().equals("Verify All")) {
             String parse = GetAllSpec();
             if ("".equals(parse))
-                insertDocument(outputText, "\n Sorry,please input a specification !", outputFontSize, Color.red, 2);
+                insertDocument(outputTextPane, "\n Sorry,please input a specification !", outputFontSize, Color.red, 2);
             else
                 GRun(parse, false);
         } else if (((JButton) e.getSource()).getText().equals("Delete All")) {
@@ -225,7 +224,7 @@ public class VerificationActionListener implements ActionListener {
     private class MyMouseListener extends MouseAdapter {
         public void mouseClicked(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON3) {
-                jPopMenu.show(outputText, e.getX(), e.getY());
+                jPopMenu.show(outputTextPane, e.getX(), e.getY());
             }
 
         }
@@ -310,7 +309,7 @@ public class VerificationActionListener implements ActionListener {
                 if (e.getSource() == verifyButton) {
                     String specific = specTextArea.getText();
                     if (tips.equalsIgnoreCase(specific) || specific.equals("") || specific.trim().startsWith("--"))
-                        insertDocument(outputText, "\n Sorry,please input a specification !", outputFontSize, Color.red, 2);
+                        insertDocument(outputTextPane, "\n Sorry,please input a specification !", outputFontSize, Color.red, 2);
                     else if (specific.endsWith(";"))
                         GRun("RTCTL*SPEC ".concat(specific), false);
                     else
@@ -353,7 +352,7 @@ public class VerificationActionListener implements ActionListener {
                 Env.loadModule(url);
                 main = (SMVModule) Env.getModule("main");
                 main.setFullPrintingMode(true);
-                insertDocument(outputText, "\n =======Done Loading Modules========", outputFontSize, Color.GREEN, 1);
+                insertDocument(outputTextPane, "\n =======Done Loading Modules========", outputFontSize, Color.GREEN, 1);
 
             } catch (Exception ie) {
                 ie.printStackTrace();
@@ -363,7 +362,7 @@ public class VerificationActionListener implements ActionListener {
                         "Warm Tips", JOptionPane.YES_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
             }finally {
                 getStat=new Statistic();
-                insertDocument(outputText, "\nInitial occupation of building model...\nNumber of BDD nodes:" + getStat.modelBDD +
+                insertDocument(outputTextPane, "\nInitial occupation of building model...\nNumber of BDD nodes:" + getStat.modelBDD +
                         "\nNumber of BDD variables:"+getStat.modelVar, outputFontSize, Color.GRAY, 1);
             }
 
@@ -373,10 +372,10 @@ public class VerificationActionListener implements ActionListener {
     public boolean ExtractSpec() {
         String[] all_specs = Env.getAllSpecsString();
         if (all_specs == null || all_specs.length == 0) {
-            insertDocument(outputText, "\n =========No Specs loaded=========", outputFontSize, Color.GREEN, 1);
+            insertDocument(outputTextPane, "\n =========No Specs loaded=========", outputFontSize, Color.GREEN, 1);
             return false;
         } else
-            insertDocument(outputText, "\n =====Automatic Loading Specs=======", outputFontSize, Color.GREEN, 1);
+            insertDocument(outputTextPane, "\n =====Automatic Loading Specs=======", outputFontSize, Color.GREEN, 1);
         for (int i = 0; i < all_specs.length; i++) {
             if (all_specs[i].startsWith("RTCTL*SPEC")) {
                 if (atltips.equals(specTextArea.getText()))
@@ -415,16 +414,16 @@ public class VerificationActionListener implements ActionListener {
         System.out.println("GRun----------"+parse);
         Spec[] all_specs = Env.loadSpecString(parse);
         if (all_specs == null||all_specs[0]==null) {
-            insertDocument(outputText, "\n Sorry,please input correct specifications...", outputFontSize, Color.RED, 1);
+            insertDocument(outputTextPane, "\n Sorry,please input correct specifications...", outputFontSize, Color.RED, 1);
             return;
         }
         String[] SpecStr = parse.split(";");
-        insertDocument(outputText, "\n ======DONE Loading Specs=========", outputFontSize, Color.ORANGE, 1);
+        insertDocument(outputTextPane, "\n ======DONE Loading Specs=========", outputFontSize, Color.ORANGE, 1);
         AlgRunnerThread runner;
         for (int i = 0; i < all_specs.length; i++) {
             getStat.startBDDVar();
             getStat.startTimeMemory();
-            insertDocument(outputText, "\n model checking " + SpecStr[i], outputFontSize, Color.BLACK, 1);
+            insertDocument(outputTextPane, "\n model checking " + SpecStr[i], outputFontSize, Color.BLACK, 1);
             if (all_specs[i].getLanguage() == InternalSpecLanguage.CTL) {
                 RTCTLKModelCheckAlg algorithm = new RTCTLKModelCheckAlg(main, all_specs[i]);
                 if (isgraph) {//return result & graph
@@ -442,10 +441,10 @@ public class VerificationActionListener implements ActionListener {
                     runner.runSequential();
                 }
                 if (runner.getDoResult() != null)
-                    insertDocument(outputText, "\n" + runner.getDoResult().resultString() +
+                    insertDocument(outputTextPane, "\n" + runner.getDoResult().resultString() +
                             "\n" + getStat.endTime() + getStat.endBDD() +getStat.endVar()+ getStat.endMemory(), outputFontSize, Color.BLACK, 1);
                 else if (runner.getDoException() != null)
-                    insertDocument(outputText, "\n" + runner.getDoException().getMessage(), outputFontSize, Color.RED, 1);
+                    insertDocument(outputTextPane, "\n" + runner.getDoException().getMessage(), outputFontSize, Color.RED, 1);
 
             } else if (all_specs[i].getLanguage() == InternalSpecLanguage.RTCTLs || all_specs[i].getLanguage() == InternalSpecLanguage.LTL) {
                 RTCTL_STAR_ModelCheckAlg algorithm = new RTCTL_STAR_ModelCheckAlg(main, all_specs[i]);
@@ -466,10 +465,10 @@ public class VerificationActionListener implements ActionListener {
 
 
                 if (runner.getDoResult() != null)
-                    insertDocument(outputText, "\n" + runner.getDoResult().resultString() +
+                    insertDocument(outputTextPane, "\n" + runner.getDoResult().resultString() +
                             "\n" + getStat.endTime() + getStat.endBDD() +getStat.endVar()+ getStat.endMemory(), outputFontSize, Color.BLACK, 1);
                 else if (runner.getDoException() != null)
-                    insertDocument(outputText, "\n" + runner.getDoException().getMessage(), outputFontSize, Color.RED, 1);
+                    insertDocument(outputTextPane, "\n" + runner.getDoException().getMessage(), outputFontSize, Color.RED, 1);
             }
         }
     }

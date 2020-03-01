@@ -6,12 +6,28 @@ import edu.wis.jtlv.env.spec.SpecException;
 import edu.wis.jtlv.lib.mc.ModelCheckAlgException;
 import edu.wis.jtlv.old_lib.mc.ModelCheckException;
 import org.graphstream.graph.Node;
+import org.graphstream.ui.swingViewer.ViewPanel;
 import org.graphstream.ui.view.Viewer;
 import org.graphstream.ui.view.ViewerListener;
 import org.graphstream.ui.view.ViewerPipe;
+import swing.mainJFrame;
 
-public class ViewerExplainRTCTLs implements ViewerListener {
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+
+import static java.lang.Double.parseDouble;
+
+public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, MouseMotionListener {
     protected boolean loop = true;
+    JFrame ceFrame;
+    Viewer viewer;
+    ViewPanel graphPanel;
+    JButton layoutButton, viewPercentButton,viewCenterButton;
+    JTextField viewPercentTextField, mouseXTextField, mouseYTextField;
 
     public GraphExplainRTCTLs getGraph() {
         return graph;
@@ -48,7 +64,50 @@ public class ViewerExplainRTCTLs implements ViewerListener {
                         "sprite {size: 0px;text-size: 14; text-alignment: at-right; }"
         );
 
-        Viewer viewer = graph.display(true);
+        //Viewer viewer = graph.display(true);
+
+        ceFrame=new JFrame(graph.getId());
+        ceFrame.setSize(800, 600);
+        // 把新窗口的位置设置到 relativeWindow 窗口的中心
+        //ceFrame.setLocationRelativeTo(this.indexJFrame);
+        Image logoIcon = new ImageIcon(mainJFrame.class.getResource("/swing/Icons/logo.png")).getImage();
+        ceFrame.setIconImage(logoIcon);
+        // 点击窗口关闭按钮, 执行销毁窗口操作（如果设置为 EXIT_ON_CLOSE, 则点击新窗口关闭按钮后, 整个进程将结束）
+        ceFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        // 窗口设置为不可改变大小 newJFrame.setResizable(false);
+
+        viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
+        viewer.enableAutoLayout();
+
+        layoutButton =new JButton("Auto Layout is working");
+        layoutButton.addActionListener(this);
+
+        viewPercentButton=new JButton("View Percent:");
+        viewPercentButton.addActionListener(this);
+        viewPercentTextField = new JTextField("1",4);
+
+        viewCenterButton = new JButton("View Center:");
+        viewCenterButton.addActionListener(this);
+        mouseXTextField = new JTextField("0",4);
+        mouseYTextField = new JTextField("0",4);
+
+        JPanel controlPanel = new JPanel();
+        controlPanel.add(layoutButton);
+        controlPanel.add(viewPercentButton);
+        controlPanel.add(viewPercentTextField);
+        controlPanel.add(viewCenterButton);
+        controlPanel.add(mouseXTextField);
+        controlPanel.add(mouseYTextField);
+
+        graphPanel = (ViewPanel) viewer.addDefaultView(false);
+
+        ceFrame.setLayout(new BorderLayout());
+        ceFrame.add("North", controlPanel);
+        ceFrame.add("Center",graphPanel);
+
+        //ceFrame.setContentPane(viewPanel);
+        ceFrame.setVisible(true);
+
 
         // The default action when closing the view is to quit
         // the program.
@@ -110,5 +169,34 @@ public class ViewerExplainRTCTLs implements ViewerListener {
 
     public void buttonReleased(String id) {
         //System.out.println("Button released on node "+id);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if(e.getSource()== layoutButton){
+            if(layoutButton.getText().equals("Auto Layout is working")){
+                viewer.disableAutoLayout();
+                layoutButton.setText("Auto Layout is closed");
+            }else{
+                viewer.enableAutoLayout();
+                layoutButton.setText("Auto Layout is working");
+            }
+        }else if(e.getSource()==viewPercentButton){
+            graphPanel.getCamera().setViewPercent(parseDouble(viewPercentTextField.getText()));
+        }else if(e.getSource()==viewCenterButton){
+            graphPanel.getCamera().setViewCenter(parseDouble(mouseXTextField.getText()), parseDouble(mouseYTextField.getText()), 0);
+        }
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+/*
+        mouseXTextField.setText(String.valueOf(e.getX()));
+        mouseYTextField.setText(String.valueOf(e.getY()));
+*/
     }
 }

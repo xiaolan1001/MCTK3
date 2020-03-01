@@ -16,7 +16,7 @@ import java.io.IOException;
  * @author yaniv sa'ar.
  * @version {@value Env#version}
  */
-public class Thesis_Experiment {
+public class TR_Experiment {
     private Statistic getStat; //get the time consuming, memory, etc.
 
     public static void main(String[] args) throws IOException {
@@ -24,7 +24,7 @@ public class Thesis_Experiment {
         //RTCTLsTestMwOven();  //算法测试
         //RTCTLsCheckTraffic();  //论文实验1
         //RTCTLsCheckDC();    //论文实验2
-        new Thesis_Experiment().RTCTLsCheckBT();    //论文实验3
+        new TR_Experiment().RTCTLsCheckBT();    //论文实验3
     }
 
     public static void RTCTLsTestMwOven() {
@@ -152,20 +152,29 @@ public class Thesis_Experiment {
         getStat = new Statistic();
         main.setFullPrintingMode(true);
         String to_parse = "";
-        to_parse = "RTCTL*SPEC !E(BF 8..16 (receiver.state=r0 | receiver.state=r1));";
-        to_parse = "RTCTL*SPEC G sender.bit=0 -> A(F(receiver.state=r0 & BF 7..16 sender.ack)) ";
+        //to_parse = "RTCTL*SPEC !E(BF 8..16 (receiver.state=r0 | receiver.state=r1));";
+        //to_parse = "RTCTL*SPEC G sender.bit=0 -> A(F(receiver.state=r0 & BF 7..16 sender.ack)) ";
         //to_parse = "RTCTL*SPEC G(sender.bit=0) -> F(receiver.state=r0 &  (BF 3..8 sender.ack));";
         //to_parse ="RTCTL*SPEC BG 7..12 ( (sender.bit=1 U receiver.state=r1) | (X sender.ack=1));";
         //to_parse = "RTCTL*SPEC (receiver.state = r0|receiver.state = r1) BU 7..14 sender.ack";
         //to_parse = "RTCTL*SPEC A(X sender.ack)";
         //to_parse = "SPEC AF sender.ack;";
-        to_parse = "RTCTL*SPEC A( BG 7..12 ( (sender.bit=1 U receiver.state=r1) | A(X sender.ack=1)) )";
-        to_parse = "RTCTL*SPEC (s.bit=1) -> (BF 5..12 (r.state=r1 & X(r.Act=sack & A F s.ack=1)))";
+        //to_parse = "RTCTL*SPEC A( BG 7..12 ( (sender.bit=1 U receiver.state=r1) | A(X sender.ack=1)) )";
+        //to_parse = "RTCTL*SPEC (s.bit=1) -> (BF 5..12 (r.state=r1 & X(r.Act=sack & A F s.ack=1)))";
         //to_parse = "RTCTL*SPEC (s.bit=1) -> (F (r.state=r1 & (r.act=sack & A F s.ack=1)))";
         //to_parse = "RTCTL*SPEC A G (s.bit -> A F r.state=r1)";
         //to_parse = "RTCTL*SPEC (A G (s.bit)) | (A G (s.bit -> A F r.state=r1))";
-        to_parse = "RTCTL*SPEC A G  (s.bit -> A BF 5..8 r.state=r1)";
-        to_parse = "RTCTL*SPEC s.bit -> BF 3..6 (r.state=r1 & r.act=sack & A X F s.ack)";
+
+
+        //to_parse = "RTCTL*SPEC A G (s.bit -> A F r.state=r1)";
+        //to_parse = "RTCTL*SPEC s.bit -> BF 3..5 (r.state=r1 & r.act=sack & A X F s.ack)";
+        to_parse = "RTCTL*SPEC A(s.bit -> F (r.state=r1 & r.act=sack & A X F s.ack))";
+        to_parse = "RTCTL*SPEC A(s.bit -> BF 3..5 (r.state=r1 & r.act=sack & A X F s.ack))";
+        to_parse = "RTCTL*SPEC A(s.bit -> F  (r.state=r1 & r.act=sack & A X F !s.ack))";
+        to_parse = "RTCTL*SPEC A G(s.bit -> F(r.state=r1 & A G(r.state=r1 -> F s.ack)))";
+        to_parse = "RTCTL*SPEC A(s.bit -> F G s.ack) | A(s.bit -> F G !s.ack)";
+        //to_parse = "RTCTL*SPEC A(s.bit -> F G s.ack)";
+        //to_parse = "RTCTL*SPEC A(s.bit -> F G !s.ack)";
 
         Spec[] all_specs = Env.loadSpecString(to_parse);
         AlgRunnerThread runner;

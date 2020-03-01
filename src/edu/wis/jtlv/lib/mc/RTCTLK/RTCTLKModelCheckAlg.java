@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Queue;
 import java.util.Vector;
 
-import static swing.mainJFrame.verifyPanel;
+import static swing.mainJFrame.verificationListener;
 
 public class RTCTLKModelCheckAlg extends CTLModelCheckAlg{
     // variables for counterexamples generation
@@ -42,9 +42,9 @@ public class RTCTLKModelCheckAlg extends CTLModelCheckAlg{
     @Override
     public AlgResultI preAlgorithm() throws AlgExceptionI {
         if (getProperty() == null)
-            VerificationActionListener.insertDocument(verifyPanel.outputText,  "\n Cannot model check a null specification.", VerificationActionListener.outputFontSize, Color.RED,1);
+            VerificationActionListener.insertDocument(verificationListener.outputTextPane,  "\n Cannot model check a null specification.", VerificationActionListener.outputFontSize, Color.RED,1);
         else if (!getProperty().isRTCTLKSpec())
-            VerificationActionListener.insertDocument(verifyPanel.outputText,  "\nCannot model check non RTCTLK specification: " + getProperty(), VerificationActionListener.outputFontSize, Color.RED,1);
+            VerificationActionListener.insertDocument(verificationListener.outputTextPane,  "\nCannot model check non RTCTLK specification: " + getProperty(), VerificationActionListener.outputFontSize, Color.RED,1);
         return null;
     }
 

@@ -4,6 +4,8 @@ VAR
   s : Sender(act, r.act);
   r : Receiver(act, s.act);
 
+--JUSTICE act=snd;
+--JUSTICE act=none;
 --JUSTICE act=SR;
 
 MODULE Sender(envact, recact)
@@ -39,6 +41,3 @@ ASSIGN
     (sndact=sb1 & state=empty & (envact=SR | envact=snd)) : r1;
     TRUE : state;
   esac;
-
-
-RTCTL*SPEC (A G (s.bit)) | (A G (s.bit -> A F r.state=r1));

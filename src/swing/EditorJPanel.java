@@ -30,7 +30,8 @@ public class EditorJPanel implements KeyListener, ActionListener, ChangeListener
     static StringBuffer rowContent;
     BoundedRangeModel model;
 
-    Font  DeFont=new Font("TimesRoman",0,18);;
+    //Font  DeFont=new Font("TimesRoman",0,14);
+    Font  DeFont=new Font("System",0,VerificationActionListener.inputFontSize);
     public EditorJPanel(mainJFrame indexJFrame)
     {
         this.indexJFrame=indexJFrame;
@@ -75,8 +76,8 @@ public class EditorJPanel implements KeyListener, ActionListener, ChangeListener
         rowNumber.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 
 
-        indexJFrame.centerPanel.add("West",rowScroll);
-        indexJFrame.centerPanel.add("Center",textScroll);
+        indexJFrame.editorPanelContainer.add("West",rowScroll);
+        indexJFrame.editorPanelContainer.add("Center",textScroll);
         textModel.addKeyListener(this);
         model=textScroll.getVerticalScrollBar().getModel();
         model.addChangeListener(this);
