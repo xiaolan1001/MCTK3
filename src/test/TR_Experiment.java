@@ -170,9 +170,9 @@ public class TR_Experiment {
         //to_parse = "RTCTL*SPEC s.bit -> BF 3..5 (r.state=r1 & r.act=sack & A X F s.ack)";
         to_parse = "RTCTL*SPEC A(s.bit -> F (r.state=r1 & r.act=sack & A X F s.ack))";
         to_parse = "RTCTL*SPEC A(s.bit -> BF 3..5 (r.state=r1 & r.act=sack & A X F s.ack))";
-        to_parse = "RTCTL*SPEC A(s.bit -> F  (r.state=r1 & r.act=sack & A X F !s.ack))";
-        to_parse = "RTCTL*SPEC A G(s.bit -> F(r.state=r1 & A G(r.state=r1 -> F s.ack)))";
-        to_parse = "RTCTL*SPEC A(s.bit -> F G s.ack) | A(s.bit -> F G !s.ack)";
+        //to_parse = "RTCTL*SPEC A(s.bit -> F  (r.state=r1 & r.act=sack & A X F !s.ack))";
+        //to_parse = "RTCTL*SPEC A G(s.bit -> F(r.state=r1 & A G(r.state=r1 -> F s.ack)))";
+        //to_parse = "RTCTL*SPEC A(s.bit -> F G s.ack) | A(s.bit -> F G !s.ack)";
         //to_parse = "RTCTL*SPEC A(s.bit -> F G s.ack)";
         //to_parse = "RTCTL*SPEC A(s.bit -> F G !s.ack)";
 

@@ -73,14 +73,6 @@ class RTCTLsTester{
             else return null;
         }
     }
-
-    BDDVarSet getAuxVariables() {
-        BDDVarSet vs = Env.getEmptySet();
-        for (ModuleBDDField var : module.getAll_couples()) {
-            vs = vs.id().union(var.support());
-        }
-        return vs;
-    }
 }
 
 class NodePath {
@@ -142,7 +134,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     private BDD chkBdd; // the BDD obtained by checking chkProp
     private BDDVarSet visibleVars;
 
-    private BDD feasibleStatesrWithTester =null;
+    private BDD feasibleStatesForWitnessE=null;
 
     private RTCTLsTester tester=null;
 
@@ -215,14 +207,14 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         return tester.getAll_couples().size() == 0;
     }
 
-/*    // return the BDDs of the aux variables for the tester
+    // return the BDDs of the aux variables for the tester
     private BDDVarSet tester_getAuxVars_BDDVarSet(SMVModule tester) {
         BDDVarSet vs = Env.getEmptySet();
         for (ModuleBDDField var : tester.getAll_couples()) {
             vs = vs.id().union(var.support());
         }
         return vs;
-    }*/
+    }
 
     // Premises: auxVarNames is the vector of aux variables created for spec, it must be created before used
     // Results: this.tester is created for spec; this.testerAuxVarNames contains the set of created aux variables
@@ -611,8 +603,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         if (op != Operator.EE) return null;
 
         c1 = sat(child[0]); // build the sub-tester of child[0]
-        BDDVarSet auxVars=tester.getAuxVariables();
-        specBdd = design.feasible().and(c1).exist(auxVars);
+        specBdd = design.feasible().and(c1);
 /*
         int oldTesterVariablesNumber = tester.module.getAll_couples().size(); // the set of tester variables before building the sub-tester for child[0]
         c1 = sat(child[0]); // build the sub-tester of child[0]
@@ -642,7 +633,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         Spec negChild0 = NNF(new SpecExp(Operator.NOT, child[0]));
         negC1 = sat(negChild0);
         // specBdd = feas /\ !(feas /\ !child[0]) = feas /\ (!feas \/ !!child[0]) = feas /\ !!child[0] = feas /\ !negC1
-        specBdd = design.feasible().and(negC1.not()).exist(tester.getAuxVariables());
+        specBdd = design.feasible().and(negC1.not());
 /*
         int oldTesterVariablesNumber = tester.module.getAll_input_variables().size();
         negC1 = sat(negChild0);
@@ -1072,23 +1063,31 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         design.syncComposition(tester.module); // the tester will be built in the following function sat()
         BDD chkBdd = sat(chkProp);
         // now design is the composition of the original model and the tester of the verified property
-
-        feasibleStatesrWithTester = design.feasible();
-
 /*
+        feasibleStatesComposedTester=design.feasible();
+        if(design.getAll_couples().size()<=originalDesignVariablesNumber){
+            // the property does not contain any temporal operator, and design is the original one
+            // feasibleStatesComposedTester is exactly the feasible states of the original model
+
+        }else {
+            // the property contains some temporal operators, and design is with the composed tester
+            // feasibleStatesComposedTester is the feasible states of the composition of the original model and the tester of the verified property
+
+
+        }
+*/
+
         // saving to the previous restriction state
         Vector<BDD> old_ini_restrictions = design.getAllIniRestrictions();
         int chkBdd_idx = design.restrictIni(chkBdd);
         BDD feas = design.feasible();// feas = the feasible states of D||T from design.init /\ chkBdd
-*/
-        BDD Init_unSat = feasibleStatesrWithTester.and(design.initial()).and(chkBdd);
-/*
+        BDD Init_unSat = feas.and(design.initial()).and(chkBdd);
+        // the initial_condition seems redundant
         design.removeIniRestriction(chkBdd_idx);
         design.setAllIniRestrictions(old_ini_restrictions);
-*/
-
         if (Init_unSat.isZero()) {
             design.decompose(tester.module);
+
             return new AlgResultString(true, "*** Property is TRUE ***");
         } else {
             graph = new GraphExplainRTCTLs("A counterexample of " + simplifySpecString(property, false), this);
@@ -1596,14 +1595,14 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 SMVModule DT = (SMVModule) getDesign(); // DT is the parallel composition of design and the tester of spec
                 BDD temp, fulfill;
 
-                if(feasibleStatesrWithTester ==null) feasibleStatesrWithTester = DT.feasible();
+                if(feasibleStatesForWitnessE==null) feasibleStatesForWitnessE = DT.feasible();
                 // feasibleStatesForWitnessE is the set of feasible states of the composition of the original model and the tester
 
                 // saving to the previous restriction state
                 Vector<BDD> old_trans_restrictions = DT.getAllTransRestrictions();
                 //Lines 1-2 are handled by the caller. ("verify")
                 // Line 3
-                DT.restrictTrans(feasibleStatesrWithTester.and(Env.prime(feasibleStatesrWithTester)));
+                DT.restrictTrans(feasibleStatesForWitnessE.and(Env.prime(feasibleStatesForWitnessE)));
                 BDD s = fromState;
                 // Lines 5-6
                 while (true) {
@@ -2293,12 +2292,12 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                     BDD neg_f_bdd = sat(neg_f);
                     if(design.getAll_couples().size()>oldDesignVariablesNum){
                         // the tester for neg_f is NOT empty, refesh the set of feasible states
-                        feasibleStatesrWithTester = design.feasible();
+                        feasibleStatesForWitnessE = design.feasible();
                     }else {
                         // the tester for neg_f is empty
-                        if (feasibleStatesrWithTester == null) feasibleStatesrWithTester = design.feasible();
+                        if (feasibleStatesForWitnessE == null) feasibleStatesForWitnessE = design.feasible();
                     }
-                    neg_f_bdd = neg_f_bdd.and(feasibleStatesrWithTester);
+                    neg_f_bdd = neg_f_bdd.and(feasibleStatesForWitnessE);
 
                     // explain !f at all positions in [0,a-1]
                     exp=true;
