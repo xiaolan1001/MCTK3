@@ -4,8 +4,8 @@ VAR
   s : Sender(act, r.act);
   r : Receiver(act, s.act);
 
---JUSTICE act=snd;
---JUSTICE act=none;
+JUSTICE act=snd;
+JUSTICE act=none;
 --JUSTICE act=SR;
 
 MODULE Sender(envact, recact)
