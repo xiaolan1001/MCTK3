@@ -1,13 +1,12 @@
 package swing;
 
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
+import javax.swing.table.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
+import java.util.Vector;
 
+import static javax.swing.ListSelectionModel.SINGLE_SELECTION;
 import static jdk.nashorn.internal.runtime.Context.DEBUG;
 
 class SpecsTableModel extends AbstractTableModel {
@@ -95,12 +94,11 @@ class SpecsTableModel extends AbstractTableModel {
 	}
 }
 
-public class mainJFrame extends JFrame implements MouseListener {
+public class mainJFrame extends JFrame implements MouseListener, ActionListener, FocusListener {
 
 	final static int width = Toolkit.getDefaultToolkit().getScreenSize().width;
 	final static int height = Toolkit.getDefaultToolkit().getScreenSize().height;
 
-	JPanel backgroundPanel;
 	JPanel menuControlPanel;
 	JPanel editorPanelContainer; // the panel holding editorPanel
 	JPanel outputPanel;
@@ -110,12 +108,27 @@ public class mainJFrame extends JFrame implements MouseListener {
 	public static JSplitPane editorAndSpecsSplitPane;
 
 
-	// backgroundPanel=(North:menuControlPanel, Center:modelSpecsPanel, East: outputPanel)
-
 	JPanel menuToolBarPanel; //, pageMenuPanel;
-//	JLabel editorLabel, verifyLabel;
 	public static MenuToolBarJPanel controlPanel;
 	public static EditorJPanel editorPanel;
+
+	JLabel outputTitleLabel;
+	JTextArea outputTextArea;
+	JSplitPane upSplitPane;
+	JToolBar specToolBar;
+	JButton addSpecButton, delSpecButton, verifySpecButton;
+
+	JTable specsTable;
+	DefaultTableModel specsTableModel;
+	Vector specsData;
+	static int colNo=0, colStatus=1, colSpec=2, colAnnotation=3;
+
+	JScrollPane specsTableScrollPane;
+	JPanel specsPanel;
+	JSplitPane mainSplitPane;
+
+	//=====================for spec list area==========================
+
 	public static VerificationActionListener verificationListener;
 	public mainJFrame()
 	{
@@ -133,7 +146,7 @@ public class mainJFrame extends JFrame implements MouseListener {
 			// ���´��ڹر�ť�¼�����
 			public void windowClosing(WindowEvent e) {
 				Object[] options = {"Exit", "Cancel"};
-				int response = JOptionPane.showOptionDialog(null, "Do you want to exit MCTK ?",
+				int response = JOptionPane.showOptionDialog(null, "Do you want to exit MCTK2?",
 						"Confirm Exit", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 				if (response == 0) {
 					System.exit(0);
@@ -144,56 +157,63 @@ public class mainJFrame extends JFrame implements MouseListener {
 
 	public void initBackgroundPanel() {
 
-		//backgroundPanel = new JPanel(new BorderLayout());
-		//backgroundPanel.setOpaque(true);
-
 		initMenuControlPanel();
-		initEditorSpecsPanel();
+		initEditorPanel();
 		this.add(menuControlPanel, BorderLayout.NORTH);
 
 		//=====================for editor(left) and output area(right)==========================
-		JLabel outputTitleLabel=new JLabel("Verification Information");
+		outputTitleLabel=new JLabel("Verification Information");
 		outputTitleLabel.setFont(new Font("System",Font.BOLD,VerificationActionListener.outputFontSize));
-		JTextArea outputTextArea = new JTextArea("Verification Outputs:\n");
-		JScrollPane outputScrollPane=new JScrollPane(outputTextArea);
+		outputTextArea = new JTextArea();
+		outputScrollPane=new JScrollPane(outputTextArea);
 
-		JPanel outputPanel=new JPanel(new BorderLayout());
+		outputTextArea.setBorder(
+				BorderFactory.createCompoundBorder(
+						BorderFactory.createCompoundBorder(
+								BorderFactory.createTitledBorder("Verification Information"),
+								BorderFactory.createEmptyBorder(0,0,0,0)),
+						BorderFactory.createEmptyBorder(0,0,0,0)));
+
+
+		outputPanel=new JPanel(new BorderLayout());
 		outputPanel.add("North", outputTitleLabel);
 		outputPanel.add("Center", outputScrollPane);
 
-		JSplitPane upSplitPane=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, editorPanelContainer, outputPanel);
+		upSplitPane=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, editorPanelContainer, outputScrollPane);
 		upSplitPane.setDividerLocation(900);
+		upSplitPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
 
 		//=====================for spec list area==========================
-		JToolBar specToolBar=new JToolBar();
-		JButton addSpecButton, delSpecButton, verifySpecButton;
+		specToolBar=new JToolBar();
 		addSpecButton=new JButton("  Insert Spec  ");
+		addSpecButton.addActionListener(this);
+
 		delSpecButton=new JButton("  Delete Spec  ");
+		delSpecButton.addActionListener(this);
+
 		verifySpecButton=new JButton(("  Verify Spec  "));
+		verifySpecButton.addActionListener(this);
+
 		specToolBar.add(addSpecButton);
 		specToolBar.add(delSpecButton);
 		specToolBar.add(verifySpecButton);
 
-		String[] columnNames = {"No",
-				"Status",
-				"RTCTL* Spec",
-				"Annotation"};
-		JTable specsTable = new JTable(new SpecsTableModel());
-		
-		JScrollPane specsTableScrollPane=new JScrollPane(specsTable);
+		//specsTable = new JTable(new SpecsTableModel());
+		initSpecsTable();
 
-		JPanel specsPanel = new JPanel(new BorderLayout());
+		specsTableScrollPane=new JScrollPane(specsTable);
+
+		specsPanel = new JPanel(new BorderLayout());
+		specsPanel.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
 		specsPanel.add("North",specToolBar);
 		specsPanel.add("Center",specsTableScrollPane);
 
-		JSplitPane mainSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upSplitPane, specsPanel);
+		mainSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upSplitPane, specsPanel);
 		mainSplitPane.setDividerLocation(600);
+		mainSplitPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
 
 		this.add(mainSplitPane, BorderLayout.CENTER);
 
-		//backgroundPanel.add(editorSpecsPanel, BorderLayout.CENTER);
-		//backgroundPanel.add(outputPanel,BorderLayout.EAST);
-		//this.add(backgroundPanel);
 	}
 
 	public void initMenuControlPanel() {
@@ -205,12 +225,111 @@ public class mainJFrame extends JFrame implements MouseListener {
 		menuControlPanel.add(menuToolBarPanel, BorderLayout.NORTH);
 	}
 
-	public void initEditorSpecsPanel() {
+	public void initEditorPanel() {
 		editorPanelContainer = new JPanel(new BorderLayout());
+		editorPanelContainer.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
 		//editorLabel.setText("<html><font color='#336699' style='font-weight:bold'>" + " SMV Editor " + "</font>&nbsp;</html>");
 		//centerPanel.setOpaque(false);
 		editorPanel=new EditorJPanel(this);
 		verificationListener =new VerificationActionListener(this);
+	}
+
+	public static void setColumnSize(JTable table, int i, int preferedWidth, int minWidth, int maxWidth){
+		//表格的列模型
+		TableColumnModel cm = table.getColumnModel();
+		//得到第i个列对象
+		TableColumn column = cm.getColumn(i);
+		column.setPreferredWidth(preferedWidth);
+		column.setMaxWidth(maxWidth);
+		column.setMinWidth(minWidth);
+	}
+
+	public void initSpecsTable(){
+		Vector columnNames=new Vector();
+		columnNames.add("No");
+		columnNames.add("Status");
+		columnNames.add("RTCTL* Specification");
+		columnNames.add("Annotation");
+		specsData=new Vector();
+		specsTableModel = new DefaultTableModel(specsData, columnNames);
+
+		specsTable=new JTable(specsTableModel){
+
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				if(column<colSpec) return false;
+				return true;
+			}
+
+		};
+
+
+		DefaultTableCellRenderer  r  =  new DefaultTableCellRenderer();
+		r.setHorizontalAlignment(JTextField.CENTER);
+		r.setFont(new Font("Default",Font.PLAIN,12));
+
+		setColumnSize(specsTable,colNo,30,30,30);
+		TableColumn c=specsTable.getColumn("No");
+		c.setCellRenderer(r);
+
+		setColumnSize(specsTable,colStatus,100,100,100);
+		specsTable.getColumn("Status").setCellRenderer(r);
+		c=specsTable.getColumn("Status");
+		c.setCellRenderer(r);
+
+		setColumnSize(specsTable,colSpec,1000,30,3000);
+
+		specsTable.setShowGrid(true);
+		specsTable.setSelectionMode(SINGLE_SELECTION);
+		specsTable.setRowSelectionAllowed(true);
+
+		specsTable.addFocusListener(this);
+
+	}
+
+	public void refreshSpecsTable(){
+		for(int row=0; row<specsTableModel.getRowCount();row++)
+			specsTableModel.setValueAt(row+1,row,0);
+	}
+
+	public int insertSpec(int row, String status, String spec, String annotation){
+
+/*
+		int row = specsTable.getSelectedRow();
+		int col = specsTable.getSelectedColumn();
+*/
+		CellEditor ce=specsTable.getCellEditor(row, colSpec);
+		if(specsTable.isEditing()) ce.stopCellEditing();
+
+		Object[] rowData={1,status,spec,annotation};
+		specsTableModel.insertRow(row, rowData);
+		refreshSpecsTable();
+		setEditing(row,colSpec);
+		return 1;
+	}
+
+	public void setEditing(int row, int col) {
+		if (!specsTable.isCellEditable(row,col))
+			return;
+		specsTable.editCellAt(row, col);
+		JTextField jText = (JTextField) ( (DefaultCellEditor) specsTable.getCellEditor(row,col)).getComponent();
+		jText.requestFocus();
+		jText.selectAll();
+	}
+
+	public int removeSpec(int row) {
+		CellEditor ce=specsTable.getCellEditor(row, colSpec);
+		if(specsTable.isEditing()) ce.stopCellEditing();
+
+		int num=specsTableModel.getRowCount();
+		if (row >= 0 && row<num) specsTableModel.removeRow(row);
+		if (row+1<num)
+			specsTable.setRowSelectionInterval(row, row);
+		else if(row+1==num && row>0)
+			specsTable.setRowSelectionInterval(row-1,row-1);
+
+		refreshSpecsTable();
+		return 0;
 	}
 
 /*
@@ -244,8 +363,8 @@ public class mainJFrame extends JFrame implements MouseListener {
 
 	public void creatEditor() {
 		editorPanelContainer.removeAll();
-		editorPanelContainer.add("West",editorPanel.rowScroll);
-		editorPanelContainer.add("Center",editorPanel.textScroll);
+		editorPanelContainer.add("West",editorPanel.rowScrollPane);
+		editorPanelContainer.add("Center",editorPanel.textScrollPane);
 		editorPanelContainer.updateUI();
 	}
 
@@ -256,6 +375,9 @@ public class mainJFrame extends JFrame implements MouseListener {
 	}
 	@Override
 	public void mouseClicked(MouseEvent e) {
+
+
+
 /*
 		if (e.getSource() == editorLabel) {
 			creatEditor();
@@ -286,4 +408,35 @@ public class mainJFrame extends JFrame implements MouseListener {
 	public void mouseExited(MouseEvent e) {
 	}
 
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource()==addSpecButton) {
+			//System.out.println("add spec clicked");
+			int row;
+			if(specsTable.getRowCount()<=0 || specsTable.getSelectedRow()==-1) row=0;
+			else row=specsTable.getSelectedRow();
+
+			insertSpec(row, "","", "");
+
+			specsTable.setEditingRow(row);
+			specsTable.setEditingColumn(2); // spec column
+			specsTable.setRowSelectionInterval(row,row);
+		}
+		if(e.getSource()==delSpecButton){
+			removeSpec(specsTable.getSelectedRow());
+		}
+
+	}
+
+	@Override
+	public void focusGained(FocusEvent e) {
+
+		//System.out.println(e.getSource().getClass().getName()+" focus gained");
+	}
+
+	@Override
+	public void focusLost(FocusEvent e) {
+
+		//System.out.println(e.getSource().getClass().getName()+" focus lost");
+	}
 }

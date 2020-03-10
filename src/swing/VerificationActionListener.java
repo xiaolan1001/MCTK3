@@ -28,6 +28,9 @@ import static swing.mainJFrame.editorPanel;
 
 public class VerificationActionListener implements ActionListener {
 
+
+
+
     public static int buttonFontSize = 13;
     public static int inputFontSize = 13;
     public static int outputFontSize = 13;
@@ -56,7 +59,11 @@ public class VerificationActionListener implements ActionListener {
     Icon witIcon = new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/witm.gif"));
     Icon verIcon = new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/verm.gif"));
     final String atltips = "Please input a RTCTL*SPEC...";
-    SMVModule main;//read the smv model only once.
+
+
+    SMVModule smvModule;//read the smv model only once.
+
+
     private Statistic getStat; //get the time consuming, memory, etc.
 
     public VerificationActionListener(mainJFrame indexJFrame) {
@@ -207,7 +214,7 @@ public class VerificationActionListener implements ActionListener {
             specTextArea.setText("");
         } else if (((JButton) e.getSource()).getText().equals("Save All")) {
             String parse = GetAllSpec(); //Read all the Specifications from SMV
-            editorPanel.textModel.setText(editorPanel.textModel.getText() + parse);
+            editorPanel.modelTextPane.setText(editorPanel.modelTextPane.getText() + parse);
             controlPanel.fileOperation.save();
             if (parse.equals("")) {
                 Object[] options = {"OK"};
@@ -340,7 +347,7 @@ public class VerificationActionListener implements ActionListener {
         String name = controlPanel.fileOperation.getFileName();
         if (name.equals("")) {
             Object[] options = {"OK"};
-            JOptionPane.showOptionDialog(null, "Sorry,please input the model file first!",
+            JOptionPane.showOptionDialog(null, "Sorry, please input the model file first!",
                     "Warm Tips", JOptionPane.YES_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
         } else {
             String src = controlPanel.fileOperation.getPath();
@@ -350,8 +357,8 @@ public class VerificationActionListener implements ActionListener {
             try {
 
                 Env.loadModule(url);
-                main = (SMVModule) Env.getModule("main");
-                main.setFullPrintingMode(true);
+                smvModule = (SMVModule) Env.getModule("main");
+                smvModule.setFullPrintingMode(true);
                 insertDocument(outputTextPane, "\n =======Done Loading Modules========", outputFontSize, Color.GREEN, 1);
 
             } catch (Exception ie) {
@@ -425,7 +432,7 @@ public class VerificationActionListener implements ActionListener {
             getStat.startTimeMemory();
             insertDocument(outputTextPane, "\n model checking " + SpecStr[i], outputFontSize, Color.BLACK, 1);
             if (all_specs[i].getLanguage() == InternalSpecLanguage.CTL) {
-                RTCTLKModelCheckAlg algorithm = new RTCTLKModelCheckAlg(main, all_specs[i]);
+                RTCTLKModelCheckAlg algorithm = new RTCTLKModelCheckAlg(smvModule, all_specs[i]);
                 if (isgraph) {//return result & graph
                     algorithm.SetShowGraph(true);
                     runner = new AlgRunnerThread(algorithm);
@@ -447,7 +454,7 @@ public class VerificationActionListener implements ActionListener {
                     insertDocument(outputTextPane, "\n" + runner.getDoException().getMessage(), outputFontSize, Color.RED, 1);
 
             } else if (all_specs[i].getLanguage() == InternalSpecLanguage.RTCTLs || all_specs[i].getLanguage() == InternalSpecLanguage.LTL) {
-                RTCTL_STAR_ModelCheckAlg algorithm = new RTCTL_STAR_ModelCheckAlg(main, all_specs[i]);
+                RTCTL_STAR_ModelCheckAlg algorithm = new RTCTL_STAR_ModelCheckAlg(smvModule, all_specs[i]);
                 if (isgraph) {//带图的反例
                     algorithm.setShowGraph(true);
                     runner = new AlgRunnerThread(algorithm);

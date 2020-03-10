@@ -13,8 +13,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 
+import static swing.EditorJPanel.modelTextPane;
 import static swing.EditorJPanel.setRowContent;
-import static swing.EditorJPanel.textModel;
 
 public class MenuToolBarJPanel implements ActionListener{
 
@@ -215,7 +215,7 @@ public class MenuToolBarJPanel implements ActionListener{
 		toolBar.add(helpButton);
 
 		uo = new UndoManager();
-		doc=textModel.getDocument();
+		doc= modelTextPane.getDocument();
 
 		doc.addUndoableEditListener(new UndoableEditListener()
 		{
@@ -266,18 +266,18 @@ public class MenuToolBarJPanel implements ActionListener{
 			uo.redo();
 			//System.out.println("Redo");
 		} else if(e.getActionCommand().equals("Copy")||e.getSource()==copyButton) {
-			textModel.copy();// 复制
+			modelTextPane.copy();// 复制
 			//System.out.println("Copy");
 		} else if(e.getActionCommand().equals("Paste")||e.getSource()==pasteButton) {
-			textModel.paste();
+			modelTextPane.paste();
 			setRowContent();
 			//System.out.println("Paste");
 		} else if(e.getActionCommand().equals("Cut")||e.getSource()==cutButton) {
-			textModel.cut();
+			modelTextPane.cut();
 			setRowContent();
 			//System.out.println("Cut");
 		} else if(e.getActionCommand().equals("Select All")) {
-			textModel.selectAll();
+			modelTextPane.selectAll();
 		}  else if(e.getActionCommand().equals("Compile Model")||e.getSource()==compileButton) {
 			indexJFrame.verificationListener.ReadSMVSpec();
 		} else if(e.getActionCommand().equals("Verify Model")) {

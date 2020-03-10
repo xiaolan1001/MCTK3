@@ -5,7 +5,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileSystemView;
 import java.io.*;
 
-import static swing.EditorJPanel.textModel;
+import static swing.EditorJPanel.modelTextPane;
 
 
 public class FileOperation {
@@ -43,7 +43,7 @@ public class FileOperation {
                 if (sbf.length() > 2)
                     sbf = new StringBuffer(sbf.substring(0, sbf.length() - 2));
                 String content = sbf.toString().replaceAll("\\t", "   ");
-                textModel.setText(content);
+                modelTextPane.setText(content);
                 return true;
             } catch (IOException e1) {
                 e1.printStackTrace();
@@ -58,7 +58,7 @@ public class FileOperation {
             BufferedWriter br;
             File newFile = new File(src);
             try {
-                String content= textModel.getText();
+                String content= modelTextPane.getText();
                 br = new BufferedWriter(new FileWriter(newFile));
                 br.write(content);
                 br.flush();
@@ -88,7 +88,7 @@ public class FileOperation {
                     newFile.delete();
                 }
                 try {
-                    String content= textModel.getText();
+                    String content= modelTextPane.getText();
                     br = new BufferedWriter(new FileWriter(newFile));
                     br.write(content);
                     br.flush();
@@ -129,7 +129,7 @@ public class FileOperation {
                 }
             }
             try {
-                String content= textModel.getText();
+                String content= modelTextPane.getText();
                 br = new BufferedWriter(new FileWriter(newFile));
                 br.write(content);
                 br.flush();
@@ -171,7 +171,7 @@ public class FileOperation {
                 }
             }
             setStyle(newFile);
-            textModel.setText("");
+            modelTextPane.setText("");
             try {
                 br = new BufferedWriter(new FileWriter(newFile));
                 br.write("");
