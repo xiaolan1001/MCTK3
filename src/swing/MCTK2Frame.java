@@ -2,12 +2,17 @@ package swing;
 
 import edu.wis.jtlv.env.Env;
 import edu.wis.jtlv.env.core.smv.SMVParseException;
+import edu.wis.jtlv.env.core.spec.InternalSpecLanguage;
 import edu.wis.jtlv.env.module.ModuleException;
+import edu.wis.jtlv.env.module.SMVModule;
 import edu.wis.jtlv.env.spec.Spec;
 import edu.wis.jtlv.env.spec.SpecException;
+import edu.wis.jtlv.lib.AlgRunnerThread;
 import edu.wis.jtlv.lib.mc.ModelCheckAlgException;
+import edu.wis.jtlv.lib.mc.RTCTLK.RTCTLKModelCheckAlg;
 import edu.wis.jtlv.lib.mc.RTCTL_STAR.RTCTL_STAR_ModelCheckAlg;
 import edu.wis.jtlv.old_lib.mc.ModelCheckException;
+import net.sf.javabdd.BDD;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -19,10 +24,10 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.Vector;
 
+import static edu.wis.jtlv.lib.AlgResultI.ResultStatus.failed;
 import static javax.swing.ListSelectionModel.SINGLE_SELECTION;
 import static jdk.nashorn.internal.runtime.Context.DEBUG;
 import static swing.VerifyActionListener.outputFontSize;
-import static swing.VerifyActionListener.smvModule;
 
 class SpecsTableModel extends AbstractTableModel {
 	private String[] columnNames = {
@@ -109,7 +114,20 @@ class SpecsTableModel extends AbstractTableModel {
 	}
 }
 
-public class mainJFrame extends JFrame implements MouseListener, ActionListener, FocusListener {
+public class MCTK2Frame extends JFrame implements MouseListener, ActionListener, FocusListener {
+	//=================The model information after loading a SMV file=================
+	static SMVModule smvModule;//read the smv model only once.
+	BDD original_feasibleStates=null;
+	static Vector<BDD> original_AllIniRestrictions=null;
+	static Vector<BDD> original_AllTransRestrictions=null;
+	static int original_AllInstancesCount = 0;
+	static int original_AllJusticesCount = 0;
+	static int original_AllCompassionsCount = 0;
+
+	public static Statistic statistic=null; //get the time consuming, memory, etc.
+
+	//=================For GUI=====================
+	public static boolean isOpeningCounterexampleWindow=false;
 
 	final static int width = Toolkit.getDefaultToolkit().getScreenSize().width;
 	final static int height = Toolkit.getDefaultToolkit().getScreenSize().height;
@@ -142,14 +160,91 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 	JPanel specsPanel;
 	JSplitPane mainSplitPane;
 
-	//=====================for spec list area==========================
+	public void initializeAfterModuleLoaded(){
+		original_AllIniRestrictions = smvModule.getAllIniRestrictions();
+		original_AllTransRestrictions = smvModule.getAllTransRestrictions();
+		original_AllInstancesCount = smvModule.getAllInstances().length;
+		original_AllJusticesCount = smvModule.allJustice().length;
+		original_AllCompassionsCount = smvModule.allPCompassion().length;
+		original_AllInstancesCount = smvModule.getAllInstancesVector().size();
+	}
 
-	public static VerifyActionListener verificationListener;
-	public mainJFrame()
+	// invoked to restore the original model data after a model checking algorithm finished
+	public static boolean restoreOriginalModuleData(){
+		boolean modelChangedAfterLoaded=false;
+
+		if(original_AllIniRestrictions.size()!=smvModule.getAllIniRestrictions().size()) {
+			modelChangedAfterLoaded=true;
+			smvModule.setAllTransRestrictions(original_AllIniRestrictions);
+		}
+
+		if(original_AllTransRestrictions.size()!=smvModule.getAllTransRestrictions().size()) {
+			modelChangedAfterLoaded=true;
+			smvModule.setAllTransRestrictions(original_AllTransRestrictions);
+		}
+
+		for(int i=smvModule.allJustice().length;i>original_AllJusticesCount;i--) {
+			modelChangedAfterLoaded=true;
+			smvModule.popLastJustice();
+		}
+
+		for(int i=smvModule.allPCompassion().length;i>original_AllCompassionsCount;i--) {
+			modelChangedAfterLoaded=true;
+			smvModule.popLastCompassion();
+		}
+
+		for(int i=smvModule.getAllInstancesVector().size(); i>original_AllInstancesCount; i--) {
+			modelChangedAfterLoaded=true;
+			smvModule.decompose(smvModule.getAllInstancesVector().lastElement());
+		}
+
+/*
+        if(modelChangedAfterLoaded){
+            // recalculate the set of feasible states
+            original_feasibleStates=smvModule.feasible();
+        }
+*/
+		return modelChangedAfterLoaded;
+	}
+
+	public void readSMVFile(){
+		String fileName = controlPanel.fileOperation.getFileName();
+		if (fileName.equals("")) {
+			Object[] options = {"OK"};
+			JOptionPane.showOptionDialog(null, "Sorry, please create a SMV file first!",
+					"Warm Tips", JOptionPane.YES_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+		} else {
+			String src = controlPanel.fileOperation.getPath();
+			String url = src + fileName + ".smv";
+			controlPanel.fileOperation.save();    //Save the file you are editing first.
+
+			Env.resetEnv();
+			try {
+				statistic =new Statistic();
+				consoleOutput("normal", "Loading the Modules of "+fileName + ".smv ...\n");
+				Env.loadModule(url);
+				smvModule = (SMVModule) Env.getModule("main");
+				initializeAfterModuleLoaded();
+				smvModule.setFullPrintingMode(true);
+
+				consoleOutput("weak", statistic.getUsedInfo(true,true,true,true));
+			} catch (Exception ie) {
+				ie.printStackTrace();
+				Object[] options = {"OK"};
+				JOptionPane.showOptionDialog(null, "Syntax error, please check the SMV file!",
+						"Warm Tips", JOptionPane.YES_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+			}finally {
+			}
+
+		}
+	}
+
+	//public static VerifyActionListener verificationListener;
+	public MCTK2Frame()
 	{
 		this.setLayout(new BorderLayout());
 
-		Image logoIcon = new ImageIcon(mainJFrame.class.getResource("/swing/Icons/logo.png")).getImage();
+		Image logoIcon = new ImageIcon(MCTK2Frame.class.getResource("/swing/Icons/logo.png")).getImage();
 		this.setIconImage(logoIcon);
 		initBackgroundPanel();
 		this.setTitle("  MCTK 2.0  ");
@@ -168,6 +263,51 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 				}
 			}
 		});
+	}
+
+	public void verifyOneSpec(String specStr) {
+		Spec[] specs = Env.loadSpecString(specStr);
+		if (specs == null||specs[0]==null) {
+			addDocument(outputTextPane, "\n Sorry, please input correct specification.", outputFontSize, Color.RED, 1);
+			return;
+		}
+//        String[] SpecStr = specStr.split(";");
+//        insertDocument(outputTextPane, "\n ======DONE Loading Specs=========", outputFontSize, Color.ORANGE, 1);
+		AlgRunnerThread runner;
+		statistic.beginBddInfo();
+		statistic.beginTimeMemory();
+		addDocument(outputTextPane, "\nModel checking " + specStr, outputFontSize, Color.BLACK, 1);
+		if (specs[0].getLanguage() == InternalSpecLanguage.RTCTLs || specs[0].getLanguage() == InternalSpecLanguage.LTL) {
+			RTCTL_STAR_ModelCheckAlg algorithm = new RTCTL_STAR_ModelCheckAlg(smvModule, specs[0]);
+			runner = new AlgRunnerThread(algorithm);
+			runner.runSequential();
+			if (runner.getDoResult().getResultStat() == failed) {//结果false，否则无图形反例
+				SetGraphThread x = new SetGraphThread(specStr, algorithm.getGraph(), this);
+				Thread y = new Thread(x);
+				y.start();
+			}
+			if (runner.getDoResult() != null)
+				addDocument(outputTextPane, "\n" + runner.getDoResult().resultString() +
+						"\n" + statistic.getUsedTime() + statistic.getUsedBddNodeNum() + statistic.getUsedBddVarNum()+ statistic.getUsedMemory(), outputFontSize, Color.BLACK, 1);
+			else if (runner.getDoException() != null)
+				addDocument(outputTextPane, "\n" + runner.getDoException().getMessage(), outputFontSize, Color.RED, 1);
+		}
+		else if (specs[0].getLanguage() == InternalSpecLanguage.CTL) {
+			RTCTLKModelCheckAlg algorithm = new RTCTLKModelCheckAlg(smvModule, specs[0]);
+			algorithm.SetShowGraph(true);
+			runner = new AlgRunnerThread(algorithm);
+			runner.runSequential();
+			if (runner.getDoResult().getResultStat() == failed) {//结果false，否则无图形反例
+				//SetGraphThread x = new SetGraphThread(specStr, algorithm.getGraph(), this);
+				//Thread y = new Thread(x);
+				//y.start();
+			}
+			if (runner.getDoResult() != null)
+				addDocument(outputTextPane, "\n" + runner.getDoResult().resultString() +
+						"\n" + statistic.getUsedTime() + statistic.getUsedBddNodeNum() + statistic.getUsedBddVarNum()+ statistic.getUsedMemory(), outputFontSize, Color.BLACK, 1);
+			else if (runner.getDoException() != null)
+				addDocument(outputTextPane, "\n" + runner.getDoException().getMessage(), outputFontSize, Color.RED, 1);
+		}
 	}
 
 	public void initBackgroundPanel() {
@@ -247,10 +387,8 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 	public void initEditorPanel() {
 		editorPanelContainer = new JPanel(new BorderLayout());
 		editorPanelContainer.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
-		//editorLabel.setText("<html><font color='#336699' style='font-weight:bold'>" + " SMV Editor " + "</font>&nbsp;</html>");
-		//centerPanel.setOpaque(false);
 		editorPanel=new EditorJPanel(this);
-		verificationListener =new VerifyActionListener(this);
+		//verificationListener =new VerifyActionListener(this);
 	}
 
 	public static void setColumnSize(JTable table, int i, int preferedWidth, int minWidth, int maxWidth){
@@ -371,7 +509,7 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 
 
 	public JLabel CreateMenuLabel(JLabel jlabel, String text, String name, JPanel jpanel) {
-		Icon icon = new ImageIcon(mainJFrame.class.getResource("/swing/Icons/" + name + ".png"));
+		Icon icon = new ImageIcon(MCTK2Frame.class.getResource("/swing/Icons/" + name + ".png"));
 		jlabel = new JLabel(icon);
 		jlabel.setText("<html><font color='black'>" + text + "</font>&nbsp;</html>");
 		jlabel.addMouseListener(this);
@@ -427,6 +565,28 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 	public void mouseExited(MouseEvent e) {
 	}
 
+	public static void addDocument(JTextPane toTextPane, String str, int textSize, Color textColor, int setFont)// 根据传入的颜色及文字，将文字插入控制台
+	{
+		SimpleAttributeSet set = new SimpleAttributeSet();
+		StyleConstants.setForeground(set, textColor);// 设置文字颜色
+		StyleConstants.setFontSize(set, textSize);// 设置字体大小
+		switch (setFont) {
+			case 1://正常输出
+				StyleConstants.setFontFamily(set, "新宋体");
+			case 2://提示，警告，异常
+				StyleConstants.setFontFamily(set, "标楷体");
+			case 3://错误提示
+				StyleConstants.setFontFamily(set, "华文行楷");
+			default:
+				StyleConstants.setFontFamily(set, "微软雅黑");
+		}
+		Document doc = toTextPane.getDocument();
+		try {
+			doc.insertString(doc.getLength(), str, set);// 插入文字
+		} catch (BadLocationException e) {
+		}
+	}
+
 	public static void consoleOutput(String type, String str)
 	{
 		SimpleAttributeSet attribureSet = new SimpleAttributeSet();
@@ -439,6 +599,10 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 			textColor=Color.BLUE;
 		}else if(type.equals("weak") || type.equals("gray")){
 			textColor=Color.GRAY;
+		}else if(type.equals("green")){
+			textColor=Color.GREEN;
+		}else if(type.equals("darkGray")){
+			textColor=Color.darkGray;
 		}
 
 		int textSize=outputFontSize;
@@ -447,6 +611,7 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 		Document doc = outputTextPane.getDocument();
 		try {
 			doc.insertString(doc.getLength(), str, attribureSet);// 插入文字
+			outputTextPane.setCaretPosition(doc.getLength());
 		} catch (BadLocationException e) {
 		}
 	}
@@ -468,6 +633,12 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 			removeSpec(specsTable.getSelectedRow());
 		}
 		if(e.getSource()==verifySpecButton){
+			if(isOpeningCounterexampleWindow){
+				consoleOutput("warning", "Please close the counterexample window before verification.\n");
+				return;
+			}
+			readSMVFile();
+
 			int row;
 			if(specsTable.getRowCount()<=0) { consoleOutput("warning", "There is not any specification inputted.\n");return; }
 			row=specsTable.getSelectedRow();
@@ -477,7 +648,7 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 			Spec spec=generateSpec(row);
 			if(spec==null) return;
 
-			RTCTL_STAR_ModelCheckAlg alg = new RTCTL_STAR_ModelCheckAlg(smvModule);
+			RTCTL_STAR_ModelCheckAlg alg = new RTCTL_STAR_ModelCheckAlg(this,smvModule);
 			try {
 				alg.modelCheckingOneSpec(spec);
 			} catch (SpecException ex) {
@@ -556,4 +727,6 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 		}
 		return s;
 	}
+
+
 }

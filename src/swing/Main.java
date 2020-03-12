@@ -16,6 +16,6 @@ public class Main {
 			UIManager.put("RootPane.setupButtonVisible", false);
 		} catch (Exception e) {
 		}
-		new mainJFrame();
+		new MCTK2Frame();
 	}
 }

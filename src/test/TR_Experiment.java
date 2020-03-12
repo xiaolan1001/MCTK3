@@ -164,8 +164,8 @@ public class TR_Experiment {
         AlgRunnerThread runner;
         if (all_specs != null) {
             for (int i = 0; i < all_specs.length; i++) {
-                getStat.startBDDVar();
-                getStat.startTimeMemory();
+                getStat.beginBddInfo();
+                getStat.beginTimeMemory();
                 if (all_specs[i].getLanguage() == InternalSpecLanguage.RTCTLs)
                     runner = new AlgRunnerThread(new RTCTL_STAR_ModelCheckAlg(main, all_specs[i]));
 //				else if (all_specs[i].getLanguage() == InternalSpecLanguage.CTL)
@@ -175,7 +175,7 @@ public class TR_Experiment {
                 runner.runSequential();
                 if (runner.getDoResult() != null)
                     System.out.println(runner.getDoResult().resultString()
-                            + "\n" + getStat.endTime() + getStat.endBDD() + getStat.endVar() + getStat.endMemory());
+                            + "\n" + getStat.getUsedTime() + getStat.getUsedBddNodeNum() + getStat.getUsedBddVarNum() + getStat.getUsedMemory());
                 if (runner.getDoException() != null)
                     System.err.println(runner.getDoException().getMessage());
             }

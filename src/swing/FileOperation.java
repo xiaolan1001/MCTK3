@@ -10,12 +10,12 @@ import static swing.EditorJPanel.modelTextPane;
 
 public class FileOperation {
     JFileChooser filechoose = new JFileChooser();
-    mainJFrame indexJFrame;
+    MCTK2Frame mainFrame;
     String src="";
     String fileName;
 
-    public FileOperation(mainJFrame indexJFrame) {
-        this.indexJFrame = indexJFrame;
+    public FileOperation(MCTK2Frame mainFrame) {
+        this.mainFrame = mainFrame;
         filechoose.setAcceptAllFileFilterUsed(false);
         filechoose.addChoosableFileFilter(new MyFileFilter("SMV Code(.smv)", ".smv"));//����ļ�������
         FileSystemView fsv = FileSystemView.getFileSystemView();
@@ -23,7 +23,7 @@ public class FileOperation {
     }
 
     public boolean open() {
-        if (JFileChooser.APPROVE_OPTION == filechoose.showOpenDialog(indexJFrame)) {
+        if (JFileChooser.APPROVE_OPTION == filechoose.showOpenDialog(mainFrame)) {
             File newFile;
             File file = filechoose.getSelectedFile();
             if (file.getName() == null) return false;
@@ -44,6 +44,7 @@ public class FileOperation {
                     sbf = new StringBuffer(sbf.substring(0, sbf.length() - 2));
                 String content = sbf.toString().replaceAll("\\t", "   ");
                 modelTextPane.setText(content);
+
                 return true;
             } catch (IOException e1) {
                 e1.printStackTrace();
@@ -70,7 +71,7 @@ public class FileOperation {
             }
         } else//�ļ�δ���ڣ��򿪣�
         {
-            if (JFileChooser.APPROVE_OPTION == filechoose.showSaveDialog(indexJFrame)) {
+            if (JFileChooser.APPROVE_OPTION == filechoose.showSaveDialog(mainFrame)) {
                 File newFile;
                 File file = filechoose.getSelectedFile();
                 if (file.getName() == null) return false;
@@ -103,7 +104,7 @@ public class FileOperation {
     }
 
     public boolean SaveAs() {
-        if (JFileChooser.APPROVE_OPTION == filechoose.showSaveDialog(indexJFrame)) {
+        if (JFileChooser.APPROVE_OPTION == filechoose.showSaveDialog(mainFrame)) {
             File newFile;
             File file = filechoose.getSelectedFile();
             if (file.getName() == null) return false;
@@ -120,7 +121,7 @@ public class FileOperation {
             if (newFile.exists())
             {
                 Object[] options = {"Replace", "Rename"};
-                int response = JOptionPane.showOptionDialog(indexJFrame, "A file with the same name already exists!",
+                int response = JOptionPane.showOptionDialog(mainFrame, "A file with the same name already exists!",
                         "Warning", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
                 if (response == 0) {//Replace
                     newFile.delete();
@@ -144,7 +145,7 @@ public class FileOperation {
 
 
     public boolean creat() {
-        if (JFileChooser.APPROVE_OPTION == filechoose.showSaveDialog(indexJFrame)) {
+        if (JFileChooser.APPROVE_OPTION == filechoose.showSaveDialog(mainFrame)) {
             File newFile;
             File file = filechoose.getSelectedFile();
             if (file.getName() == null) return false;
@@ -161,7 +162,7 @@ public class FileOperation {
             if (newFile.exists())
             {
                 Object[] options = {"Replace", "Rename"};
-                int response = JOptionPane.showOptionDialog(indexJFrame, "A file with the same name already exists!",
+                int response = JOptionPane.showOptionDialog(mainFrame, "A file with the same name already exists!",
                         "Warning", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
                 if (response == 0) {//Replace
                     newFile.delete();
@@ -187,7 +188,7 @@ public class FileOperation {
 
     public void setStyle(File file) {
         String name = file.getName();
-        indexJFrame.setTitle("MCTK2-" + file.getAbsolutePath());
+        mainFrame.setTitle("MCTK2-" + file.getAbsolutePath());
     }
 
     public String getPath() {

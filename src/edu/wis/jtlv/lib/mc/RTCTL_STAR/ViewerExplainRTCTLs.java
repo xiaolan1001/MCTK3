@@ -10,16 +10,14 @@ import org.graphstream.ui.swingViewer.ViewPanel;
 import org.graphstream.ui.view.Viewer;
 import org.graphstream.ui.view.ViewerListener;
 import org.graphstream.ui.view.ViewerPipe;
-import swing.mainJFrame;
+import swing.MCTK2Frame;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 
 import static java.lang.Double.parseDouble;
+import static swing.MCTK2Frame.consoleOutput;
 
 public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, MouseMotionListener {
     protected boolean loop = true;
@@ -67,10 +65,19 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
         //Viewer viewer = graph.display(true);
 
         ceFrame=new JFrame(graph.getId());
+        ceFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                MCTK2Frame.isOpeningCounterexampleWindow=false;
+                ceFrame.dispose();
+            }
+        });
+
         ceFrame.setSize(800, 600);
         // 把新窗口的位置设置到 relativeWindow 窗口的中心
         //ceFrame.setLocationRelativeTo(this.indexJFrame);
-        Image logoIcon = new ImageIcon(mainJFrame.class.getResource("/swing/Icons/logo.png")).getImage();
+        Image logoIcon = new ImageIcon(MCTK2Frame.class.getResource("/swing/Icons/logo.png")).getImage();
         ceFrame.setIconImage(logoIcon);
         // 点击窗口关闭按钮, 执行销毁窗口操作（如果设置为 EXIT_ON_CLOSE, 则点击新窗口关闭按钮后, 整个进程将结束）
         ceFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -111,7 +118,7 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
 
         // The default action when closing the view is to quit
         // the program.
-        viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.HIDE_ONLY);
+        //viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.HIDE_ONLY);
 
         // We connect back the viewer to the graph,
         // the graph becomes a sink for the viewer.
@@ -141,6 +148,7 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
     }
 
     public void viewClosed(String id) {
+        MCTK2Frame.isOpeningCounterexampleWindow=false;
         loop = false;
     }
 
@@ -150,8 +158,13 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
         try {
             try {
                 graph.getChecker().explainOneNode(id);
-                System.out.println("---------------- State "+id+" ----------------");
-                System.out.println(graph.nodeGetInfo(id,true));
+
+                String s=graph.nodeGetInfo(id,true);
+                if(s!=null)
+                    consoleOutput("darkGray","==========State "+id+"==========\n"+s+"\n");
+
+                // NOTE: it is easy to cause error when invoking two consoleOutput() one by one
+
             } catch (ModelCheckException e) {
                 e.printStackTrace();
             } catch (SpecException e) {

@@ -17,13 +17,14 @@ import net.sf.javabdd.BDDVarSet;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import org.graphstream.ui.spriteManager.Sprite;
+import swing.MCTK2Frame;
+import swing.Statistic;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
-import static swing.VerifyActionListener.restoreOriginalModuleData;
-import static swing.mainJFrame.consoleOutput;
+import static swing.MCTK2Frame.*;
 
 class CacheSpecTesterInfo {
     Spec spec;
@@ -131,6 +132,7 @@ class NodePath {
 
 
 public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
+    MCTK2Frame mainFrame;
     private Spec property;
 
     //private Spec chkProp; // the property actually checked
@@ -194,8 +196,9 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
      *
      * @param design The design to check.
      */
-    public RTCTL_STAR_ModelCheckAlg(Module design) {
+    public RTCTL_STAR_ModelCheckAlg(MCTK2Frame mainFrame, Module design) {
         super(design);
+        this.mainFrame=mainFrame;
 //		this.tester = user_tester;
     }
 
@@ -1115,7 +1118,10 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     }
 
     public AlgResultString modelCheckingOneSpec(Spec aProperty) throws SpecException, ModelCheckException, ModuleException, ModelCheckAlgException, SMVParseException {
-        consoleOutput("emph","Model checking RTCTL*SPEC property: " + simplifySpecString(aProperty,false));
+        consoleOutput("emph","Model checking RTCTL*SPEC property: " + simplifySpecString(aProperty,false) +"\n");
+        if(statistic==null) statistic=new Statistic();
+        else statistic.beginStatistic(true,true);
+
         Spec chkProp;
         if (!aProperty.isStateSpec()) {
             chkProp = NNF(new SpecExp(Operator.EE,
@@ -1123,7 +1129,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         } else { // the property is a state formula
             chkProp = NNF(new SpecExp(Operator.NOT, aProperty)); // newp = !property
         }
-        consoleOutput("normal","The negative propperty: " + simplifySpecString(chkProp,false));
+        consoleOutput("normal","The negative propperty: " + simplifySpecString(chkProp,false)+"\n");
         visibleVars = this.getRelevantVars(getDesign(), chkProp);
         // now chkProp is a state property
 
@@ -1145,7 +1151,10 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         design.setAllIniRestrictions(old_ini_restrictions);
         if (Init_unSat.isZero()) {
             design.decompose(tester.module);
-            return new AlgResultString(true, "*** Property is TRUE ***");
+            String res="*** Property is TRUE ***\n";
+            consoleOutput("emph", res);
+            consoleOutput("weak", statistic.getUsedInfo(true,true,true,true));
+            return new AlgResultString(true, res);
         } else {
             graph = new GraphExplainRTCTLs("A counterexample of " + simplifySpecString(aProperty, false), this);
             graph.addAttribute("ui.title", graph.getId());
@@ -1156,10 +1165,15 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             n.setAttribute("ui.class", "initialState");
 
             boolean ok = witness(chkProp,n);
+
             String returned_msg = "";
-            returned_msg = "*** Property is NOT VALID ***\n";
+            returned_msg = "*** Property is FALSE ***\n";
+            consoleOutput("error", returned_msg);
+            consoleOutput("weak", statistic.getUsedInfo(true,true,true,true));
+
             new Thread(){@Override
                 public void run() {
+                    isOpeningCounterexampleWindow=true;
                     new ViewerExplainRTCTLs(graph);
                 }
             }.start();

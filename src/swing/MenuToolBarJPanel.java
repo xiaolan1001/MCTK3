@@ -18,9 +18,9 @@ import static swing.EditorJPanel.setRowContent;
 
 public class MenuToolBarJPanel implements ActionListener{
 
-	mainJFrame indexJFrame;
+	MCTK2Frame mainFrame;
 	FileOperation fileOperation;
-	JMenuBar menubar;
+	JMenuBar menuBar;
 	public static UndoManager uo;
 	Document doc;
 
@@ -30,27 +30,27 @@ public class MenuToolBarJPanel implements ActionListener{
 			 undoButton,redoButton,cutButton,copyButton,
 			 pasteButton,frontButton,compileButton,helpButton;
 
-	public MenuToolBarJPanel(mainJFrame indexJFrame)
+	public MenuToolBarJPanel(MCTK2Frame mainFrame)
 	{
-		this.indexJFrame=indexJFrame;
-		fileOperation=new FileOperation(indexJFrame);
+		this.mainFrame = mainFrame;
+		fileOperation=new FileOperation(mainFrame);
 		creatMenu();
 	}
 
 	public void creatMenu()
 	{
-		menubar=new JMenuBar();
+		menuBar =new JMenuBar();
 		JMenu file=new JMenu("File");
 		JMenu edit=new JMenu("Edit");
 		JMenu style=new JMenu("Style");
 		JMenu run=new JMenu("Run");
 		JMenu about=new JMenu("Help");
 
-		menubar.add(file);
-		menubar.add(edit);
-		menubar.add(style);
-		menubar.add(run);
-		menubar.add(about);
+		menuBar.add(file);
+		menuBar.add(edit);
+		menuBar.add(style);
+		menuBar.add(run);
+		menuBar.add(about);
 
 		JMenuItem newFile=new JMenuItem("New");
 		setShortcut(newFile, KeyEvent.VK_N);
@@ -121,7 +121,7 @@ public class MenuToolBarJPanel implements ActionListener{
 		about.addActionListener(this);
 
 		toolBar.setLayout(new FlowLayout(FlowLayout.LEFT));
-		Icon newIcon = new ImageIcon(mainJFrame.class.getResource("/swing/Icons/new.png"));
+		Icon newIcon = new ImageIcon(MCTK2Frame.class.getResource("/swing/Icons/new.png"));
 		Icon openIcon=new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/open.png"));
 		Icon saveIcon=new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/save.png"));
 		Icon saveAsIcon=new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/saveas.png"));
@@ -227,8 +227,8 @@ public class MenuToolBarJPanel implements ActionListener{
 		setFont.addActionListener(this);
 		about1.addActionListener(this);
 
-		indexJFrame.menuToolBarPanel.add("North", menubar);
-		indexJFrame.menuToolBarPanel.add("South", toolBar);
+		mainFrame.menuToolBarPanel.add("North", menuBar);
+		mainFrame.menuToolBarPanel.add("South", toolBar);
 	}
 
 	public void setShortcut(JMenuItem jmi,int key)
@@ -256,7 +256,7 @@ public class MenuToolBarJPanel implements ActionListener{
 				System.exit(0);
 			}
 		} else if(e.getActionCommand().equals("Set Front")||e.getSource()==frontButton) {
-			new SetFont(indexJFrame);
+			new SetFont(mainFrame);
 		} else if(e.getActionCommand().equals("Undo")||e.getSource()==undoButton) {
 			if(uo.canUndo())
 				uo.undo();
@@ -279,14 +279,14 @@ public class MenuToolBarJPanel implements ActionListener{
 		} else if(e.getActionCommand().equals("Select All")) {
 			modelTextPane.selectAll();
 		}  else if(e.getActionCommand().equals("Compile Model")||e.getSource()==compileButton) {
-			indexJFrame.verificationListener.ReadSMVSpec();
+			mainFrame.readSMVFile();
 		} else if(e.getActionCommand().equals("Verify Model")) {
-			indexJFrame.creatVerifyUI();
+			mainFrame.creatVerifyUI();
 /*
 			indexJFrame.editorLabel.setText("<html><font color='black'>" + " SMV Editor " + "</font>&nbsp;</html>");
 			indexJFrame.verifyLabel.setText("<html><font color='#336699' style='font-weight:bold'>" + " Verification " + "</font>&nbsp;</html>");
 */
-			indexJFrame.verificationListener.ReadSMVSpec();//读取SMV中文本属性
+			mainFrame.readSMVFile();//读取SMV中文本属性
 		}else if(e.getActionCommand().equals("Source Code")){
 			new Thread() {
 				public void run() {
@@ -301,7 +301,7 @@ public class MenuToolBarJPanel implements ActionListener{
 			}.start();//start this thread
 		} else if(e.getActionCommand().equals("About")||e.getSource()==helpButton){
 			Object[] options = {"OK"};
-			JOptionPane.showOptionDialog(indexJFrame, "MCTK 2.0.0 : A Symbolic Model Checker for Branching Time Logic RTCTL*\n" +
+			JOptionPane.showOptionDialog(mainFrame, "MCTK 2.0.0 : A Symbolic Model Checker for Branching Time Logic RTCTL*\n" +
 							"Developers:\n" +
 							"    Xiangyu Luo, Huaqiao University, luoxy@hqu.edu.cn\n" +
 							"    Sen Liang, Huaqiao University, liangsen@hqu.edu.cn",

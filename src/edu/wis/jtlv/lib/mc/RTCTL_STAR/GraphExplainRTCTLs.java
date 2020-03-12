@@ -250,10 +250,10 @@ public class GraphExplainRTCTLs extends MultiGraph {
     public String nodeGetInfo(String nodeID, boolean withStateDetails) throws SpecException {
         Node n=getNode(nodeID); if(n==null) return null;
         BDD state=nodeGetBDD(nodeID);
+        String ret="";
 
         String s1=nodeGetSpecsInfo(nodeID);
         String s2=nodeGetAnnotations(nodeID);
-        String ret="";
         if(s1==null || s1.equals(""))
             {if(s2==null || s2.equals("")) ret=""; else ret=s2;}
         else
@@ -261,7 +261,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
 
         if(withStateDetails){
             String stateDetails=Env.getOneBDDStateDetails(n.getAttribute("BDD"),"\n");
-            if(!ret.equals(""))
+            if(ret!=null && !ret.equals(""))
                 return "----satisfied formulas and annotations----\n"+ret
                         +"\n----state details----\n"+stateDetails;
             else
