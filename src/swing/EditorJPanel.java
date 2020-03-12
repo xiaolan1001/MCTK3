@@ -30,7 +30,7 @@ public class EditorJPanel implements KeyListener, ActionListener, ChangeListener
     BoundedRangeModel model;
 
     //Font  DeFont=new Font("TimesRoman",0,14);
-    Font  DeFont=new Font("System",0,VerificationActionListener.inputFontSize);
+    Font  DeFont=new Font("System",0, VerifyActionListener.inputFontSize);
     public EditorJPanel(mainJFrame indexJFrame)
     {
         this.indexJFrame=indexJFrame;

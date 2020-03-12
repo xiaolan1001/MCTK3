@@ -22,6 +22,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
+import static swing.VerifyActionListener.restoreOriginalModuleData;
+import static swing.mainJFrame.consoleOutput;
+
 class CacheSpecTesterInfo {
     Spec spec;
     BDD specBdd;
@@ -130,7 +133,7 @@ class NodePath {
 public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     private Spec property;
 
-    private Spec chkProp; // the property actually checked
+    //private Spec chkProp; // the property actually checked
     private BDD chkBdd; // the BDD obtained by checking chkProp
     private BDDVarSet visibleVars;
 
@@ -145,11 +148,6 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     private Vector<NodePath> trunkNodePaths = new Vector<NodePath>();
 
     private GraphExplainRTCTLs graph; //used for displaying witness graph
-    boolean isShowGraph;
-
-    public void setShowGraph(boolean isShowGraph) {
-        this.isShowGraph = isShowGraph;
-    }
 
     public void setGraph(GraphExplainRTCTLs g){
         this.graph = g;
@@ -1044,7 +1042,18 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
      * @see edu.wis.jtlv.lib.AlgI#doAlgorithm()
      */
     public AlgResultI doAlgorithm() throws AlgExceptionI, ModelCheckException, ModuleException, SMVParseException, SpecException {
+        AlgResultString res = modelCheckingOneSpec(property);
+        if(res.getResultStat()== AlgResultI.ResultStatus.succeed){
+            consoleOutput("emph", res.resultString());
+        }
+        if(res.getResultStat()== AlgResultI.ResultStatus.failed){
+            consoleOutput("error", res.resultString());
+        }
+
+        return res;
+/*
         System.out.println("The original property: " + simplifySpecString(property,false));
+        Spec chkProp;
         if (!property.isStateSpec()) {
             chkProp = NNF(new SpecExp(Operator.EE,
                     new SpecExp(Operator.NOT, property))); // newp = E !property
@@ -1063,19 +1072,6 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         design.syncComposition(tester.module); // the tester will be built in the following function sat()
         BDD chkBdd = sat(chkProp);
         // now design is the composition of the original model and the tester of the verified property
-/*
-        feasibleStatesComposedTester=design.feasible();
-        if(design.getAll_couples().size()<=originalDesignVariablesNumber){
-            // the property does not contain any temporal operator, and design is the original one
-            // feasibleStatesComposedTester is exactly the feasible states of the original model
-
-        }else {
-            // the property contains some temporal operators, and design is with the composed tester
-            // feasibleStatesComposedTester is the feasible states of the composition of the original model and the tester of the verified property
-
-
-        }
-*/
 
         // saving to the previous restriction state
         Vector<BDD> old_ini_restrictions = design.getAllIniRestrictions();
@@ -1115,6 +1111,67 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             //design.decompose(tester.module); // delay the decomposition of tester to reserve the tester during showing the counterexample
             return new AlgResultString(false, returned_msg);
         }
+*/
+    }
+
+    public AlgResultString modelCheckingOneSpec(Spec aProperty) throws SpecException, ModelCheckException, ModuleException, ModelCheckAlgException, SMVParseException {
+        consoleOutput("emph","Model checking RTCTL*SPEC property: " + simplifySpecString(aProperty,false));
+        Spec chkProp;
+        if (!aProperty.isStateSpec()) {
+            chkProp = NNF(new SpecExp(Operator.EE,
+                    new SpecExp(Operator.NOT, aProperty))); // newp = E !property
+        } else { // the property is a state formula
+            chkProp = NNF(new SpecExp(Operator.NOT, aProperty)); // newp = !property
+        }
+        consoleOutput("normal","The negative propperty: " + simplifySpecString(chkProp,false));
+        visibleVars = this.getRelevantVars(getDesign(), chkProp);
+        // now chkProp is a state property
+
+        SMVModule design = (SMVModule) getDesign(); // now design does not contain the tester
+        restoreOriginalModuleData();
+
+        tester = new RTCTLsTester();
+        design.syncComposition(tester.module); // the tester will be built in the following function sat()
+        BDD chkBdd = sat(chkProp);
+        // now design is the composition of the original model and the tester of the verified property
+
+        // saving to the previous restriction state
+        Vector<BDD> old_ini_restrictions = design.getAllIniRestrictions();
+        int chkBdd_idx = design.restrictIni(chkBdd);
+        BDD feas = design.feasible();// feas = the feasible states of D||T from design.init /\ chkBdd
+        BDD Init_unSat = feas.and(design.initial()).and(chkBdd);
+        // the initial_condition seems redundant
+        design.removeIniRestriction(chkBdd_idx);
+        design.setAllIniRestrictions(old_ini_restrictions);
+        if (Init_unSat.isZero()) {
+            design.decompose(tester.module);
+            return new AlgResultString(true, "*** Property is TRUE ***");
+        } else {
+            graph = new GraphExplainRTCTLs("A counterexample of " + simplifySpecString(aProperty, false), this);
+            graph.addAttribute("ui.title", graph.getId());
+            // design with the composed tester...
+            // create the initial node
+            BDD initState = Init_unSat.satOne(getDesign().moduleUnprimeVars(), false);
+            Node n = graph.addNode(1, 0, initState);
+            n.setAttribute("ui.class", "initialState");
+
+            boolean ok = witness(chkProp,n);
+            String returned_msg = "";
+            returned_msg = "*** Property is NOT VALID ***\n";
+            new Thread(){@Override
+                public void run() {
+                    new ViewerExplainRTCTLs(graph);
+                }
+            }.start();
+            //design.decompose(tester.module); // delay the decomposition of tester to reserve the tester during showing the counterexample
+            return new AlgResultString(false, returned_msg);
+        }
+    }
+
+    @Override
+    public AlgResultI postAlgorithm() throws AlgExceptionI {
+        //getDesign().removeAllTransRestrictions();
+        return null;
     }
 
     public AlgResultI Swing_doAlgorithm() throws AlgExceptionI, ModelCheckException, ModuleException, SMVParseException, SpecException {
@@ -2342,10 +2399,5 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     }
 
 
-    @Override
-    public AlgResultI postAlgorithm() throws AlgExceptionI {
-        //getDesign().removeAllTransRestrictions();
-        return null;
-    }
 
 }

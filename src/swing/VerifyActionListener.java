@@ -7,6 +7,7 @@ import edu.wis.jtlv.env.spec.Spec;
 import edu.wis.jtlv.lib.AlgRunnerThread;
 import edu.wis.jtlv.lib.mc.RTCTLK.RTCTLKModelCheckAlg;
 import edu.wis.jtlv.lib.mc.RTCTL_STAR.RTCTL_STAR_ModelCheckAlg;
+import net.sf.javabdd.BDD;
 import org.graphstream.graph.implementations.MultiGraph;
 
 import javax.swing.*;
@@ -26,11 +27,7 @@ import static swing.mainJFrame.controlPanel;
 import static swing.mainJFrame.editorPanel;
 
 
-public class VerificationActionListener implements ActionListener {
-
-
-
-
+public class VerifyActionListener implements ActionListener {
     public static int buttonFontSize = 13;
     public static int inputFontSize = 13;
     public static int outputFontSize = 13;
@@ -60,13 +57,66 @@ public class VerificationActionListener implements ActionListener {
     Icon verIcon = new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/verm.gif"));
     final String atltips = "Please input a RTCTL*SPEC...";
 
+    //=================The model information after loading a SMV file=================
+    static SMVModule smvModule;//read the smv model only once.
+    BDD original_feasibleStates=null;
+    static Vector<BDD> original_AllIniRestrictions=null;
+    static Vector<BDD> original_AllTransRestrictions=null;
+    static int original_AllInstancesCount = 0;
+    static int original_AllJusticesCount = 0;
+    static int original_AllCompassionsCount = 0;
 
-    SMVModule smvModule;//read the smv model only once.
+    public void initializeAfterModuleLoaded(){
+        original_AllIniRestrictions = smvModule.getAllIniRestrictions();
+        original_AllTransRestrictions = smvModule.getAllTransRestrictions();
+        original_AllInstancesCount = smvModule.getAllInstances().length;
+        original_AllJusticesCount = smvModule.allJustice().length;
+        original_AllCompassionsCount = smvModule.allPCompassion().length;
+        original_AllInstancesCount = smvModule.getAllInstancesVector().size();
+    }
+
+    // invoked to restore the original model data after a model checking algorithm finished
+    public static boolean restoreOriginalModuleData(){
+        boolean modelChangedAfterLoaded=false;
+
+        if(original_AllIniRestrictions.size()!=smvModule.getAllIniRestrictions().size()) {
+            modelChangedAfterLoaded=true;
+            smvModule.setAllTransRestrictions(original_AllIniRestrictions);
+        }
+
+        if(original_AllTransRestrictions.size()!=smvModule.getAllTransRestrictions().size()) {
+            modelChangedAfterLoaded=true;
+            smvModule.setAllTransRestrictions(original_AllTransRestrictions);
+        }
+
+        for(int i=smvModule.allJustice().length;i>original_AllJusticesCount;i--) {
+            modelChangedAfterLoaded=true;
+            smvModule.popLastJustice();
+        }
+
+        for(int i=smvModule.allPCompassion().length;i>original_AllCompassionsCount;i--) {
+            modelChangedAfterLoaded=true;
+            smvModule.popLastCompassion();
+        }
+
+        for(int i=smvModule.getAllInstancesVector().size(); i>original_AllInstancesCount; i--) {
+            modelChangedAfterLoaded=true;
+            smvModule.decompose(smvModule.getAllInstancesVector().lastElement());
+        }
+
+/*
+        if(modelChangedAfterLoaded){
+            // recalculate the set of feasible states
+            original_feasibleStates=smvModule.feasible();
+        }
+*/
+        return modelChangedAfterLoaded;
+    }
 
 
     private Statistic getStat; //get the time consuming, memory, etc.
 
-    public VerificationActionListener(mainJFrame indexJFrame) {
+    public VerifyActionListener(mainJFrame indexJFrame) {
         this.indexJFrame = indexJFrame;
         clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         buttonsSpecsPanel = new JPanel(new BorderLayout());// (new GridLayout(3,1));
@@ -105,7 +155,7 @@ public class VerificationActionListener implements ActionListener {
 
         outputTextPane = new JTextPane();
         outputScrollPane = new JScrollPane(outputTextPane);
-        insertDocument(outputTextPane, "Verification information...", outputFontSize, Color.BLUE, 1);
+        addDocument(outputTextPane, "Verification information...", outputFontSize, Color.BLUE, 1);
         outputScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
         menuItemCopy = new JMenuItem("Copy(C)");
@@ -173,7 +223,7 @@ public class VerificationActionListener implements ActionListener {
             clipboard.setContents(content, null);
         } else if (e.getSource() == menuItemClear) {
             outputTextPane.setText("");
-            insertDocument(outputTextPane, "Verification information...", outputFontSize, Color.BLUE, 1);
+            addDocument(outputTextPane, "Verification information...", outputFontSize, Color.BLUE, 1);
         } else if (e.getSource() == addButton || e.getActionCommand().equals("atlADD")) {
             JTextArea specTextArea=insertSpecLine("",getClickedSourceIndex(e));
             specTextArea.requestFocus(true);
@@ -182,11 +232,11 @@ public class VerificationActionListener implements ActionListener {
         } else if (e.getSource() == verifyButton) {
             String specific = specTextArea.getText();
             if (atltips.equalsIgnoreCase(specific) || specific.equals("") || specific.trim().startsWith("--"))
-                insertDocument(outputTextPane, "\n Sorry,please input a specification !", outputFontSize, Color.red, 2);
+                addDocument(outputTextPane, "\n Sorry,please input a specification !", outputFontSize, Color.red, 2);
             else if (specific.endsWith(";"))
-                GRun("RTCTL*SPEC ".concat(specific), false);
+                runModelChecking("RTCTL*SPEC ".concat(specific), false);
             else
-                GRun("RTCTL*SPEC ".concat(specific) + ";", false);
+                runModelChecking("RTCTL*SPEC ".concat(specific) + ";", false);
         } else if (((JButton) e.getSource()).getText().equals("Extract Spec")) {
             if (ExtractSpec()) {
                 Object[] options = {"OK"};
@@ -201,9 +251,9 @@ public class VerificationActionListener implements ActionListener {
         } else if (((JButton) e.getSource()).getText().equals("Verify All")) {
             String parse = GetAllSpec();
             if ("".equals(parse))
-                insertDocument(outputTextPane, "\n Sorry,please input a specification !", outputFontSize, Color.red, 2);
+                addDocument(outputTextPane, "\n Sorry,please input a specification !", outputFontSize, Color.red, 2);
             else
-                GRun(parse, false);
+                runModelChecking(parse, false);
         } else if (((JButton) e.getSource()).getText().equals("Delete All")) {
             while (specPanelsVector.size() > 1) {
                 specsPanel.remove(specPanelsVector.lastElement());
@@ -312,15 +362,16 @@ public class VerificationActionListener implements ActionListener {
         });
 
         verifyButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() == verifyButton) {
                     String specific = specTextArea.getText();
                     if (tips.equalsIgnoreCase(specific) || specific.equals("") || specific.trim().startsWith("--"))
-                        insertDocument(outputTextPane, "\n Sorry,please input a specification !", outputFontSize, Color.red, 2);
+                        addDocument(outputTextPane, "\n Sorry,please input a specification !", outputFontSize, Color.red, 2);
                     else if (specific.endsWith(";"))
-                        GRun("RTCTL*SPEC ".concat(specific), false);
+                        runModelChecking("RTCTL*SPEC ".concat(specific), false);
                     else
-                        GRun("RTCTL*SPEC ".concat(specific) + ";", false);
+                        runModelChecking("RTCTL*SPEC ".concat(specific) + ";", false);
                 }
             }
         });
@@ -358,8 +409,9 @@ public class VerificationActionListener implements ActionListener {
 
                 Env.loadModule(url);
                 smvModule = (SMVModule) Env.getModule("main");
+                initializeAfterModuleLoaded();
                 smvModule.setFullPrintingMode(true);
-                insertDocument(outputTextPane, "\n =======Done Loading Modules========", outputFontSize, Color.GREEN, 1);
+                addDocument(outputTextPane, "\n =======Done Loading Modules========", outputFontSize, Color.GREEN, 1);
 
             } catch (Exception ie) {
                 ie.printStackTrace();
@@ -369,7 +421,7 @@ public class VerificationActionListener implements ActionListener {
                         "Warm Tips", JOptionPane.YES_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
             }finally {
                 getStat=new Statistic();
-                insertDocument(outputTextPane, "\nInitial occupation of building model...\nNumber of BDD nodes:" + getStat.modelBDD +
+                addDocument(outputTextPane, "\nInitial occupation of building model...\nNumber of BDD nodes:" + getStat.modelBDD +
                         "\nNumber of BDD variables:"+getStat.modelVar, outputFontSize, Color.GRAY, 1);
             }
 
@@ -379,10 +431,10 @@ public class VerificationActionListener implements ActionListener {
     public boolean ExtractSpec() {
         String[] all_specs = Env.getAllSpecsString();
         if (all_specs == null || all_specs.length == 0) {
-            insertDocument(outputTextPane, "\n =========No Specs loaded=========", outputFontSize, Color.GREEN, 1);
+            addDocument(outputTextPane, "\n =========No Specs loaded=========", outputFontSize, Color.GREEN, 1);
             return false;
         } else
-            insertDocument(outputTextPane, "\n =====Automatic Loading Specs=======", outputFontSize, Color.GREEN, 1);
+            addDocument(outputTextPane, "\n =====Automatic Loading Specs=======", outputFontSize, Color.GREEN, 1);
         for (int i = 0; i < all_specs.length; i++) {
             if (all_specs[i].startsWith("RTCTL*SPEC")) {
                 if (atltips.equals(specTextArea.getText()))
@@ -395,7 +447,7 @@ public class VerificationActionListener implements ActionListener {
     }
 
 
-    public static void insertDocument(JTextPane JTP, String str, int textSize, Color textColor, int setFont)// 根据传入的颜色及文字，将文字插入控制台
+    public static void addDocument(JTextPane toTextPane, String str, int textSize, Color textColor, int setFont)// 根据传入的颜色及文字，将文字插入控制台
     {
         SimpleAttributeSet set = new SimpleAttributeSet();
         StyleConstants.setForeground(set, textColor);// 设置文字颜色
@@ -410,27 +462,76 @@ public class VerificationActionListener implements ActionListener {
             default:
                 StyleConstants.setFontFamily(set, "微软雅黑");
         }
-        Document doc = JTP.getDocument();
+        Document doc = toTextPane.getDocument();
         try {
             doc.insertString(doc.getLength(), str, set);// 插入文字
         } catch (BadLocationException e) {
         }
     }
 
-    public void GRun(String parse, Boolean isgraph) {
-        System.out.println("GRun----------"+parse);
+
+
+    public void ModelCheckingOneSpec(String specStr) {
+        Spec[] specs = Env.loadSpecString(specStr);
+        if (specs == null||specs[0]==null) {
+            addDocument(outputTextPane, "\n Sorry, please input correct specification.", outputFontSize, Color.RED, 1);
+            return;
+        }
+//        String[] SpecStr = specStr.split(";");
+//        insertDocument(outputTextPane, "\n ======DONE Loading Specs=========", outputFontSize, Color.ORANGE, 1);
+        AlgRunnerThread runner;
+        getStat.startBDDVar();
+        getStat.startTimeMemory();
+        addDocument(outputTextPane, "\nModel checking " + specStr, outputFontSize, Color.BLACK, 1);
+        if (specs[0].getLanguage() == InternalSpecLanguage.RTCTLs || specs[0].getLanguage() == InternalSpecLanguage.LTL) {
+            RTCTL_STAR_ModelCheckAlg algorithm = new RTCTL_STAR_ModelCheckAlg(smvModule, specs[0]);
+            runner = new AlgRunnerThread(algorithm);
+            runner.runSequential();
+            if (runner.getDoResult().getResultStat() == failed) {//结果false，否则无图形反例
+                this.graph = algorithm.getGraph();
+                SetGraphThread x = new SetGraphThread(specStr, this.graph, this.indexJFrame);
+                Thread y = new Thread(x);
+                y.start();
+            }
+            if (runner.getDoResult() != null)
+                addDocument(outputTextPane, "\n" + runner.getDoResult().resultString() +
+                        "\n" + getStat.endTime() + getStat.endBDD() +getStat.endVar()+ getStat.endMemory(), outputFontSize, Color.BLACK, 1);
+            else if (runner.getDoException() != null)
+                addDocument(outputTextPane, "\n" + runner.getDoException().getMessage(), outputFontSize, Color.RED, 1);
+        }
+        else if (specs[0].getLanguage() == InternalSpecLanguage.CTL) {
+            RTCTLKModelCheckAlg algorithm = new RTCTLKModelCheckAlg(smvModule, specs[0]);
+            algorithm.SetShowGraph(true);
+            runner = new AlgRunnerThread(algorithm);
+            runner.runSequential();
+            if (runner.getDoResult().getResultStat() == failed) {//结果false，否则无图形反例
+                this.graph = algorithm.GetGraph();
+                SetGraphThread x = new SetGraphThread(specStr, this.graph, this.indexJFrame);
+                Thread y = new Thread(x);
+                y.start();
+            }
+            if (runner.getDoResult() != null)
+                addDocument(outputTextPane, "\n" + runner.getDoResult().resultString() +
+                        "\n" + getStat.endTime() + getStat.endBDD() +getStat.endVar()+ getStat.endMemory(), outputFontSize, Color.BLACK, 1);
+            else if (runner.getDoException() != null)
+                addDocument(outputTextPane, "\n" + runner.getDoException().getMessage(), outputFontSize, Color.RED, 1);
+        }
+    }
+
+    public void runModelChecking(String parse, Boolean isgraph) {
+        //System.out.println("GRun----------"+parse);
         Spec[] all_specs = Env.loadSpecString(parse);
         if (all_specs == null||all_specs[0]==null) {
-            insertDocument(outputTextPane, "\n Sorry,please input correct specifications...", outputFontSize, Color.RED, 1);
+            addDocument(outputTextPane, "\n Sorry, please input correct specifications.", outputFontSize, Color.RED, 1);
             return;
         }
         String[] SpecStr = parse.split(";");
-        insertDocument(outputTextPane, "\n ======DONE Loading Specs=========", outputFontSize, Color.ORANGE, 1);
+        addDocument(outputTextPane, "\n ======DONE Loading Specs=========", outputFontSize, Color.ORANGE, 1);
         AlgRunnerThread runner;
         for (int i = 0; i < all_specs.length; i++) {
             getStat.startBDDVar();
             getStat.startTimeMemory();
-            insertDocument(outputTextPane, "\n model checking " + SpecStr[i], outputFontSize, Color.BLACK, 1);
+            addDocument(outputTextPane, "\nModel checking " + SpecStr[i], outputFontSize, Color.BLACK, 1);
             if (all_specs[i].getLanguage() == InternalSpecLanguage.CTL) {
                 RTCTLKModelCheckAlg algorithm = new RTCTLKModelCheckAlg(smvModule, all_specs[i]);
                 if (isgraph) {//return result & graph
@@ -448,15 +549,14 @@ public class VerificationActionListener implements ActionListener {
                     runner.runSequential();
                 }
                 if (runner.getDoResult() != null)
-                    insertDocument(outputTextPane, "\n" + runner.getDoResult().resultString() +
+                    addDocument(outputTextPane, "\n" + runner.getDoResult().resultString() +
                             "\n" + getStat.endTime() + getStat.endBDD() +getStat.endVar()+ getStat.endMemory(), outputFontSize, Color.BLACK, 1);
                 else if (runner.getDoException() != null)
-                    insertDocument(outputTextPane, "\n" + runner.getDoException().getMessage(), outputFontSize, Color.RED, 1);
+                    addDocument(outputTextPane, "\n" + runner.getDoException().getMessage(), outputFontSize, Color.RED, 1);
 
             } else if (all_specs[i].getLanguage() == InternalSpecLanguage.RTCTLs || all_specs[i].getLanguage() == InternalSpecLanguage.LTL) {
                 RTCTL_STAR_ModelCheckAlg algorithm = new RTCTL_STAR_ModelCheckAlg(smvModule, all_specs[i]);
                 if (isgraph) {//带图的反例
-                    algorithm.setShowGraph(true);
                     runner = new AlgRunnerThread(algorithm);
                     runner.runSequential();
                     if (runner.getDoResult().getResultStat() == failed) {//结果false，否则无图形反例
@@ -472,10 +572,10 @@ public class VerificationActionListener implements ActionListener {
 
 
                 if (runner.getDoResult() != null)
-                    insertDocument(outputTextPane, "\n" + runner.getDoResult().resultString() +
+                    addDocument(outputTextPane, "\n" + runner.getDoResult().resultString() +
                             "\n" + getStat.endTime() + getStat.endBDD() +getStat.endVar()+ getStat.endMemory(), outputFontSize, Color.BLACK, 1);
                 else if (runner.getDoException() != null)
-                    insertDocument(outputTextPane, "\n" + runner.getDoException().getMessage(), outputFontSize, Color.RED, 1);
+                    addDocument(outputTextPane, "\n" + runner.getDoException().getMessage(), outputFontSize, Color.RED, 1);
             }
         }
     }

@@ -23,7 +23,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import static swing.VerificationActionListener.insertDocument;
+import static swing.VerifyActionListener.addDocument;
 
 public class SetGraphThread implements Runnable, ViewerListener, ActionListener {
     MultiGraph graph;
@@ -59,7 +59,7 @@ public class SetGraphThread implements Runnable, ViewerListener, ActionListener 
         Viewer viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
         ViewPanel viewPanel = (ViewPanel) viewer.addDefaultView(false);
         graphJPanel = viewPanel;
-        insertDocument(nodeConsole, "Node detail...", VerificationActionListener.outputFontSize, Color.BLUE, 1);
+        addDocument(nodeConsole, "Node detail...", VerifyActionListener.outputFontSize, Color.BLUE, 1);
         GraphNodeJSP.setRightComponent(nodeScroll);
         GraphNodeJSP.setLeftComponent(graphJPanel);
         //重新绘制
@@ -133,13 +133,13 @@ public class SetGraphThread implements Runnable, ViewerListener, ActionListener 
     public void buttonPushed(String id) {
         //Node n = graph.getNode(id);
         //System.out.println("-------- State "+id+" --------");
-        insertDocument(nodeConsole, "\n" + "-------- State " + id + " --------", VerificationActionListener.outputFontSize, Color.BLACK, 1);
+        addDocument(nodeConsole, "\n" + "-------- State " + id + " --------", VerifyActionListener.outputFontSize, Color.BLACK, 1);
         String str = null;
         if (graph instanceof GraphExplainRTCTLK) {
             str = ((GraphExplainRTCTLK) graph).getNodeSatSpec(id);
             if (str != null && !str.equals(""))
-                insertDocument(nodeConsole, "\n" + "[satisfies " + str + "]", VerificationActionListener.outputFontSize, Color.BLACK, 1);
-            insertDocument(nodeConsole, "\n" + ((GraphExplainRTCTLK) graph).getNodeStateDetails(id), VerificationActionListener.outputFontSize, Color.BLACK, 1);
+                addDocument(nodeConsole, "\n" + "[satisfies " + str + "]", VerifyActionListener.outputFontSize, Color.BLACK, 1);
+            addDocument(nodeConsole, "\n" + ((GraphExplainRTCTLK) graph).getNodeStateDetails(id), VerifyActionListener.outputFontSize, Color.BLACK, 1);
             try {
                 ((GraphExplainRTCTLK) graph).getChecker().explainOneGraphNode(((GraphExplainRTCTLK) graph), id);
             } catch (ModelCheckAlgException e) {
@@ -152,8 +152,8 @@ public class SetGraphThread implements Runnable, ViewerListener, ActionListener 
                 e.printStackTrace();
             }
             if (str != null && !str.equals(""))
-                insertDocument(nodeConsole, "\n" + "[satisfies " + str + "]", VerificationActionListener.outputFontSize, Color.BLACK, 1);
-            insertDocument(nodeConsole, "\n" + ((GraphExplainRTCTLs) graph).nodeGetStateDetails(id), VerificationActionListener.outputFontSize, Color.BLACK, 1);
+                addDocument(nodeConsole, "\n" + "[satisfies " + str + "]", VerifyActionListener.outputFontSize, Color.BLACK, 1);
+            addDocument(nodeConsole, "\n" + ((GraphExplainRTCTLs) graph).nodeGetStateDetails(id), VerifyActionListener.outputFontSize, Color.BLACK, 1);
             try {
                 ((GraphExplainRTCTLs) graph).getChecker().explainOneNode(id);
             } catch (ModelCheckAlgException e) {
@@ -183,7 +183,7 @@ public class SetGraphThread implements Runnable, ViewerListener, ActionListener 
             clipboard.setContents(content, null);
         } else if (e.getSource() == clear) {
             nodeConsole.setText("");
-            insertDocument(nodeConsole, "Node detail...", VerificationActionListener.outputFontSize, Color.BLUE, 1);
+            addDocument(nodeConsole, "Node detail...", VerifyActionListener.outputFontSize, Color.BLUE, 1);
         }
     }
 }

@@ -14,7 +14,7 @@ import net.sf.javabdd.BDD;
 import net.sf.javabdd.BDDVarSet;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
-import swing.VerificationActionListener;
+import swing.VerifyActionListener;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -42,9 +42,9 @@ public class RTCTLKModelCheckAlg extends CTLModelCheckAlg{
     @Override
     public AlgResultI preAlgorithm() throws AlgExceptionI {
         if (getProperty() == null)
-            VerificationActionListener.insertDocument(verificationListener.outputTextPane,  "\n Cannot model check a null specification.", VerificationActionListener.outputFontSize, Color.RED,1);
+            VerifyActionListener.addDocument(verificationListener.outputTextPane,  "\n Cannot model check a null specification.", VerifyActionListener.outputFontSize, Color.RED,1);
         else if (!getProperty().isRTCTLKSpec())
-            VerificationActionListener.insertDocument(verificationListener.outputTextPane,  "\nCannot model check non RTCTLK specification: " + getProperty(), VerificationActionListener.outputFontSize, Color.RED,1);
+            VerifyActionListener.addDocument(verificationListener.outputTextPane,  "\nCannot model check non RTCTLK specification: " + getProperty(), VerifyActionListener.outputFontSize, Color.RED,1);
         return null;
     }
 

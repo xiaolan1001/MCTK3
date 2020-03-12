@@ -1,13 +1,28 @@
 package swing;
 
+import edu.wis.jtlv.env.Env;
+import edu.wis.jtlv.env.core.smv.SMVParseException;
+import edu.wis.jtlv.env.module.ModuleException;
+import edu.wis.jtlv.env.spec.Spec;
+import edu.wis.jtlv.env.spec.SpecException;
+import edu.wis.jtlv.lib.mc.ModelCheckAlgException;
+import edu.wis.jtlv.lib.mc.RTCTL_STAR.RTCTL_STAR_ModelCheckAlg;
+import edu.wis.jtlv.old_lib.mc.ModelCheckException;
+
 import javax.swing.*;
 import javax.swing.table.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Vector;
 
 import static javax.swing.ListSelectionModel.SINGLE_SELECTION;
 import static jdk.nashorn.internal.runtime.Context.DEBUG;
+import static swing.VerifyActionListener.outputFontSize;
+import static swing.VerifyActionListener.smvModule;
 
 class SpecsTableModel extends AbstractTableModel {
 	private String[] columnNames = {
@@ -113,10 +128,10 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 	public static EditorJPanel editorPanel;
 
 	JLabel outputTitleLabel;
-	JTextArea outputTextArea;
+	public static JTextPane outputTextPane;
 	JSplitPane upSplitPane;
 	JToolBar specToolBar;
-	JButton addSpecButton, delSpecButton, verifySpecButton;
+	JButton addSpecButton, delSpecButton, verifySpecButton, saveSpecsButton;
 
 	JTable specsTable;
 	DefaultTableModel specsTableModel;
@@ -129,7 +144,7 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 
 	//=====================for spec list area==========================
 
-	public static VerificationActionListener verificationListener;
+	public static VerifyActionListener verificationListener;
 	public mainJFrame()
 	{
 		this.setLayout(new BorderLayout());
@@ -163,11 +178,11 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 
 		//=====================for editor(left) and output area(right)==========================
 		outputTitleLabel=new JLabel("Verification Information");
-		outputTitleLabel.setFont(new Font("System",Font.BOLD,VerificationActionListener.outputFontSize));
-		outputTextArea = new JTextArea();
-		outputScrollPane=new JScrollPane(outputTextArea);
+		outputTitleLabel.setFont(new Font("System",Font.BOLD, outputFontSize));
+		outputTextPane = new JTextPane();
+		outputScrollPane=new JScrollPane(outputTextPane);
 
-		outputTextArea.setBorder(
+		outputTextPane.setBorder(
 				BorderFactory.createCompoundBorder(
 						BorderFactory.createCompoundBorder(
 								BorderFactory.createTitledBorder("Verification Information"),
@@ -194,9 +209,13 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 		verifySpecButton=new JButton(("  Verify Spec  "));
 		verifySpecButton.addActionListener(this);
 
+		saveSpecsButton=new JButton(("  Save Specs  "));
+		saveSpecsButton.addActionListener(this);
+
 		specToolBar.add(addSpecButton);
 		specToolBar.add(delSpecButton);
 		specToolBar.add(verifySpecButton);
+		specToolBar.add(saveSpecsButton);
 
 		//specsTable = new JTable(new SpecsTableModel());
 		initSpecsTable();
@@ -231,7 +250,7 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 		//editorLabel.setText("<html><font color='#336699' style='font-weight:bold'>" + " SMV Editor " + "</font>&nbsp;</html>");
 		//centerPanel.setOpaque(false);
 		editorPanel=new EditorJPanel(this);
-		verificationListener =new VerificationActionListener(this);
+		verificationListener =new VerifyActionListener(this);
 	}
 
 	public static void setColumnSize(JTable table, int i, int preferedWidth, int minWidth, int maxWidth){
@@ -370,7 +389,7 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 
 	public void creatVerifyUI() {
 		editorPanelContainer.removeAll();
-		editorPanelContainer.add(VerificationActionListener.mainSplitPane, "Center");
+		editorPanelContainer.add(VerifyActionListener.mainSplitPane, "Center");
 		editorPanelContainer.updateUI();
 	}
 	@Override
@@ -408,6 +427,29 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 	public void mouseExited(MouseEvent e) {
 	}
 
+	public static void consoleOutput(String type, String str)
+	{
+		SimpleAttributeSet attribureSet = new SimpleAttributeSet();
+		Color textColor=Color.BLACK;
+		if(type.equals("warning") || type.equals("magenta")){
+			textColor=Color.MAGENTA;
+		}else if(type.equals("error") || type.equals("red")){
+			textColor=Color.RED;
+		}else if(type.equals("emph") || type.equals("blue")){
+			textColor=Color.BLUE;
+		}else if(type.equals("weak") || type.equals("gray")){
+			textColor=Color.GRAY;
+		}
+
+		int textSize=outputFontSize;
+		StyleConstants.setForeground(attribureSet, textColor);// 设置文字颜色
+		StyleConstants.setFontSize(attribureSet, textSize);// 设置字体大小
+		Document doc = outputTextPane.getDocument();
+		try {
+			doc.insertString(doc.getLength(), str, attribureSet);// 插入文字
+		} catch (BadLocationException e) {
+		}
+	}
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource()==addSpecButton) {
@@ -425,6 +467,43 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 		if(e.getSource()==delSpecButton){
 			removeSpec(specsTable.getSelectedRow());
 		}
+		if(e.getSource()==verifySpecButton){
+			int row;
+			if(specsTable.getRowCount()<=0) { consoleOutput("warning", "There is not any specification inputted.\n");return; }
+			row=specsTable.getSelectedRow();
+			if(row==-1) { consoleOutput("warning", "Select one specification please.\n"); return; }
+
+			String specStr=(String)specsTableModel.getValueAt(row,colSpec);
+			Spec spec=generateSpec(row);
+			if(spec==null) return;
+
+			RTCTL_STAR_ModelCheckAlg alg = new RTCTL_STAR_ModelCheckAlg(smvModule);
+			try {
+				alg.modelCheckingOneSpec(spec);
+			} catch (SpecException ex) {
+				ex.printStackTrace();
+			} catch (ModelCheckException ex) {
+				ex.printStackTrace();
+			} catch (ModuleException ex) {
+				ex.printStackTrace();
+			} catch (ModelCheckAlgException ex) {
+				ex.printStackTrace();
+			} catch (SMVParseException ex) {
+				ex.printStackTrace();
+			}
+
+		}
+		if(e.getSource()==saveSpecsButton){
+			Object[] options = {"Save","Cancel"};
+			int response = JOptionPane.showOptionDialog(this,
+					"Do you want to save these specifications to the opened SMV file?",
+					"Warning", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+			if(response==0){
+				//save
+				String specs = generateSpecsString();
+			}
+
+		}
 
 	}
 
@@ -438,5 +517,43 @@ public class mainJFrame extends JFrame implements MouseListener, ActionListener,
 	public void focusLost(FocusEvent e) {
 
 		//System.out.println(e.getSource().getClass().getName()+" focus lost");
+	}
+
+	public Spec generateSpec(int row){
+		if(specsTableModel.getRowCount()<=0) return null;
+		if(row<0 || row>specsTableModel.getRowCount()-1) return null;
+		String s="";
+		String inputSpec = ((String) specsTableModel.getValueAt(row, colSpec)).trim();
+
+		if(inputSpec!=null && inputSpec!=""){
+			String aLine="RTCTL*SPEC "+inputSpec.trim();
+			Spec[] specs = Env.loadSpecString(aLine);
+			if(specs==null || specs[0]==null) return null;
+			else return specs[0];
+		}
+		return null;
+	}
+
+	public String generateSpecsString(){
+		String s="";
+		for(int row=0; row<specsTableModel.getRowCount();row++){
+			String inputSpec = ((String) specsTableModel.getValueAt(row, colSpec)).trim();
+			String inputAnn = ((String) specsTableModel.getValueAt(row, colAnnotation)).trim();
+
+			if(inputSpec!=null && inputSpec!=""){
+				String aLine="RTCTL*SPEC "+inputSpec.trim()+";";
+				Spec[] specs = Env.loadSpecString(aLine);
+/*
+				if(specs==null || specs[0]==null) {
+					System.out.println("The following specification is illegal: "+aLine);
+					return "";
+				}else{
+*/
+					if(!inputAnn.equals("")) aLine+=" -- "+inputAnn+"\n"; else aLine+="\n";
+					s+=aLine;
+//				}
+			}
+		}
+		return s;
 	}
 }

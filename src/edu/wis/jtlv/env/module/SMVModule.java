@@ -22,6 +22,10 @@ import java.util.Vector;
 public class SMVModule extends ModuleWithStrongFairness {
 	private String player_name;
 
+	public Vector<SMVModule> getAllInstancesVector() {
+		return instances;
+	}
+
 	public Vector<ModuleBDDField> getAll_couples() {
 		return all_couples;
 	}
