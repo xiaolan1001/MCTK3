@@ -6,8 +6,11 @@ MCTK2 is now in alpha version 2.0.0. You are welcome to test it and report any m
 Cheers,
 
 Xiangyu Luo
+
 College of Computer Science & Technology
+
 Huaqiao University
+
 Email: luoxy(at)hqu.edu.cn
 
 March 8, 2020
