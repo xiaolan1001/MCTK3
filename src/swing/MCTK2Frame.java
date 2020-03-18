@@ -15,6 +15,7 @@ import edu.wis.jtlv.old_lib.mc.ModelCheckException;
 import net.sf.javabdd.BDD;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
@@ -155,7 +156,7 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 	public static JTextPane outputTextPane;
 	JSplitPane upSplitPane;
 	JToolBar specToolBar;
-	JButton addSpecButton, delSpecButton, verifySpecButton;//, saveSpecsButton;
+	JButton appendSpecButton, insertSpecButton, delSpecButton, verifySpecButton;//, saveSpecsButton;
 
 	static JTable specsTable;
 	static DefaultTableModel specsTableModel;
@@ -349,19 +350,29 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 
 		//=====================for spec list area==========================
 		specToolBar=new JToolBar();
-		addSpecButton=new JButton("  Insert Spec  ");
-		addSpecButton.addActionListener(this);
+		specToolBar.setBorder(new EmptyBorder(0,7,7,7));
+
+		appendSpecButton =new JButton("  Append Spec  ");
+		appendSpecButton.addActionListener(this);
+//		appendSpecButton.setBorder(BorderFactory.createRaisedSoftBevelBorder());
+
+		insertSpecButton =new JButton("  Insert Spec  ");
+		insertSpecButton.addActionListener(this);
+//		insertSpecButton.setBorder(BorderFactory.createRaisedSoftBevelBorder());
 
 		delSpecButton=new JButton("  Delete Spec  ");
 		delSpecButton.addActionListener(this);
+//		delSpecButton.setBorder(BorderFactory.createRaisedSoftBevelBorder());
 
 		verifySpecButton=new JButton(("  Verify Spec  "));
 		verifySpecButton.addActionListener(this);
+//		verifySpecButton.setBorder(BorderFactory.createRaisedSoftBevelBorder());
 
 		//saveSpecsButton=new JButton(("  Save Specs  "));
 		//saveSpecsButton.addActionListener(this);
 
-		specToolBar.add(addSpecButton);
+		specToolBar.add(appendSpecButton);
+		specToolBar.add(insertSpecButton);
 		specToolBar.add(delSpecButton);
 		specToolBar.add(verifySpecButton);
 		//specToolBar.add(saveSpecsButton);
@@ -626,7 +637,17 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 	}
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if(e.getSource()==addSpecButton) {
+		if(e.getSource()== appendSpecButton) {
+			//System.out.println("add spec clicked");
+			int row=specsTable.getRowCount();
+
+			insertSpec(row, "RTCTL*","", "");
+
+			specsTable.setEditingRow(row);
+			specsTable.setEditingColumn(2); // spec column
+			specsTable.setRowSelectionInterval(row,row);
+		}
+		if(e.getSource()== insertSpecButton) {
 			//System.out.println("add spec clicked");
 			int row;
 			if(specsTable.getRowCount()<=0 || specsTable.getSelectedRow()==-1) row=0;
