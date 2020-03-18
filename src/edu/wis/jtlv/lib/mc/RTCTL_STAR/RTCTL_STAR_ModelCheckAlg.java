@@ -51,6 +51,7 @@ class RTCTLsTester{
 
     RTCTLsTester(){
         module=new SMVModule("RTCTLsTester");
+        module.conjunctTrans(Env.TRUE());
         auxVarNames=new Vector<String>();
         cacheSpecsInfo=new LinkedHashMap<String, CacheSpecTesterInfo>();
     }

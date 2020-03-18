@@ -3,6 +3,8 @@ package swing;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyledDocument;
@@ -13,9 +15,22 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.*;
 
+import static swing.MCTK2Frame.modelTextPaneChanged;
+
+class modelDocumentListener implements DocumentListener {
+    public void insertUpdate(DocumentEvent e) {
+        modelTextPaneChanged=true;
+    }
+    public void removeUpdate(DocumentEvent e) {
+        modelTextPaneChanged=true;
+    }
+    public void changedUpdate(DocumentEvent e) {
+        //Plain text components don't fire these events.
+    }
+}
 
 
-public class EditorJPanel implements KeyListener, ActionListener, ChangeListener{
+public class EditorJPanel implements KeyListener, ActionListener, ChangeListener {
     MCTK2Frame indexJFrame;
     static JTextPane rowTextPane;
     static JTextPane modelTextPane =new JTextPane();
@@ -67,6 +82,7 @@ public class EditorJPanel implements KeyListener, ActionListener, ChangeListener
         modelTextPane.addMouseListener(new MyMouseListener());
         //+++++++++++++++++++++++++++++++++++++++++++++++++++
         modelTextPane.getDocument().addDocumentListener(cKeyWord);
+        modelTextPane.getDocument().addDocumentListener(new modelDocumentListener());
 
         rowTextPane.setForeground(Color.lightGray);
         rowTextPane.setText("1");

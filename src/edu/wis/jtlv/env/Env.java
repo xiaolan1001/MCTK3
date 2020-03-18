@@ -24,6 +24,8 @@ import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.security.AccessControlException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -100,17 +102,17 @@ public final class Env {
         return all_agent_modules;
     }
 
-    public static String[] getAllSpecsString() {
+    public static String[][] getAllSpecsString() {
         return all_specifications_string;
     }
     public static Vector<ModuleBDDField> all_couples; // holds the BDD pairs (unprime and prime versions) for STATE_VARs
 
 
-    public static void setAllSpecsString(String[] allSpecsString) {
+    public static void setAllSpecsString(String[][] allSpecsString) {
         Env.all_specifications_string = allSpecsString;
     }
 
-    private static String[] all_specifications_string;
+    private static String[][] all_specifications_string;
 
     /**
      * <p>
@@ -816,8 +818,11 @@ public final class Env {
                         false, order);
             } else if (filename.toLowerCase().endsWith("smv")) {
                 MCTKANTLRFileStream input_smv = new MCTKANTLRFileStream(filename);
-                Env.setAllSpecsString(input_smv.seperateSpecsFromModules());
-                return loadSMVModule( new ANTLRStringStream(input_smv.dataStr), false, false, order);
+                String moduleStr=null;
+                //String[][] specAnns=null;
+                input_smv.removeSpecs();
+                moduleStr = input_smv.removeComments();
+                return loadSMVModule( new ANTLRStringStream(moduleStr), false, false, order);
             }
         } catch (RecognitionException e) {
             Env.doError(e, e.toString()); //LXY: correct error
@@ -825,6 +830,51 @@ public final class Env {
             Env.doError(e, e.toString()); //LXY: correct error
         }
         throw new IOException("Cannot load module with formats other then .fds or .smv");
+    }
+
+    public static void seperateSpecsFromSMVfile(String sourceSMVfileData, Vector<String[]> moduleSpecAnns) {
+        String moduleStr = sourceSMVfileData;
+        int oldLength=moduleStr.length();
+        if(moduleStr.equals("")) {
+            moduleStr="";
+            moduleSpecAnns=null;
+            return;
+        }
+
+//        String regEx = "((CTLSPEC|LTLSPEC|SPEC|RTCTL\\*SPEC)[^;]*;( *--.*(\r\n)?)?)|((CTLSPEC|LTLSPEC|SPEC|RTCTL\\*SPEC)[^;]*;( *(\r\n)?)?)";
+        String regEx = "(CTLSPEC|LTLSPEC|SPEC|RTCTL\\*SPEC)[^;]*;( *--.*(\r\n)?)?";
+        // 编译正则表达式,匹配以;结尾的规范
+        Pattern pattern = Pattern.compile(regEx,Pattern.MULTILINE);
+        Matcher matcher = pattern.matcher(moduleStr);
+        ArrayList<String> specList = new ArrayList<String>();
+        ArrayList<String> annList = new ArrayList<String>();
+        while(matcher.find()){
+            String specAnn=matcher.group();
+            String[] s = specAnn.split(";( *--)?",2);
+            String[] oneSpec = new String[2];
+            oneSpec[0]=s[0].replaceAll("\r\n","");
+            if(s.length>1) oneSpec[1]=s[1].replaceAll("\r\n",""); else oneSpec[1]="";
+
+            moduleSpecAnns.add(oneSpec);
+
+            moduleStr = moduleStr.replace(specAnn+"\r\n", "");
+            moduleStr = moduleStr.replace(specAnn, "");
+        }
+        String[] oneSpec = new String[2];
+        oneSpec[0]=moduleStr;
+        oneSpec[1]="modules";
+        moduleSpecAnns.insertElementAt(oneSpec, 0);
+
+        return;
+    }
+
+    public static String removeCommentsFromSMVfile(String sourceSMVfileData) {
+        String dataStr = new String(sourceSMVfileData);
+
+        // delete all comments
+        dataStr=dataStr.replaceAll("(--.*\r\n)|(--.*$)", "");
+
+        return dataStr;
     }
 
     /**

@@ -26,9 +26,12 @@ public class MenuToolBarJPanel implements ActionListener{
 
 	//创建工具栏
 	JPanel toolBar=new JPanel();
-	private JButton newButton,openButton,saveAsButton,saveButton,
+	private JButton // newButton,
+			openButton,saveAsButton,saveButton,
 			 undoButton,redoButton,cutButton,copyButton,
-			 pasteButton,frontButton,compileButton,helpButton;
+			 pasteButton,frontButton,
+			//compileButton,
+			helpButton;
 
 	public MenuToolBarJPanel(MCTK2Frame mainFrame)
 	{
@@ -134,8 +137,10 @@ public class MenuToolBarJPanel implements ActionListener{
 		Icon compileIcon=new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/debug.png"));
 		Icon helpIcon=new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/help.png"));
 
+/*
 		newButton= new JButton(newIcon);
 		newButton.setBorderPainted(false);
+*/
 		openButton=new JButton(openIcon);
 		openButton.setBorderPainted(false);
 		saveButton= new JButton(saveIcon);
@@ -155,13 +160,13 @@ public class MenuToolBarJPanel implements ActionListener{
 
 		frontButton=new JButton(frontIcon);
 		frontButton.setBorderPainted(false);
-		compileButton=new JButton(compileIcon);
-		compileButton.setBorderPainted(false);
+//		compileButton=new JButton(compileIcon);
+//		compileButton.setBorderPainted(false);
 
 		helpButton=new JButton(helpIcon);
 		helpButton.setBorderPainted(false);
 
-		newButton.setPreferredSize(new Dimension(22,22));
+//		newButton.setPreferredSize(new Dimension(22,22));
 		openButton.setPreferredSize(new Dimension(22,22));
 		saveButton.setPreferredSize(new Dimension(22,22));
 		saveAsButton.setPreferredSize(new Dimension(22,22));
@@ -171,10 +176,10 @@ public class MenuToolBarJPanel implements ActionListener{
 		copyButton.setPreferredSize(new Dimension(22,22));
 		pasteButton.setPreferredSize(new Dimension(22,22));
 		frontButton.setPreferredSize(new Dimension(22,22));
-		compileButton.setPreferredSize(new Dimension(22,22));
+//		compileButton.setPreferredSize(new Dimension(22,22));
 		helpButton.setPreferredSize(new Dimension(22,22));
 		//注册工具栏按钮事件
-		newButton.addActionListener(this);
+//		newButton.addActionListener(this);
 		openButton.addActionListener(this);
 		saveButton.addActionListener(this);
 		saveAsButton.addActionListener(this);
@@ -184,10 +189,10 @@ public class MenuToolBarJPanel implements ActionListener{
 		copyButton.addActionListener(this);
 		pasteButton.addActionListener(this);
 		frontButton.addActionListener(this);
-		compileButton.addActionListener(this);
+//		compileButton.addActionListener(this);
 		helpButton.addActionListener(this);
 		//设置按钮提示文字
-		newButton.setToolTipText("New File");
+//		newButton.setToolTipText("New File");
 		openButton.setToolTipText("Open");
 		saveButton.setToolTipText("Save");
 		saveAsButton.setToolTipText("Save As");
@@ -197,11 +202,11 @@ public class MenuToolBarJPanel implements ActionListener{
 		copyButton.setToolTipText("Copy");
 		pasteButton.setToolTipText("Paste");
 		frontButton.setToolTipText("Front Style");
-		compileButton.setToolTipText("Compile This Model");
+//		compileButton.setToolTipText("Compile This Model");
 		helpButton.setToolTipText("About MCTK2.0");
 
 		//向工具栏添加按钮
-		toolBar.add(newButton);
+//		toolBar.add(newButton);
 		toolBar.add(openButton);
 		toolBar.add(saveButton);
 		toolBar.add(saveAsButton);
@@ -211,7 +216,7 @@ public class MenuToolBarJPanel implements ActionListener{
 		toolBar.add(copyButton);
 		toolBar.add(pasteButton);
 		toolBar.add(frontButton);
-		toolBar.add(compileButton);
+//		toolBar.add(compileButton);
 		toolBar.add(helpButton);
 
 		uo = new UndoManager();
@@ -240,11 +245,19 @@ public class MenuToolBarJPanel implements ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getActionCommand().equals("Save")||e.getSource()==saveButton) {
-			fileOperation.save();
+			try {
+				fileOperation.saveFile();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
 		} else if(e.getActionCommand().equals("Save As")||e.getSource()==saveAsButton) {
-			fileOperation.SaveAs();
-		} else if(e.getActionCommand().equals("New")||e.getSource()==newButton) {
-			fileOperation.creat();
+			try {
+				fileOperation.SaveAs();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+//		} else if(e.getActionCommand().equals("New")||e.getSource()==newButton) {
+//			fileOperation.creat();
 		} else if(e.getActionCommand().equals("Open File")||e.getSource()==openButton) {
 			if(fileOperation.open());
 			setRowContent();
@@ -278,15 +291,25 @@ public class MenuToolBarJPanel implements ActionListener{
 			//System.out.println("Cut");
 		} else if(e.getActionCommand().equals("Select All")) {
 			modelTextPane.selectAll();
+/*
 		}  else if(e.getActionCommand().equals("Compile Model")||e.getSource()==compileButton) {
-			mainFrame.readSMVFile();
+			try {
+				mainFrame.readSMVFile();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+*/
 		} else if(e.getActionCommand().equals("Verify Model")) {
 			mainFrame.creatVerifyUI();
 /*
 			indexJFrame.editorLabel.setText("<html><font color='black'>" + " SMV Editor " + "</font>&nbsp;</html>");
 			indexJFrame.verifyLabel.setText("<html><font color='#336699' style='font-weight:bold'>" + " Verification " + "</font>&nbsp;</html>");
 */
-			mainFrame.readSMVFile();//读取SMV中文本属性
+			try {
+				mainFrame.readSMVmodulesFromFile();//读取SMV中文本属性
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
 		}else if(e.getActionCommand().equals("Source Code")){
 			new Thread() {
 				public void run() {

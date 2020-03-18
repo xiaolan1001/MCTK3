@@ -22,17 +22,19 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.Vector;
 
 import static edu.wis.jtlv.lib.AlgResultI.ResultStatus.failed;
 import static javax.swing.ListSelectionModel.SINGLE_SELECTION;
 import static jdk.nashorn.internal.runtime.Context.DEBUG;
+import static swing.EditorJPanel.modelTextPane;
 import static swing.VerifyActionListener.outputFontSize;
 
 class SpecsTableModel extends AbstractTableModel {
 	private String[] columnNames = {
 			"No",
-			"Status",
+			"Logic",
 			"RTCTL* Spec",
 			"Annotation"};
 	private Object[][] data = {
@@ -127,6 +129,10 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 	public static Statistic statistic=null; //get the time consuming, memory, etc.
 
 	//=================For GUI=====================
+	public static Vector<String[]> initSpecAnns=null;  // the initial specs after loading a smv file
+
+	public static boolean modelTextPaneChanged = false;
+
 	public static boolean isOpeningCounterexampleWindow=false;
 
 	final static int width = Toolkit.getDefaultToolkit().getScreenSize().width;
@@ -149,12 +155,12 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 	public static JTextPane outputTextPane;
 	JSplitPane upSplitPane;
 	JToolBar specToolBar;
-	JButton addSpecButton, delSpecButton, verifySpecButton, saveSpecsButton;
+	JButton addSpecButton, delSpecButton, verifySpecButton;//, saveSpecsButton;
 
-	JTable specsTable;
-	DefaultTableModel specsTableModel;
+	static JTable specsTable;
+	static DefaultTableModel specsTableModel;
 	Vector specsData;
-	static int colNo=0, colStatus=1, colSpec=2, colAnnotation=3;
+	static int colNo=0, colLogic =1, colSpec=2, colAnnotation=3;
 
 	JScrollPane specsTableScrollPane;
 	JPanel specsPanel;
@@ -207,19 +213,21 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 		return modelChangedAfterLoaded;
 	}
 
-	public void readSMVFile(){
+	public boolean readSMVmodulesFromFile() throws IOException {
 		String fileName = controlPanel.fileOperation.getFileName();
+/*
 		if (fileName.equals("")) {
 			Object[] options = {"OK"};
 			JOptionPane.showOptionDialog(null, "Sorry, please create a SMV file first!",
 					"Warm Tips", JOptionPane.YES_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
 		} else {
+*/
 			String src = controlPanel.fileOperation.getPath();
 			String url = src + fileName + ".smv";
-			controlPanel.fileOperation.save();    //Save the file you are editing first.
+//			controlPanel.fileOperation.saveFile();    //Save the file you are editing first.
 
-			Env.resetEnv();
 			try {
+				Env.resetEnv();
 				statistic =new Statistic();
 				consoleOutput("normal", "Loading the Modules of "+fileName + ".smv ...\n");
 				Env.loadModule(url);
@@ -228,15 +236,16 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 				smvModule.setFullPrintingMode(true);
 
 				consoleOutput("weak", statistic.getUsedInfo(true,true,true,true));
+				return true;
 			} catch (Exception ie) {
 				ie.printStackTrace();
 				Object[] options = {"OK"};
-				JOptionPane.showOptionDialog(null, "Syntax error, please check the SMV file!",
-						"Warm Tips", JOptionPane.YES_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
-			}finally {
+				JOptionPane.showOptionDialog(null, "Please check the syntax of the SMV file!",
+						"Syntax Error", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE, null, options, options[0]);
+				return false;
 			}
 
-		}
+//		}
 	}
 
 	//public static VerifyActionListener verificationListener;
@@ -349,13 +358,13 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 		verifySpecButton=new JButton(("  Verify Spec  "));
 		verifySpecButton.addActionListener(this);
 
-		saveSpecsButton=new JButton(("  Save Specs  "));
-		saveSpecsButton.addActionListener(this);
+		//saveSpecsButton=new JButton(("  Save Specs  "));
+		//saveSpecsButton.addActionListener(this);
 
 		specToolBar.add(addSpecButton);
 		specToolBar.add(delSpecButton);
 		specToolBar.add(verifySpecButton);
-		specToolBar.add(saveSpecsButton);
+		//specToolBar.add(saveSpecsButton);
 
 		//specsTable = new JTable(new SpecsTableModel());
 		initSpecsTable();
@@ -404,8 +413,8 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 	public void initSpecsTable(){
 		Vector columnNames=new Vector();
 		columnNames.add("No");
-		columnNames.add("Status");
-		columnNames.add("RTCTL* Specification");
+		columnNames.add("Logic");
+		columnNames.add("Specification");
 		columnNames.add("Annotation");
 		specsData=new Vector();
 		specsTableModel = new DefaultTableModel(specsData, columnNames);
@@ -429,9 +438,9 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 		TableColumn c=specsTable.getColumn("No");
 		c.setCellRenderer(r);
 
-		setColumnSize(specsTable,colStatus,100,100,100);
-		specsTable.getColumn("Status").setCellRenderer(r);
-		c=specsTable.getColumn("Status");
+		setColumnSize(specsTable, colLogic,60,60,60);
+		specsTable.getColumn("Logic").setCellRenderer(r);
+		c=specsTable.getColumn("Logic");
 		c.setCellRenderer(r);
 
 		setColumnSize(specsTable,colSpec,1000,30,3000);
@@ -449,7 +458,7 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 			specsTableModel.setValueAt(row+1,row,0);
 	}
 
-	public int insertSpec(int row, String status, String spec, String annotation){
+	public int insertSpec(int row, String logic, String spec, String annotation){
 
 /*
 		int row = specsTable.getSelectedRow();
@@ -458,14 +467,14 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 		CellEditor ce=specsTable.getCellEditor(row, colSpec);
 		if(specsTable.isEditing()) ce.stopCellEditing();
 
-		Object[] rowData={1,status,spec,annotation};
+		Object[] rowData={1,logic,spec,annotation};
 		specsTableModel.insertRow(row, rowData);
 		refreshSpecsTable();
-		setEditing(row,colSpec);
+		//setTableEditing(row,colSpec);
 		return 1;
 	}
 
-	public void setEditing(int row, int col) {
+	public void setTableEditing(int row, int col) {
 		if (!specsTable.isCellEditable(row,col))
 			return;
 		specsTable.editCellAt(row, col);
@@ -623,7 +632,7 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 			if(specsTable.getRowCount()<=0 || specsTable.getSelectedRow()==-1) row=0;
 			else row=specsTable.getSelectedRow();
 
-			insertSpec(row, "","", "");
+			insertSpec(row, "RTCTL*","", "");
 
 			specsTable.setEditingRow(row);
 			specsTable.setEditingColumn(2); // spec column
@@ -633,37 +642,13 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 			removeSpec(specsTable.getSelectedRow());
 		}
 		if(e.getSource()==verifySpecButton){
-			if(isOpeningCounterexampleWindow){
-				consoleOutput("warning", "Please close the counterexample window before verification.\n");
-				return;
-			}
-			readSMVFile();
-
-			int row;
-			if(specsTable.getRowCount()<=0) { consoleOutput("warning", "There is not any specification inputted.\n");return; }
-			row=specsTable.getSelectedRow();
-			if(row==-1) { consoleOutput("warning", "Select one specification please.\n"); return; }
-
-			String specStr=(String)specsTableModel.getValueAt(row,colSpec);
-			Spec spec=generateSpec(row);
-			if(spec==null) return;
-
-			RTCTL_STAR_ModelCheckAlg alg = new RTCTL_STAR_ModelCheckAlg(this,smvModule);
 			try {
-				alg.modelCheckingOneSpec(spec);
-			} catch (SpecException ex) {
-				ex.printStackTrace();
-			} catch (ModelCheckException ex) {
-				ex.printStackTrace();
-			} catch (ModuleException ex) {
-				ex.printStackTrace();
-			} catch (ModelCheckAlgException ex) {
-				ex.printStackTrace();
-			} catch (SMVParseException ex) {
+				verifyEditingModel();
+			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
-
 		}
+/*
 		if(e.getSource()==saveSpecsButton){
 			Object[] options = {"Save","Cancel"};
 			int response = JOptionPane.showOptionDialog(this,
@@ -671,9 +656,85 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 					"Warning", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
 			if(response==0){
 				//save
-				String specs = generateSpecsString();
+				String specs = generateSpecsString(false);
 			}
 
+		}
+*/
+
+	}
+
+	public void verifyEditingModel() throws IOException {
+		if(isOpeningCounterexampleWindow){
+			consoleOutput("warning", "Please close the counterexample window before verification.\n");
+			return;
+		}
+		// If no file opened, then save the current data to a specified file name
+		String fileName = controlPanel.fileOperation.getFileName();
+		if (fileName.equals("")) { // currently no file opened
+			if(modelTextPane.getText().trim().equals("")){
+				consoleOutput("warning", "Please input the model.\n");
+				return;
+			}else {
+				if(specsTableModel.getRowCount()<=0){
+					consoleOutput("warning", "Please input a RTCTL*SPEC specification.\n");
+					return;
+				}else { // the model and the spec list both are not empty, but the filename is empty, try to saveAs
+					Object[] options = {"Save", "Cancel"};
+					int response = JOptionPane.showOptionDialog(null, "Do you want to save the current model and specifications to a SMV file?",
+							"Save to File", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+					if(response!=0){
+						return;
+					}else{ // save to a new file
+						try {
+							if(!controlPanel.fileOperation.SaveAs()){
+								consoleOutput("warning", "No file saved.\n");
+								return;
+							}
+						} catch (IOException ex) {
+							ex.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+		// Now a file was opened before, try to save the current editing data to the file
+		if(!controlPanel.fileOperation.saveFile4verification()) return;
+
+		// try to construct the formal model of the saved file
+		try {
+			readSMVmodulesFromFile();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+			return;
+		}
+
+		// try to verify the selected specification
+		int row;
+		if(specsTable.getRowCount()<=0) { consoleOutput("warning", "There is not any specification inputted.\n");return; }
+		row=specsTable.getSelectedRow();
+		if(row==-1) { consoleOutput("warning", "Select one specification please.\n"); return; }
+
+		String specStr=(String)specsTableModel.getValueAt(row,colSpec);
+		Spec spec=generateSpec(row);
+		if(spec==null) {
+			consoleOutput("error", "There is syntax error in specification "+specStr+"\n");
+			return;
+		}
+
+		RTCTL_STAR_ModelCheckAlg alg = new RTCTL_STAR_ModelCheckAlg(this,smvModule);
+		try {
+			alg.modelCheckingOneSpec(spec);
+		} catch (SpecException ex) {
+			ex.printStackTrace();
+		} catch (ModelCheckException ex) {
+			ex.printStackTrace();
+		} catch (ModuleException ex) {
+			ex.printStackTrace();
+		} catch (ModelCheckAlgException ex) {
+			ex.printStackTrace();
+		} catch (SMVParseException ex) {
+			ex.printStackTrace();
 		}
 
 	}
@@ -705,27 +766,52 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 		return null;
 	}
 
-	public String generateSpecsString(){
+	public String generateSpecsString(boolean checkSyntax){
 		String s="";
 		for(int row=0; row<specsTableModel.getRowCount();row++){
 			String inputSpec = ((String) specsTableModel.getValueAt(row, colSpec)).trim();
 			String inputAnn = ((String) specsTableModel.getValueAt(row, colAnnotation)).trim();
-
-			if(inputSpec!=null && inputSpec!=""){
+			Spec spec=null;
+			if(checkSyntax) spec=generateSpec(row);
+			if(!checkSyntax || (checkSyntax && spec!=null)){
 				String aLine="RTCTL*SPEC "+inputSpec.trim()+";";
-				Spec[] specs = Env.loadSpecString(aLine);
-/*
-				if(specs==null || specs[0]==null) {
-					System.out.println("The following specification is illegal: "+aLine);
-					return "";
-				}else{
-*/
-					if(!inputAnn.equals("")) aLine+=" -- "+inputAnn+"\n"; else aLine+="\n";
-					s+=aLine;
-//				}
+				if(!inputAnn.equals("")) aLine+=" --"+inputAnn+"\r\n"; else aLine+="\r\n";
+				s+=aLine;
+			}else{
+				consoleOutput("error","There exists syntax error in specification "+(row+1)+".\n");
+				return null;
 			}
 		}
 		return s;
+	}
+
+	public String generateSMVtext(boolean checkSyntax){
+		String modelStr=modelTextPane.getText().trim();
+		if(modelStr.equals("")) return null;
+		String specsStr = generateSpecsString(checkSyntax);
+		if(specsStr==null) return null;
+
+		if(specsStr.equals("")) return modelStr;
+		else {
+			if(modelStr.equals("")) return specsStr;
+			else return modelStr+"\r\n"+specsStr;
+		}
+	}
+
+	public static boolean specsTableChanged(){
+		if(specsTable.isEditing()) specsTable.getCellEditor().stopCellEditing();
+		if(initSpecAnns==null && specsTableModel.getRowCount()==0) return false;
+		if(initSpecAnns==null && specsTableModel.getRowCount()>00) return true;
+
+		if(initSpecAnns.size()!=specsTableModel.getRowCount()) return true;
+
+		for(int row=0; row<specsTableModel.getRowCount(); row++){
+			String spec=((String)specsTableModel.getValueAt(row,colSpec)).trim();
+			String ann=((String)specsTableModel.getValueAt(row,colAnnotation)).trim();
+			if(!spec.equals(initSpecAnns.get(row)[0])) return true;
+			if(!ann.equals(initSpecAnns.get(row)[1])) return true;
+		}
+		return false;
 	}
 
 

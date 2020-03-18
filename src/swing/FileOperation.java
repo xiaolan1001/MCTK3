@@ -1,17 +1,21 @@
 package swing;
 
+import edu.wis.jtlv.env.Env;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileSystemView;
 import java.io.*;
+import java.util.Vector;
 
 import static swing.EditorJPanel.modelTextPane;
+import static swing.MCTK2Frame.*;
 
 
 public class FileOperation {
     JFileChooser filechoose = new JFileChooser();
     MCTK2Frame mainFrame;
-    String src="";
+    String currentPathFileName ="";
     String fileName;
 
     public FileOperation(MCTK2Frame mainFrame) {
@@ -23,15 +27,15 @@ public class FileOperation {
     }
 
     public boolean open() {
-        if (JFileChooser.APPROVE_OPTION == filechoose.showOpenDialog(mainFrame)) {
+        if (filechoose.showOpenDialog(mainFrame)==JFileChooser.APPROVE_OPTION) {
             File newFile;
             File file = filechoose.getSelectedFile();
             if (file.getName() == null) return false;
             BufferedReader br;
             newFile = file;
-            src = newFile.toString();
+            currentPathFileName = newFile.toString();
             fileName = newFile.getName();
-            setStyle(newFile);
+            setFrameTitle(newFile);
             try {
                 String s;
                 StringBuffer sbf = new StringBuffer();
@@ -43,7 +47,27 @@ public class FileOperation {
                 if (sbf.length() > 2)
                     sbf = new StringBuffer(sbf.substring(0, sbf.length() - 2));
                 String content = sbf.toString().replaceAll("\\t", "   ");
-                modelTextPane.setText(content);
+
+                //String moduleStr=new String();
+                Vector<String[]> moduleSpecAnns=new Vector<String[]>();
+                Env.seperateSpecsFromSMVfile(content, moduleSpecAnns);
+
+                modelTextPane.setText(moduleSpecAnns.get(0)[0]);
+                MCTK2Frame.modelTextPaneChanged=false;
+
+                if (initSpecAnns!=null) initSpecAnns.clear(); else initSpecAnns=new Vector<String[]>();
+                for(int i=1; i<moduleSpecAnns.size(); i++) {
+                    String[] specAnn=moduleSpecAnns.get(i);
+                    specAnn[0]=specAnn[0].replaceAll("RTCTL\\*SPEC","").trim();
+                    specAnn[1]=specAnn[1].trim();
+                    initSpecAnns.add(specAnn);
+                }
+
+                specsTableModel.getDataVector().clear();
+                for(int i=0; i<initSpecAnns.size(); i++) {
+                    mainFrame.insertSpec(i,"RTCTL*",initSpecAnns.get(i)[0],initSpecAnns.get(i)[1]);
+                }
+                if(specsTable.getRowCount()>0) specsTable.setRowSelectionInterval(0,0);
 
                 return true;
             } catch (IOException e1) {
@@ -53,58 +77,97 @@ public class FileOperation {
         return false;
     }
 
-    public boolean save() {
-        if (!src.equals(""))//�ļ��Ѵ���
+    public boolean saveFile() throws IOException {
+        if (!currentPathFileName.equals(""))
         {
+            if(!MCTK2Frame.modelTextPaneChanged && !mainFrame.specsTableChanged()){
+                consoleOutput("warning", "There is not any change in the model and specification list. Don't need to save the opening file.\n");
+                return true;
+            }
+
             BufferedWriter br;
-            File newFile = new File(src);
-            try {
-                String content= modelTextPane.getText();
+            File newFile = new File(currentPathFileName);
+            setFrameTitle(newFile);
+            //save file
+            String fileContent=mainFrame.generateSMVtext(false);
+            if(fileContent!=null){
                 br = new BufferedWriter(new FileWriter(newFile));
-                br.write(content);
+                br.write(fileContent);
                 br.flush();
                 br.close();
-                //System.out.println("Write Successfully!");
+
+                if(specsTableChanged()) {
+                    initSpecAnns.clear();
+                    for (int row = 0; row < specsTableModel.getRowCount(); row++) {
+                        String[] specAnn=new String[2];
+                        specAnn[0]="RTCTL*SPEC "+((String) specsTableModel.getValueAt(row,colSpec)).trim();
+                        specAnn[1]=((String) specsTableModel.getValueAt(row,colAnnotation)).trim();
+                        initSpecAnns.add(specAnn);
+                    }
+                }
+
+                modelTextPaneChanged=false;
+                consoleOutput("emph", "The file "+newFile.getName()+" saved.\n");
                 return true;
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-        } else//�ļ�δ���ڣ��򿪣�
+            }else return false;
+        } else
         {
-            if (JFileChooser.APPROVE_OPTION == filechoose.showSaveDialog(mainFrame)) {
-                File newFile;
-                File file = filechoose.getSelectedFile();
-                if (file.getName() == null) return false;
-                BufferedWriter br;
-                MyFileFilter filter = (MyFileFilter) filechoose.getFileFilter();
-                String ends = filter.getEnds();
-                if (file.toString().indexOf(ends) != -1) {
-                    newFile = file;
-                } else {
-                    newFile = new File(file.getAbsolutePath() + ends);
-                }
-                src = newFile.toString();
-                fileName = newFile.getName();
-                if (newFile.exists()){//�Ѵ���ͬ���ļ���ɾ��
-                    newFile.delete();
-                }
-                try {
-                    String content= modelTextPane.getText();
-                    br = new BufferedWriter(new FileWriter(newFile));
-                    br.write(content);
-                    br.flush();
-                    br.close();
-                    return true;
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
-            }
+            consoleOutput("emph", "Please use the \"Save As\" function.\n");
+            return false;
         }
-        return false;
     }
 
-    public boolean SaveAs() {
-        if (JFileChooser.APPROVE_OPTION == filechoose.showSaveDialog(mainFrame)) {
+    // save to a file before verification
+    // return true if the file is ok for verification
+    // return false if the file is not ready for verification
+    public boolean saveFile4verification() throws IOException {
+        if (!currentPathFileName.equals(""))
+        {
+            if(!MCTK2Frame.modelTextPaneChanged && !mainFrame.specsTableChanged()){
+                return true;
+            }
+            Object[] options = {"Save", "Cancel"};
+            int responseSave = JOptionPane.showOptionDialog(mainFrame, "Do you want to save the editing model and specifications to "+fileName+"?\n",
+                    "Warning", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+            if (responseSave != 0) // do not save
+                return false; //cancel
+
+            // need to save
+            BufferedWriter br;
+            File newFile = new File(currentPathFileName);
+            setFrameTitle(newFile);
+            //save file
+            String fileContent=mainFrame.generateSMVtext(false);
+            if(fileContent!=null){
+                br = new BufferedWriter(new FileWriter(newFile));
+                br.write(fileContent);
+                br.flush();
+                br.close();
+
+                if(specsTableChanged()) {
+                    initSpecAnns.clear();
+                    for (int row = 0; row < specsTableModel.getRowCount(); row++) {
+                        String[] specAnn=new String[2];
+                        specAnn[0]="RTCTL*SPEC "+((String) specsTableModel.getValueAt(row,colSpec)).trim();
+                        specAnn[1]=((String) specsTableModel.getValueAt(row,colAnnotation)).trim();
+                        initSpecAnns.add(specAnn);
+                    }
+                }
+
+                modelTextPaneChanged=false;
+                consoleOutput("emph", "The file "+newFile.getName()+" saved.\n");
+                return true;
+            }else return false;
+        } else
+        {
+            consoleOutput("emph", "Please save the editing model to a file before verification.\n");
+            return false;
+        }
+    }
+
+    public boolean SaveAs() throws IOException { // return 0--OK, return 1--Cancel
+        if (filechoose.showSaveDialog(mainFrame) == JFileChooser.APPROVE_OPTION) {
+            // 1. input/choose a file name to save
             File newFile;
             File file = filechoose.getSelectedFile();
             if (file.getName() == null) return false;
@@ -116,31 +179,46 @@ public class FileOperation {
             } else {
                 newFile = new File(file.getAbsolutePath() + ends);
             }
-            src = newFile.toString();
-            fileName = newFile.getName();
+            // 2. confirm that use the chosen file name to save the current data
+            int responseReplace;
             if (newFile.exists())
             {
-                Object[] options = {"Replace", "Rename"};
-                int response = JOptionPane.showOptionDialog(mainFrame, "A file with the same name already exists!",
-                        "Warning", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-                if (response == 0) {//Replace
-                    newFile.delete();
-                } else if (response == 1) {//Rename
-                    SaveAs();
-                }
+                Object[] options = {"Replace", "Cancel"};
+                responseReplace = JOptionPane.showOptionDialog(mainFrame, "A file with the same name "+fileName+" already exists!\n" +
+                                "Do you want to replace it?",
+                        "Warning", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+                if (responseReplace != 0) // do not replace
+                    return false; //cancel
             }
-            try {
-                String content= modelTextPane.getText();
+            // try to replace the file
+            //save file
+            String fileContent=mainFrame.generateSMVtext(false);
+            if(fileContent!=null){
+                if(newFile.exists()) newFile.delete();
+
                 br = new BufferedWriter(new FileWriter(newFile));
-                br.write(content);
+                br.write(fileContent);
                 br.flush();
                 br.close();
+
+                if(specsTableChanged()) {
+                    initSpecAnns.clear();
+                    for (int row = 0; row < specsTableModel.getRowCount(); row++) {
+                        String[] specAnn=new String[2];
+                        specAnn[0]="RTCTL*SPEC "+((String) specsTableModel.getValueAt(row,colSpec)).trim();
+                        specAnn[1]=((String) specsTableModel.getValueAt(row,colAnnotation)).trim();
+                        initSpecAnns.add(specAnn);
+                    }
+                }
+
+                modelTextPaneChanged=false;
+                currentPathFileName = newFile.toString();
+                fileName = newFile.getName();
+                setFrameTitle(newFile);
+
                 return true;
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-        }
-        return false;
+            }else return false;
+        }else return false;
     }
 
 
@@ -157,7 +235,7 @@ public class FileOperation {
             } else {
                 newFile = new File(file.getAbsolutePath() + ends);
             }
-            src = newFile.toString();
+            currentPathFileName = newFile.toString();
             fileName = newFile.getName();
             if (newFile.exists())
             {
@@ -171,12 +249,12 @@ public class FileOperation {
                     creat();
                 }
             }
-            setStyle(newFile);
+            setFrameTitle(newFile);
             modelTextPane.setText("");
             try {
                 br = new BufferedWriter(new FileWriter(newFile));
                 br.write("");
-                br.flush(); //ˢ�»����������ݵ��ļ�
+                br.flush();
                 br.close();
                 return true;
             } catch (IOException e1) {
@@ -186,15 +264,15 @@ public class FileOperation {
         return false;
     }
 
-    public void setStyle(File file) {
+    public void setFrameTitle(File file) {
         String name = file.getName();
-        mainFrame.setTitle("MCTK2-" + file.getAbsolutePath());
+        mainFrame.setTitle("MCTK 2.0 - " + file.getAbsolutePath());
     }
 
     public String getPath() {
         String name = getFileName();
-        int t = src.lastIndexOf(name, src.length() - 1);
-        String path = src.substring(0, t);
+        int t = currentPathFileName.lastIndexOf(name, currentPathFileName.length() - 1);
+        String path = currentPathFileName.substring(0, t);
         return path;
     }
 

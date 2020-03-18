@@ -1,6 +1,5 @@
 package swing;
 
-import edu.wis.jtlv.env.Env;
 import org.graphstream.graph.implementations.MultiGraph;
 
 import javax.swing.*;
@@ -12,6 +11,7 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -199,7 +199,11 @@ public class VerifyActionListener implements ActionListener {
         } else if (((JButton) e.getSource()).getText().equals("Save All")) {
             String parse = GetAllSpec(); //Read all the Specifications from SMV
             editorPanel.modelTextPane.setText(editorPanel.modelTextPane.getText() + parse);
-            controlPanel.fileOperation.save();
+            try {
+                controlPanel.fileOperation.saveFile();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
             if (parse.equals("")) {
                 Object[] options = {"OK"};
                 int response = JOptionPane.showOptionDialog(indexJFrame, "Please input a specificaton firstly!",
@@ -329,7 +333,8 @@ public class VerifyActionListener implements ActionListener {
     }
 
     public boolean ExtractSpec() {
-        String[] all_specs = Env.getAllSpecsString();
+/*
+        String[][] all_specs = Env.getAllSpecsString();
         if (all_specs == null || all_specs.length == 0) {
             addDocument(outputTextPane, "\n =========No Specs loaded=========", outputFontSize, Color.GREEN, 1);
             return false;
@@ -343,6 +348,7 @@ public class VerifyActionListener implements ActionListener {
                     insertSpecLine(all_specs[i].replaceAll("RTCTL\\*SPEC", "").toString(), i);
             }
         }
+*/
         return true;
     }
 
