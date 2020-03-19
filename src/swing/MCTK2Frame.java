@@ -8,6 +8,7 @@ import edu.wis.jtlv.env.spec.Spec;
 import edu.wis.jtlv.env.spec.SpecException;
 import edu.wis.jtlv.lib.mc.ModelCheckAlgException;
 import edu.wis.jtlv.lib.mc.RTCTL_STAR.RTCTL_STAR_ModelCheckAlg;
+import edu.wis.jtlv.lib.mc.RTCTL_STAR.ViewerExplainRTCTLs;
 import edu.wis.jtlv.old_lib.mc.ModelCheckException;
 import net.sf.javabdd.BDD;
 import org.jb2011.lnf.beautyeye.BeautyEyeLNFHelper;
@@ -150,12 +151,9 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 	JPanel editorPanelContainer; // the panel holding editorPanel
 	JPanel outputPanel;
 
-	JScrollPane buttonsSpecsScrollPane, outputScrollPane;
-	public static JSplitPane editorSpecsAndOutputSplitPane;
-	public static JSplitPane editorAndSpecsSplitPane;
+	JScrollPane outputScrollPane;
 
-
-	JPanel menuToolBarPanel; //, pageMenuPanel;
+	JPanel menuToolBarPanel;
 	public static MenuToolBarJPanel controlPanel;
 	public static EditorJPanel editorPanel;
 
@@ -237,13 +235,13 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 			try {
 				Env.resetEnv();
 				statistic =new Statistic();
-				consoleOutput("normal", "Loading the Modules of "+fileName + ".smv ...\n");
+				consoleOutput(0,"normal", "Loading the Modules of "+fileName + ".smv ...\n");
 				Env.loadModule(url);
 				smvModule = (SMVModule) Env.getModule("main");
 				initializeAfterModuleLoaded();
 				smvModule.setFullPrintingMode(true);
 
-				consoleOutput("weak", statistic.getUsedInfo(true,true,true,true));
+				consoleOutput(0,"weak", statistic.getUsedInfo(true,true,true,true));
 				return true;
 			} catch (Exception ie) {
 				ie.printStackTrace();
@@ -625,8 +623,13 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 		}
 	}
 
-	public static void consoleOutput(String type, String str)
+	// console=0: output to the console of main window
+	// console=1: output to the console of counterexample window
+	public static void consoleOutput(int console, String type, String str)
 	{
+		JTextPane textPane;
+		textPane=(console==0)? MCTK2Frame.outputTextPane : ViewerExplainRTCTLs.outputTextPane;
+
 		SimpleAttributeSet attribureSet = new SimpleAttributeSet();
 		Color textColor=Color.BLACK;
 		if(type.equals("warning") || type.equals("magenta")){
@@ -646,13 +649,14 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 		int textSize=outputFontSize;
 		StyleConstants.setForeground(attribureSet, textColor);// 设置文字颜色
 		StyleConstants.setFontSize(attribureSet, textSize);// 设置字体大小
-		Document doc = outputTextPane.getDocument();
+		Document doc = textPane.getDocument();
 		try {
 			doc.insertString(doc.getLength(), str, attribureSet);// 插入文字
-			outputTextPane.setCaretPosition(doc.getLength());
+			textPane.setCaretPosition(doc.getLength());
 		} catch (BadLocationException e) {
 		}
 	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource()== appendSpecButton) {
@@ -705,18 +709,18 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 
 	public void verifyEditingModel() throws IOException {
 		if(isOpeningCounterexampleWindow){
-			consoleOutput("warning", "Please close the counterexample window before verification.\n");
+			consoleOutput(0,"warning", "Please close the counterexample window before verification.\n");
 			return;
 		}
 		// If no file opened, then save the current data to a specified file name
 		String fileName = controlPanel.fileOperation.getFileName();
 		if (fileName.equals("")) { // currently no file opened
 			if(modelTextPane.getText().trim().equals("")){
-				consoleOutput("warning", "Please input the model.\n");
+				consoleOutput(0,"warning", "Please input the model.\n");
 				return;
 			}else {
 				if(specsTableModel.getRowCount()<=0){
-					consoleOutput("warning", "Please input a RTCTL*SPEC specification.\n");
+					consoleOutput(0,"warning", "Please input a RTCTL*SPEC specification.\n");
 					return;
 				}else { // the model and the spec list both are not empty, but the filename is empty, try to saveAs
 					Object[] options = {"Save", "Cancel"};
@@ -727,7 +731,7 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 					}else{ // save to a new file
 						try {
 							if(!controlPanel.fileOperation.SaveAs()){
-								consoleOutput("warning", "No file saved.\n");
+								consoleOutput(0,"warning", "No file saved.\n");
 								return;
 							}
 						} catch (IOException ex) {
@@ -750,14 +754,14 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 
 		// try to verify the selected specification
 		int row;
-		if(specsTable.getRowCount()<=0) { consoleOutput("warning", "There is not any specification inputted.\n");return; }
+		if(specsTable.getRowCount()<=0) { consoleOutput(0,"warning", "There is not any specification inputted.\n");return; }
 		row=specsTable.getSelectedRow();
-		if(row==-1) { consoleOutput("warning", "Select one specification please.\n"); return; }
+		if(row==-1) { consoleOutput(0,"warning", "Select one specification please.\n"); return; }
 
 		String specStr=(String)specsTableModel.getValueAt(row, colSpec);
 		Spec spec=generateSpec(row);
 		if(spec==null) {
-			consoleOutput("error", "There is syntax error in specification "+specStr+"\n");
+			consoleOutput(0,"error", "There is syntax error in specification "+specStr+"\n");
 			return;
 		}
 
@@ -817,7 +821,7 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 				if(!inputAnn.equals("")) aLine+=" --"+inputAnn+"\r\n"; else aLine+="\r\n";
 				s+=aLine;
 			}else{
-				consoleOutput("error","There exists syntax error in specification "+(row+1)+".\n");
+				consoleOutput(0,"error","There exists syntax error in specification "+(row+1)+".\n");
 				return null;
 			}
 		}

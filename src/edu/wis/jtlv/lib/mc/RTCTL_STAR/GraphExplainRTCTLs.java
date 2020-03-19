@@ -74,6 +74,7 @@ class GraphEdgeSpecInfo{
 
 public class GraphExplainRTCTLs extends MultiGraph {
     private SpriteManager sman;
+    public String negSpecStr="";
 
     public RTCTL_STAR_ModelCheckAlg getChecker() {
         return checker;
@@ -85,8 +86,9 @@ public class GraphExplainRTCTLs extends MultiGraph {
 
     private RTCTL_STAR_ModelCheckAlg checker;
 
-    public GraphExplainRTCTLs(String id, RTCTL_STAR_ModelCheckAlg checker) {
-        super(id);
+    public GraphExplainRTCTLs(String specStr, String negSpecStr, RTCTL_STAR_ModelCheckAlg checker) {
+        super("A counterexample of " + specStr);
+        this.negSpecStr=negSpecStr;
         this.checker = checker;
         sman = new SpriteManager(this);
     }
@@ -262,7 +264,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
         if(withStateDetails){
             String stateDetails=Env.getOneBDDStateDetails(n.getAttribute("BDD"),"\n");
             if(ret!=null && !ret.equals(""))
-                return "----satisfied formulas and annotations----\n"+ret
+                return "----annotations----\n"+ret
                         +"\n----state details----\n"+stateDetails;
             else
                 return stateDetails;

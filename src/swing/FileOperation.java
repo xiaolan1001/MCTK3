@@ -81,7 +81,7 @@ public class FileOperation {
         if (!currentPathFileName.equals(""))
         {
             if(!MCTK2Frame.modelTextPaneChanged && !mainFrame.specsTableChanged()){
-                consoleOutput("warning", "There is not any change in the model and specification list. Don't need to save the opening file.\n");
+                consoleOutput(0,"warning", "There is not any change in the model and specification list. Don't need to save the opening file.\n");
                 return true;
             }
 
@@ -107,12 +107,12 @@ public class FileOperation {
                 }
 
                 modelTextPaneChanged=false;
-                consoleOutput("emph", "The file "+newFile.getName()+" saved.\n");
+                consoleOutput(0,"emph", "The file "+newFile.getName()+" saved.\n");
                 return true;
             }else return false;
         } else
         {
-            consoleOutput("emph", "Please use the \"Save As\" function.\n");
+            consoleOutput(0,"emph", "Please use the \"Save As\" function.\n");
             return false;
         }
     }
@@ -155,12 +155,12 @@ public class FileOperation {
                 }
 
                 modelTextPaneChanged=false;
-                consoleOutput("emph", "The file "+newFile.getName()+" saved.\n");
+                consoleOutput(0,"emph", "The file "+newFile.getName()+" saved.\n");
                 return true;
             }else return false;
         } else
         {
-            consoleOutput("emph", "Please save the editing model to a file before verification.\n");
+            consoleOutput(0,"emph", "Please save the editing model to a file before verification.\n");
             return false;
         }
     }

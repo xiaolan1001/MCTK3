@@ -1048,10 +1048,10 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     public AlgResultI doAlgorithm() throws AlgExceptionI, ModelCheckException, ModuleException, SMVParseException, SpecException {
         AlgResultString res = modelCheckingOneSpec(property);
         if(res.getResultStat()== AlgResultI.ResultStatus.succeed){
-            consoleOutput("emph", res.resultString());
+            consoleOutput(0,"emph", res.resultString());
         }
         if(res.getResultStat()== AlgResultI.ResultStatus.failed){
-            consoleOutput("error", res.resultString());
+            consoleOutput(0,"error", res.resultString());
         }
 
         return res;
@@ -1119,7 +1119,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     }
 
     public AlgResultString modelCheckingOneSpec(Spec aProperty) throws SpecException, ModelCheckException, ModuleException, ModelCheckAlgException, SMVParseException {
-        consoleOutput("emph","Model checking RTCTL*SPEC property: " + simplifySpecString(aProperty,false) +"\n");
+        consoleOutput(0,"emph","Model checking RTCTL*SPEC property: " + simplifySpecString(aProperty,false) +"\n");
         if(statistic==null) statistic=new Statistic();
         else statistic.beginStatistic(true,true);
 
@@ -1130,7 +1130,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         } else { // the property is a state formula
             chkProp = NNF(new SpecExp(Operator.NOT, aProperty)); // newp = !property
         }
-        consoleOutput("normal","The negative propperty: " + simplifySpecString(chkProp,false)+"\n");
+        //consoleOutput(0,"normal","The negative propperty: " + simplifySpecString(chkProp,false)+"\n");
         visibleVars = this.getRelevantVars(getDesign(), chkProp);
         // now chkProp is a state property
 
@@ -1153,11 +1153,11 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         if (Init_unSat.isZero()) {
             design.decompose(tester.module);
             String res="*** Property is TRUE ***\n";
-            consoleOutput("emph", res);
-            consoleOutput("weak", statistic.getUsedInfo(true,true,true,true));
+            consoleOutput(0,"emph", res);
+            consoleOutput(0,"weak", statistic.getUsedInfo(true,true,true,true));
             return new AlgResultString(true, res);
         } else {
-            graph = new GraphExplainRTCTLs("A counterexample of " + simplifySpecString(aProperty, false), this);
+            graph = new GraphExplainRTCTLs(simplifySpecString(aProperty, false), simplifySpecString(chkProp,false),this);
             graph.addAttribute("ui.title", graph.getId());
             // design with the composed tester...
             // create the initial node
@@ -1169,8 +1169,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
 
             String returned_msg = "";
             returned_msg = "*** Property is FALSE ***\n";
-            consoleOutput("error", returned_msg);
-            consoleOutput("weak", statistic.getUsedInfo(true,true,true,true));
+            consoleOutput(0,"error", returned_msg);
+            consoleOutput(0,"weak", statistic.getUsedInfo(true,true,true,true));
 
             new Thread(){@Override
                 public void run() {

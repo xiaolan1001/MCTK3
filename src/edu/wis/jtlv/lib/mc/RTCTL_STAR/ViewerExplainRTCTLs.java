@@ -18,6 +18,7 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 
+import static edu.wis.jtlv.lib.mc.RTCTL_STAR.RTCTL_STAR_ModelCheckAlg.simplifySpecString;
 import static java.lang.Double.parseDouble;
 import static swing.MCTK2Frame.consoleOutput;
 
@@ -30,6 +31,10 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
     JToggleButton layoutToggleButton;
     JLabel viewPercentLabel;
     JTextField viewPercentTextField, mouseXTextField, mouseYTextField;
+    JLabel negSpecLabel;
+
+    JSplitPane splitPane;
+    public static JTextPane outputTextPane;
 
     public GraphExplainRTCTLs getGraph() {
         return graph;
@@ -68,7 +73,7 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
             }
         });
 
-        ceFrame.setSize(1024, 768);
+        ceFrame.setSize(1280, 800);
         // 把新窗口的位置设置到 relativeWindow 窗口的中心
         //ceFrame.setLocationRelativeTo(this.indexJFrame);
         Image logoIcon = new ImageIcon(MCTK2Frame.class.getResource("/swing/Icons/logo.png")).getImage();
@@ -91,7 +96,6 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
             }
         });
 
-
         viewPercentLabel=new JLabel("View Percent:");
         viewPercentTextField = new JTextField("1",4);
         viewPercentTextField.addActionListener(this);
@@ -103,22 +107,38 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
         mouseYTextField = new JTextField("0",4);
 */
 
+        negSpecLabel = new JLabel("The following is a witness of "+graph.negSpecStr);
+        negSpecLabel.setToolTipText(graph.negSpecStr);
+
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         controlPanel.add(layoutToggleButton);
         controlPanel.add(viewPercentLabel);
         controlPanel.add(viewPercentTextField);
+        controlPanel.add(negSpecLabel);
 /*
         controlPanel.add(viewCenterButton);
         controlPanel.add(mouseXTextField);
         controlPanel.add(mouseYTextField);
 */
-
         graphPanel = (ViewPanel) viewer.addDefaultView(false);
+
+        outputTextPane = new JTextPane();
+        JScrollPane outputScrollPane = new JScrollPane(outputTextPane);
+        outputScrollPane.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createCompoundBorder(
+                                BorderFactory.createTitledBorder("Counterexample Information"),
+                                BorderFactory.createEmptyBorder(0,0,0,0)),
+                        BorderFactory.createEmptyBorder(0,0,0,0)));
+
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, graphPanel, outputScrollPane);
+        splitPane.setDividerLocation(ceFrame.getWidth()-350);
+        splitPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
 
         ceFrame.setLayout(new BorderLayout());
         ceFrame.add("North", controlPanel);
-        ceFrame.add("Center",graphPanel);
+        ceFrame.add("Center",splitPane);
 
         //ceFrame.setContentPane(viewPanel);
         ceFrame.setVisible(true);
@@ -167,9 +187,9 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
             try {
                 graph.getChecker().explainOneNode(id);
 
-                String s=graph.nodeGetInfo(id,true);
+                String s=simplifySpecString(graph.nodeGetInfo(id,true),false);
                 if(s!=null)
-                    consoleOutput("darkGray","==========State "+id+"==========\n"+s+"\n");
+                    consoleOutput(1,"darkGray","========State "+id+"========\n"+s+"\n");
 
                 // NOTE: it is easy to cause error when invoking two consoleOutput() one by one
 
