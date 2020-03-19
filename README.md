@@ -28,7 +28,7 @@ March 8, 2020
 
 2. Simple usage of MCTK2
 
-(1) The input language of MCTK2 is fully compatiable with the SMV input language used by NuSMV and nuXmv.
+(1) The input language of MCTK2 is fully compatiable with the SMV input language used by NuSMV and nuXmv. We refer to the NuSMV 2.6 Tutorial for more details.
 
 (2) Currently the verified formulas cannot be written in SMV file. You should write them in java source code like TR_Experiment.java. 
 
