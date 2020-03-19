@@ -15,7 +15,7 @@ import static swing.MCTK2Frame.*;
 public class FileOperation {
     JFileChooser filechoose = new JFileChooser();
     MCTK2Frame mainFrame;
-    String currentPathFileName ="";
+    public static String currentPathFileName ="";
     String fileName;
 
     public FileOperation(MCTK2Frame mainFrame) {

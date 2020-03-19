@@ -16,6 +16,9 @@ import java.io.IOException;
 
 import static swing.EditorJPanel.modelTextPane;
 import static swing.EditorJPanel.setRowContent;
+import static swing.FileOperation.currentPathFileName;
+import static swing.MCTK2Frame.modelTextPaneChanged;
+import static swing.MCTK2Frame.specsTableChanged;
 
 public class MenuToolBarJPanel implements ActionListener{
 
@@ -65,7 +68,7 @@ public class MenuToolBarJPanel implements ActionListener{
 		JMenuItem save=new JMenuItem("Save");
 		setShortcut(save, KeyEvent.VK_S);
 		JMenuItem saveas=new JMenuItem("Save As");
-		JMenuItem quit=new JMenuItem("Close");
+		JMenuItem quit=new JMenuItem("Quit MCTK");
 		setShortcut(quit, KeyEvent.VK_Q);
 
 
@@ -275,12 +278,11 @@ public class MenuToolBarJPanel implements ActionListener{
 		} else if(e.getActionCommand().equals("Open File")||e.getSource()==openButton) {
 			if(fileOperation.open());
 			setRowContent();
-		} else if(e.getActionCommand().equals("Close")) {
-			Object[] options = {"Exit", "Cancel"};
-			int response = JOptionPane.showOptionDialog(null, "Do you want to exit MCTK ?",
-					"Confirm Exit", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-			if (response == 0) {
-				System.exit(0);
+		} else if(e.getActionCommand().equals("Quit MCTK")) {
+			try {
+				quitMCTK();
+			} catch (IOException ex) {
+				ex.printStackTrace();
 			}
 		} else if(e.getActionCommand().equals("Set Front")||e.getSource()==frontButton) {
 			new SetFont(mainFrame);
@@ -344,6 +346,47 @@ public class MenuToolBarJPanel implements ActionListener{
 							"    Sen Liang, Huaqiao University, liangsen@hqu.edu.cn\n" +
 					"MCTK2 Website: https://gitlab.com/hovertiger/mctk2-tr",
 					"About",JOptionPane.YES_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+		}
+	}
+
+	public void quitMCTK() throws IOException {
+		if (currentPathFileName.equals("")){
+			if(!modelTextPaneChanged && !specsTableChanged()){
+				Object[] options = {"Quit", "Cancel"};
+				int response = JOptionPane.showOptionDialog(null, "Do you want to quit MCTK?",
+						"Quit MCTK", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+				if(response==0) System.exit(0); else return;
+			}else{ // there is change occurred
+				Object[] options = {"Save", "Don't Save and Quit", "Cancel"};
+				int response = JOptionPane.showOptionDialog(null, "Do you want to save the editing model?",
+						"Save As", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+				if(response==0) {
+					fileOperation.saveFile();
+				}else if (response == 1) {
+					System.exit(0);
+				}else if(response==2){
+					return;
+				}
+			}
+		}else{ // a file opened
+			if(!modelTextPaneChanged && !specsTableChanged()){
+				Object[] options = {"Quit", "Cancel"};
+				int response = JOptionPane.showOptionDialog(null, "Do you want to quit MCTK?",
+						"Quit MCTK", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+				if(response==0) System.exit(0); else return;
+			}else{ // there is change occurred
+				Object[] options = {"Save and Quit", "Don't Save and Quit", "Cancel"};
+				int response = JOptionPane.showOptionDialog(null, "Do you want to save the editing model?",
+						"Save File", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+				if(response==0) {
+					fileOperation.saveFile();
+					System.exit(0);
+				}else if (response == 1) {
+					System.exit(0);
+				}else if(response==2){
+					return;
+				}
+			}
 		}
 	}
 }

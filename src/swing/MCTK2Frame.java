@@ -270,11 +270,10 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 		this.addWindowListener(new WindowAdapter() {
 			// ���´��ڹر�ť�¼�����
 			public void windowClosing(WindowEvent e) {
-				Object[] options = {"Exit", "Cancel"};
-				int response = JOptionPane.showOptionDialog(null, "Do you want to exit MCTK2?",
-						"Confirm Exit", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-				if (response == 0) {
-					System.exit(0);
+				try {
+					controlPanel.quitMCTK();
+				} catch (IOException ex) {
+					ex.printStackTrace();
 				}
 			}
 		});
