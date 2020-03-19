@@ -32,11 +32,13 @@ March 8, 2020
 
 (2) Currently the verified formulas cannot be written in SMV file. You should write them in java source code like TR_Experiment.java. 
 
-(3) The syntax of RTCTL* formulas is fully compatiable with the syntax of LTL in NuSMV and nuXmv. The syntax of the extended bounded temporal operators are listed as follows: 
+(3) The syntax of RTCTL* formulas is fully compatiable with the syntax of LTL in NuSMV and nuXmv. The syntax of the extended path quantifiers and bounded temporal operators are listed as follows: 
 
-	(a) bounded until: f BU a..b g (meaning: f holds until g holds in the interval [a,b])
-	(b) bounded release: f BR a..b g (meaning: f release g in [a,b])
-	(c) We have that f BR a..b g == !(!f BR a..b !g)
-	(d) bounded finally: BF a..b f (f will hold at some position in [a,b )
+	(a) existential path quantifier: E (f)
+	(b) universal path quantifier: A (f)
+	(c) bounded until: f BU a..b g (meaning: f holds until g holds in the interval [a,b])
+	(d) bounded release: f BR a..b g (meaning: f release g in [a,b])
+	(e) We have that f BR a..b g == !(!f BR a..b !g)
+	(f) bounded finally: BF a..b f (f will hold at some position in [a,b )
 	(e) bounded globally: BG a..b f (f always hold in [a,b])
 
