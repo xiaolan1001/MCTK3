@@ -13,6 +13,8 @@ import org.graphstream.ui.view.ViewerPipe;
 import swing.MCTK2Frame;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -24,7 +26,9 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
     JFrame ceFrame;
     Viewer viewer;
     ViewPanel graphPanel;
-    JButton layoutButton, viewPercentButton,viewCenterButton;
+    JButton viewCenterButton;
+    JToggleButton layoutToggleButton;
+    JLabel viewPercentLabel;
     JTextField viewPercentTextField, mouseXTextField, mouseYTextField;
 
     public GraphExplainRTCTLs getGraph() {
@@ -41,16 +45,6 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
         System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
         graph = G;
         graph.addAttribute("ui.label", graph.getId());
-/*
-        for (Node n: graph) {
-            n.addAttribute("ui.label", n.getId());
-        }
-*/
-
-//        for (Edge e: graph.getEachEdge()) {
-//            e.addAttribute("ui.label", e.getId());
-//        }
-
 
         graph.addAttribute("ui.stylesheet",
                 "node { stroke-mode: plain; shape: circle; size: 55px; fill-color: green; z-index: 10; text-size: 16; text-style: bold; }" +
@@ -74,7 +68,7 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
             }
         });
 
-        ceFrame.setSize(800, 600);
+        ceFrame.setSize(1024, 768);
         // 把新窗口的位置设置到 relativeWindow 窗口的中心
         //ceFrame.setLocationRelativeTo(this.indexJFrame);
         Image logoIcon = new ImageIcon(MCTK2Frame.class.getResource("/swing/Icons/logo.png")).getImage();
@@ -86,25 +80,39 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
         viewer = new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
         viewer.enableAutoLayout();
 
-        layoutButton =new JButton("Auto Layout is working");
-        layoutButton.addActionListener(this);
+        layoutToggleButton=new JToggleButton("Auto Layout");
+        layoutToggleButton.setSelected(true);
+        layoutToggleButton.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if(layoutToggleButton.isSelected()){
+                    viewer.enableAutoLayout();
+                }else viewer.disableAutoLayout();
+            }
+        });
 
-        viewPercentButton=new JButton("View Percent:");
-        viewPercentButton.addActionListener(this);
+
+        viewPercentLabel=new JLabel("View Percent:");
         viewPercentTextField = new JTextField("1",4);
+        viewPercentTextField.addActionListener(this);
 
+/*
         viewCenterButton = new JButton("View Center:");
         viewCenterButton.addActionListener(this);
         mouseXTextField = new JTextField("0",4);
         mouseYTextField = new JTextField("0",4);
+*/
 
         JPanel controlPanel = new JPanel();
-        controlPanel.add(layoutButton);
-        controlPanel.add(viewPercentButton);
+        controlPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        controlPanel.add(layoutToggleButton);
+        controlPanel.add(viewPercentLabel);
         controlPanel.add(viewPercentTextField);
+/*
         controlPanel.add(viewCenterButton);
         controlPanel.add(mouseXTextField);
         controlPanel.add(mouseYTextField);
+*/
 
         graphPanel = (ViewPanel) viewer.addDefaultView(false);
 
@@ -186,7 +194,7 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(e.getSource()== layoutButton){
+/*        if(e.getSource()== layoutToggleButton){
             if(layoutButton.getText().equals("Auto Layout is working")){
                 viewer.disableAutoLayout();
                 layoutButton.setText("Auto Layout is closed");
@@ -194,7 +202,7 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
                 viewer.enableAutoLayout();
                 layoutButton.setText("Auto Layout is working");
             }
-        }else if(e.getSource()==viewPercentButton){
+        }else */if(e.getSource()==viewPercentTextField){
             graphPanel.getCamera().setViewPercent(parseDouble(viewPercentTextField.getText()));
         }else if(e.getSource()==viewCenterButton){
             graphPanel.getCamera().setViewCenter(parseDouble(mouseXTextField.getText()), parseDouble(mouseYTextField.getText()), 0);

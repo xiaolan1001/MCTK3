@@ -2,6 +2,7 @@ package swing;
 
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.Document;
@@ -25,7 +26,9 @@ public class MenuToolBarJPanel implements ActionListener{
 	Document doc;
 
 	//创建工具栏
-	JPanel toolBar=new JPanel();
+	//JPanel toolBar=new JPanel();
+	JToolBar toolBar=new JToolBar();
+
 	private JButton // newButton,
 			openButton,saveAsButton,saveButton,
 			 undoButton,redoButton,cutButton,copyButton,
@@ -46,13 +49,13 @@ public class MenuToolBarJPanel implements ActionListener{
 		JMenu file=new JMenu("File");
 		JMenu edit=new JMenu("Edit");
 		JMenu style=new JMenu("Style");
-		JMenu run=new JMenu("Run");
+//		JMenu run=new JMenu("Run");
 		JMenu about=new JMenu("Help");
 
 		menuBar.add(file);
 		menuBar.add(edit);
 		menuBar.add(style);
-		menuBar.add(run);
+//		menuBar.add(run);
 		menuBar.add(about);
 
 		JMenuItem newFile=new JMenuItem("New");
@@ -83,9 +86,9 @@ public class MenuToolBarJPanel implements ActionListener{
 		JMenuItem setFont=new JMenuItem("Set Front");
 		JMenuItem compile=new JMenuItem("Compile Model");
 		JMenuItem verify=new JMenuItem("Verify Model");
-		JMenuItem sourcecode=new JMenuItem("Source Code");
+		//JMenuItem sourcecode=new JMenuItem("Source Code");
 		Icon codeIcon=new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/code.png"));
-		sourcecode.setIcon(codeIcon);
+		//sourcecode.setIcon(codeIcon);
 
 		JMenuItem about1=new JMenuItem("About");
 		Icon aboutIcon=new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/helppng.png"));
@@ -103,8 +106,8 @@ public class MenuToolBarJPanel implements ActionListener{
 		edit.add(cut);edit.addSeparator();
 		edit.add(selall);
 		style.add(setFont);
-		run.add(compile);run.add(verify);
-		about.add(sourcecode);
+//		run.add(compile);run.add(verify);
+		//about.add(sourcecode);
 		about.add(about1);
 
 		newFile.addActionListener(this);
@@ -120,10 +123,10 @@ public class MenuToolBarJPanel implements ActionListener{
 		selall.addActionListener(this);
 		compile.addActionListener(this);
 		verify.addActionListener(this);
-		sourcecode.addActionListener(this);
+		//sourcecode.addActionListener(this);
 		about.addActionListener(this);
 
-		toolBar.setLayout(new FlowLayout(FlowLayout.LEFT));
+//		toolBar.setLayout(new FlowLayout(FlowLayout.LEFT));
 		Icon newIcon = new ImageIcon(MCTK2Frame.class.getResource("/swing/Icons/new.png"));
 		Icon openIcon=new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/open.png"));
 		Icon saveIcon=new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/save.png"));
@@ -206,15 +209,26 @@ public class MenuToolBarJPanel implements ActionListener{
 		helpButton.setToolTipText("About MCTK2.0");
 
 		//向工具栏添加按钮
+		toolBar.setBorderPainted(false);
+		toolBar.setBorder(new EmptyBorder(8,8,0,0));
 //		toolBar.add(newButton);
 		toolBar.add(openButton);
 		toolBar.add(saveButton);
 		toolBar.add(saveAsButton);
+
+		toolBar.addSeparator();
+
 		toolBar.add(undoButton);
 		toolBar.add(redoButton);
+
+		toolBar.addSeparator();
+
 		toolBar.add(cutButton);
 		toolBar.add(copyButton);
 		toolBar.add(pasteButton);
+
+		toolBar.addSeparator();
+
 		toolBar.add(frontButton);
 //		toolBar.add(compileButton);
 		toolBar.add(helpButton);
@@ -324,10 +338,11 @@ public class MenuToolBarJPanel implements ActionListener{
 			}.start();//start this thread
 		} else if(e.getActionCommand().equals("About")||e.getSource()==helpButton){
 			Object[] options = {"OK"};
-			JOptionPane.showOptionDialog(mainFrame, "MCTK 2.0.0 : A Symbolic Model Checker for Branching Time Logic RTCTL*\n" +
+			JOptionPane.showOptionDialog(mainFrame, "MCTK 2.0.0 : A Symbolic Model Checker for Real-Time Computation Tree Logic RTCTL*\n" +
 							"Developers:\n" +
 							"    Xiangyu Luo, Huaqiao University, luoxy@hqu.edu.cn\n" +
-							"    Sen Liang, Huaqiao University, liangsen@hqu.edu.cn",
+							"    Sen Liang, Huaqiao University, liangsen@hqu.edu.cn\n" +
+					"MCTK2 Website: https://gitlab.com/hovertiger/mctk2-tr",
 					"About",JOptionPane.YES_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
 		}
 	}

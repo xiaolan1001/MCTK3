@@ -2,17 +2,15 @@ package swing;
 
 import edu.wis.jtlv.env.Env;
 import edu.wis.jtlv.env.core.smv.SMVParseException;
-import edu.wis.jtlv.env.core.spec.InternalSpecLanguage;
 import edu.wis.jtlv.env.module.ModuleException;
 import edu.wis.jtlv.env.module.SMVModule;
 import edu.wis.jtlv.env.spec.Spec;
 import edu.wis.jtlv.env.spec.SpecException;
-import edu.wis.jtlv.lib.AlgRunnerThread;
 import edu.wis.jtlv.lib.mc.ModelCheckAlgException;
-import edu.wis.jtlv.lib.mc.RTCTLK.RTCTLKModelCheckAlg;
 import edu.wis.jtlv.lib.mc.RTCTL_STAR.RTCTL_STAR_ModelCheckAlg;
 import edu.wis.jtlv.old_lib.mc.ModelCheckException;
 import net.sf.javabdd.BDD;
+import org.jb2011.lnf.beautyeye.BeautyEyeLNFHelper;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -26,7 +24,6 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.util.Vector;
 
-import static edu.wis.jtlv.lib.AlgResultI.ResultStatus.failed;
 import static javax.swing.ListSelectionModel.SINGLE_SELECTION;
 import static jdk.nashorn.internal.runtime.Context.DEBUG;
 import static swing.EditorJPanel.modelTextPane;
@@ -118,6 +115,16 @@ class SpecsTableModel extends AbstractTableModel {
 }
 
 public class MCTK2Frame extends JFrame implements MouseListener, ActionListener, FocusListener {
+
+	public static void main(String[] args) throws Exception {
+		// 设置窗口边框样式
+		BeautyEyeLNFHelper.frameBorderStyle = BeautyEyeLNFHelper.FrameBorderStyle.translucencyAppleLike;
+		org.jb2011.lnf.beautyeye.BeautyEyeLNFHelper.launchBeautyEyeLNF();
+		// 隐藏设置按钮
+		UIManager.put("RootPane.setupButtonVisible", false);
+		new MCTK2Frame();
+	}
+
 	//=================The model information after loading a SMV file=================
 	static SMVModule smvModule;//read the smv model only once.
 	BDD original_feasibleStates=null;
@@ -275,6 +282,7 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 		});
 	}
 
+/*
 	public void verifyOneSpec(String specStr) {
 		Spec[] specs = Env.loadSpecString(specStr);
 		if (specs == null||specs[0]==null) {
@@ -319,6 +327,7 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 				addDocument(outputTextPane, "\n" + runner.getDoException().getMessage(), outputFontSize, Color.RED, 1);
 		}
 	}
+*/
 
 	public void initBackgroundPanel() {
 
@@ -352,19 +361,27 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 		specToolBar=new JToolBar();
 		specToolBar.setBorder(new EmptyBorder(0,7,7,7));
 
-		appendSpecButton =new JButton("  Append Spec  ");
+		appendSpecButton =new JButton("Append Spec");
+		Icon appendIcon = new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/icons8-add-row-24.png"));
+		appendSpecButton.setIcon(appendIcon);
 		appendSpecButton.addActionListener(this);
 //		appendSpecButton.setBorder(BorderFactory.createRaisedSoftBevelBorder());
 
-		insertSpecButton =new JButton("  Insert Spec  ");
+		insertSpecButton =new JButton("Insert Spec");
+		Icon insertIcon = new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/icons8-insert-row-24.png"));
+		insertSpecButton.setIcon(insertIcon);
 		insertSpecButton.addActionListener(this);
 //		insertSpecButton.setBorder(BorderFactory.createRaisedSoftBevelBorder());
 
-		delSpecButton=new JButton("  Delete Spec  ");
+		delSpecButton=new JButton("Delete Spec");
+		Icon delIcon = new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/icons8-delete-row-24.png"));
+		delSpecButton.setIcon(delIcon);
 		delSpecButton.addActionListener(this);
 //		delSpecButton.setBorder(BorderFactory.createRaisedSoftBevelBorder());
 
-		verifySpecButton=new JButton(("  Verify Spec  "));
+		verifySpecButton=new JButton(("Verify Spec"));
+		Icon verifyIcon = new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/icons8-search-24.png"));
+		verifySpecButton.setIcon(verifyIcon);
 		verifySpecButton.addActionListener(this);
 //		verifySpecButton.setBorder(BorderFactory.createRaisedSoftBevelBorder());
 
@@ -374,6 +391,7 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 		specToolBar.add(appendSpecButton);
 		specToolBar.add(insertSpecButton);
 		specToolBar.add(delSpecButton);
+		specToolBar.addSeparator();
 		specToolBar.add(verifySpecButton);
 		//specToolBar.add(saveSpecsButton);
 
@@ -736,14 +754,14 @@ public class MCTK2Frame extends JFrame implements MouseListener, ActionListener,
 		row=specsTable.getSelectedRow();
 		if(row==-1) { consoleOutput("warning", "Select one specification please.\n"); return; }
 
-		String specStr=(String)specsTableModel.getValueAt(row,colSpec);
+		String specStr=(String)specsTableModel.getValueAt(row, colSpec);
 		Spec spec=generateSpec(row);
 		if(spec==null) {
 			consoleOutput("error", "There is syntax error in specification "+specStr+"\n");
 			return;
 		}
 
-		RTCTL_STAR_ModelCheckAlg alg = new RTCTL_STAR_ModelCheckAlg(this,smvModule);
+		RTCTL_STAR_ModelCheckAlg alg = new RTCTL_STAR_ModelCheckAlg(this, smvModule);
 		try {
 			alg.modelCheckingOneSpec(spec);
 		} catch (SpecException ex) {
