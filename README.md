@@ -28,9 +28,9 @@ March 8, 2020
 
 2. Simple usage of MCTK2
 
-(1) The input language of MCTK2 is fully compatiable with the SMV input language used by NuSMV and nuXmv. We refer to [the NuSMV 2.6 Tutorial](http://nusmv.fbk.eu/NuSMV/tutorial/v26/tutorial.pdf) for more details.
+(1) The input language of MCTK2 is fully compatible with the SMV input language used by NuSMV and nuXmv. We refer to [the NuSMV 2.6 Tutorial](http://nusmv.fbk.eu/NuSMV/tutorial/v26/tutorial.pdf) for more details.
 
-(2) The syntax of RTCTL* formulas is fully compatiable with the syntax of LTL in NuSMV and nuXmv. The syntax of the extended path quantifiers and bounded temporal operators are listed as follows: 
+(2) The syntax of RTCTL* formulas is fully compatible with the syntax of LTL in NuSMV and nuXmv. The syntax of the extended path quantifiers and bounded temporal operators are listed as follows: 
 
 	(a) existential path quantifier: E (f)
 	(b) universal path quantifier: A (f)
