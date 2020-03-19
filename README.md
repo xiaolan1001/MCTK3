@@ -22,7 +22,7 @@ March 8, 2020
 
 (2) Run the main function of MCTK2Frame.java.
 
-(3) On the GUI windows of MCTK2, open the SMV file btp_tr.smv (the model of the bit transmission protocol) in the directory "testcases".
+(3) In the GUI window of MCTK2, open the SMV file btp_tr.smv (the model of the bit transmission protocol) in the directory "testcases".
  
 (4) Input and verify some RTCTL* formulas of interest. A graphical counterexample will be generated after a formula is checked false.
 
