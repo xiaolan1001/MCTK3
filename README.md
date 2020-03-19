@@ -20,7 +20,11 @@ March 8, 2020
 
 (1) Download the package of MCTK2 from https://gitlab.com/hovertiger/mctk2-tr and decompress it.
 
-(2) Run TR_Experiment.java, which defaultly reads file btp_tr.smv (the model of the bit transmission protocol) and verifies a RTCTL* formula. You can revise it to test some other examples.
+(2) Run the main function of MCTK2Frame.java.
+
+(3) On the GUI windows of MCTK2, open the SMV file btp_tr.smv (the model of the bit transmission protocol) in the directory "testcases".
+ 
+(4) Input and verify some RTCTL* formulas of interest. A graphical counterexample will be generated after a formula is checked false.
 
 2. Simple usage of MCTK2
 
