@@ -41,3 +41,5 @@ ASSIGN
     (sndact=sb1 & state=empty & (envact=SR | envact=snd)) : r1;
     TRUE : state;
   esac;
+RTCTL*SPEC A(s.bit -> (s.bit BU 3..5 (r.state=r1 & r.act=sack & A X F s.ack))); --an example for TR
+RTCTL*SPEC A G (s.bit -> F s.ack);
