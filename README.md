@@ -20,7 +20,7 @@ March 8, 2020
 
 (1) Download the package of MCTK2 from https://gitlab.com/hovertiger/mctk2-tr and decompress it. This package includes the Java source code and the jar file (https://gitlab.com/hovertiger/mctk2-tr/-/raw/master/out/artifacts/MCTK2_TR_jar/MCTK2-TR.jar) of MCTK2. 
 
-(2) There are two ways to run MCTK2. The first way is to run MCTK2-TR.jar. The second way is to compile the source code by a Java Integrated Development Environment and run the main function of MCTK2Frame.java.
+(2) There are two ways to run MCTK2. The first way is to run MCTK2-TR.jar directly. The second way is to compile the source code by a Java Integrated Development Environment and run the main function of MCTK2Frame.java.
 
 (3) In the GUI window of MCTK2, open the SMV file btp_tr.smv (the model of the bit transmission protocol) in the directory "testcases".
  
