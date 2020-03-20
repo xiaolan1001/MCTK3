@@ -7,7 +7,7 @@ import javax.swing.text.*;
 import java.awt.*;
 
 class ColorKeyWords implements DocumentListener{
-	private KeyWord keywords;//����KeyWord���������ж��Ƿ��ǹؼ���
+	private KeyWord keywords;
 	private Style keywordStyle;
 	private Style spcwordStyle;
 	private Style operwordStyle;
@@ -17,8 +17,8 @@ class ColorKeyWords implements DocumentListener{
 		spcwordStyle = ((StyledDocument) text.getDocument()).addStyle("spcStyle", null);
 		operwordStyle = ((StyledDocument) text.getDocument()).addStyle("operStyle", null);
 		normalStyle = ((StyledDocument) text.getDocument()).addStyle("normalStyle", null);
-		StyleConstants.setForeground(keywordStyle, Color.RED);//���ùؼ�����ʾΪ��ɫ
-		StyleConstants.setForeground(spcwordStyle, Color.BLUE);//����SPEC��ʾΪǳɫ
+		StyleConstants.setForeground(keywordStyle, Color.BLUE);//���ùؼ�����ʾΪ��ɫ
+		StyleConstants.setForeground(spcwordStyle, Color.RED);//����SPEC��ʾΪǳɫ
 		StyleConstants.setForeground(operwordStyle, Color.MAGENTA);//���ùؼ�����ʾΪ��ɫ
 		StyleConstants.setForeground(normalStyle, Color.BLACK);
 		keywords=new KeyWord();
@@ -47,10 +47,10 @@ class ColorKeyWords implements DocumentListener{
 		if (keywords.isSMV(word))
 		{
 			SwingUtilities.invokeLater(new Coloring(doc, pos, wordEnd - pos, keywordStyle));
-		} else if (keywords.isSPC(word)) {
-			SwingUtilities.invokeLater(new Coloring(doc, pos, wordEnd - pos,spcwordStyle ));
 		} else if (keywords.isOPER(word)) {
 			SwingUtilities.invokeLater(new Coloring(doc, pos, wordEnd - pos, operwordStyle));
+		} else if (keywords.isSPC(word)) {
+			SwingUtilities.invokeLater(new Coloring(doc, pos, wordEnd - pos,spcwordStyle ));
 		} else {
 			SwingUtilities.invokeLater(new Coloring(doc, pos, wordEnd - pos, normalStyle));
 		}

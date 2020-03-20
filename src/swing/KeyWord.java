@@ -13,10 +13,19 @@ public class KeyWord {
 				"LTLWFF", "MAX", "max", "MDEFINE", "MIN", "min", "MIRROR", "mod", "MODULE", "NAME", "next", "NEXTWFF", "of",
 				"PRED", "PREDICATES", "Real", "real", "resize",  "self", "signed", "SIMPWFF", "sizeof",
 				"swconst", "T", "toint", "TRANS", "TRUE", "typeof","union", "unsigned", "uwconst", "V", "VAR", "Word", "word",
-				"word1",  "xnor", "xor","AGENT"};
+				"word1", "AGENT"};
 		spcKeyWords=new String[]{
 				"INVARSPEC","LTLSPEC", "SPEC","CTLSPEC","PSLSPEC","ATL","ATL*SPEC","RTCTL","RTCTL*SPEC"};
 		operKeyWords=new String[]{
+				"[", "]", ":", "]",	"!",
+"/", "mod", "+", "-",
+			"<<",   ">>",
+		"union",
+				"in",
+      "=",   "!=",   "<",   ">",   "<=",   ">=",
+      "&",
+"|", "xor", "xnor", "(", ")", "<->",
+"->",
 				"A", "ABF", "ABG", "AF", "AG", "AX",  "BU",
 				"E", "EBF", "EBG", "EF", "EG",  "EX", "F", "G", "H",
 				"next", "O", "S", "U",  "V", "X", "Y", "Z", "NOT", "FINALLY", "GLOBALLY",

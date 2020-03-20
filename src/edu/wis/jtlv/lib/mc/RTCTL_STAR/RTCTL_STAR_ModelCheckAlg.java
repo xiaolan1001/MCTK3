@@ -1119,7 +1119,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     }
 
     public AlgResultString modelCheckingOneSpec(Spec aProperty) throws SpecException, ModelCheckException, ModuleException, ModelCheckAlgException, SMVParseException {
-        consoleOutput(0,"emph","Model checking RTCTL*SPEC property: " + simplifySpecString(aProperty,false) +"\n");
+        consoleOutput(0,"emph","Model checking RTCTL* property: " + simplifySpecString(aProperty,false) +"\n");
         if(statistic==null) statistic=new Statistic();
         else statistic.beginStatistic(true,true);
 
