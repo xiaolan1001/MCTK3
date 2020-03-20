@@ -1,4 +1,4 @@
-# MCTK2 (2.0.0)
+# MCTK 2.0.0
 MCTK2 is a BDD-based symbolic model checker developed in Java and built upon JTLV. MCTK2 is fully compatiable with the SMV input language used by NuSMV and nuXmv. It currently supports the verification and graphical counterexample generation of RTCTL*, which is an extension of CTL* with bounded temporal operators.
 
 MCTK2 is now in alpha version 2.0.0. You are welcome to test it and report any message to me by email.
