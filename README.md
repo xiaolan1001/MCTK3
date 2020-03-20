@@ -18,7 +18,7 @@ March 8, 2020
 =====================================================
 1. How to run MCTK2 and test it?
 
-(1) Download the package of MCTK2 from https://gitlab.com/hovertiger/mctk2-tr and decompress it. This package includes the Java source code and the jar file [MCTK2-TR.jar](https://gitlab.com/hovertiger/mctk2-tr/-/raw/master/out/artifacts/MCTK2_TR_jar/MCTK2-TR.jar) of MCTK2. 
+(1) Download the package of MCTK2 from https://gitlab.com/hovertiger/mctk2-tr and decompress it. This package includes the Java source code and the jar file (https://gitlab.com/hovertiger/mctk2-tr/-/raw/master/out/artifacts/MCTK2_TR_jar/MCTK2-TR.jar) of MCTK2. 
 
 (2) There are two ways to run MCTK2. The first way is to run MCTK2-TR.jar. The second way is to compile the source code by a Java Integrated Development Environment and run the main function of MCTK2Frame.java.
 
