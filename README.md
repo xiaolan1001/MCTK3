@@ -36,7 +36,7 @@ March 8, 2020
 	(b) universal path quantifier: A (f)
 	(c) bounded until: f BU a..b g (meaning: f holds until g holds in the interval [a,b])
 	(d) bounded release: f BR a..b g (meaning: f release g in [a,b])
-	(e) We have that f BR a..b g == !(!f BR a..b !g)
+	(e) We have that f BR a..b g == !(!f BU a..b !g)
 	(f) bounded finally: BF a..b f (f will hold at some position in [a,b )
 	(e) bounded globally: BG a..b f (f always hold in [a,b])
 
