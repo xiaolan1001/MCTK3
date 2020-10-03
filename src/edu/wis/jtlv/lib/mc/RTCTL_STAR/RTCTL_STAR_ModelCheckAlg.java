@@ -1618,6 +1618,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             return true;
     }
 
+    // Notation: the advantage of this version is that: for a formula with E f and more than one principally temporal subformulas to be witnessed,
+    //          only one node path is constructed for all principally temporal subformulas.
     // Premises: n |= E spec; spec is a NNF formula
     // Results: if spec has to be explained over a path, then generate a new feasible lasso path pi from n, explain spec over pi;
     //          otherwise, explain spec only on node n
@@ -1631,11 +1633,11 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         String fromNodeId = pathNo+"."+stateNo;
         if (fromState == null || fromState.isZero()) return false;
 
-        if(!specNeedExplainEE(spec) && !specNeedExplainTemporalOp(spec)){
+        if(!specNeedExplainEE(spec) && !specNeedExplainTemporalOp(spec)){ // !EE /\ !TT
             // spec is a state formula composed by !,/\,\/,AA
             //witness(spec, n);
             return graph.nodeAddSpec(n.getId(),spec);
-        }else if(specNeedExplainEE(spec)){
+        }else if(specNeedExplainEE(spec)){ // (EE /\ !TT) \/ (EE /\ TT) = EE /\ (!TT \/ TT) = EE
             // spec is a formula composed by !,/\,\/,AA,EE,temporal operators
             SpecExp se = (SpecExp) spec;
             Operator op = se.getOperator();
@@ -1656,7 +1658,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 //return witnessE(child[0],n);
                 return graph.nodeAddSpec(n.getId(),spec);
             }else return false;
-        }else{
+        }else{ // !EE /\ TT
             // now !specNeedExplainEE(spec) && specNeedExplainTemporalOp(spec)
             // spec is composed by !, \/, /\, AA, temporal operators
             if(!needCreatePath(spec,n)){
@@ -1891,23 +1893,27 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     }
 
 
-/*
+ /*
+    // Notation: the shortage of this old version is that: for a formula with E f and more than one principally temporal subformulas to be witnessed,
+    //          more then one node paths will be contructed for each principally temporal subformulas. This is irrational.
     // Premises: n |= E spec; spec is a NNF formula
     // Results: if spec has to be explained over a path, then generate a new feasible lasso path pi from n, explain spec over pi;
     //          otherwise, explain spec only on node n
     public boolean witnessE(Spec spec,
                             Node n) throws ModelCheckException, SpecException, ModelCheckAlgException, SMVParseException, ModuleException {
         if(n==null) return false;
+        BDD feasibleStates=null;
         BDD fromState = n.getAttribute("BDD");
         int pathNo = n.getAttribute("pathNo");
         int stateNo = n.getAttribute("stateNo");
         String fromNodeId = pathNo+"."+stateNo;
         if (fromState == null || fromState.isZero()) return false;
 
-        if(!specNeedExplainEE(spec) && !specNeedExplainTemporalOp(spec)){
+        if(!specNeedExplainEE(spec) && !specNeedExplainTemporalOp(spec)){ // !EE /\ !TT
             // spec is a state formula composed by !,/\,\/,AA
-            witness(spec, n);
-        }else if(specNeedExplainEE(spec)){
+            //witness(spec, n);
+            return graph.nodeAddSpec(n.getId(),spec);
+        }else if(specNeedExplainEE(spec)){ // (EE /\ !TT) \/ (EE /\ TT) = EE /\ (!TT \/ TT) = EE
             // spec is a formula composed by !,/\,\/,AA,EE,temporal operators
             SpecExp se = (SpecExp) spec;
             Operator op = se.getOperator();
@@ -1920,14 +1926,15 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             }else if(op==Operator.OR){
                 Spec p,q;
                 if(child[0].isPropSpec()) {p=child[0]; q=child[1];} else {p=child[1]; q=child[0];}
-                BDD pBdd = SpecBDDMap.get(p);
+                BDD pBdd = tester.cacheGetSpecBdd(p); if(pBdd==null) return false; // SpecBDDMap.get(p);
                 if (!fromState.and(pBdd).isZero())
                     return witnessE(p,n);
                 else return witnessE(q,n);
             }else if(op==Operator.EE){
-                return witnessE(child[0],n);
+                //return witnessE(child[0],n);
+                return graph.nodeAddSpec(n.getId(),spec);
             }else return false;
-        }else{
+        }else{ // !EE /\ TT
             // now !specNeedExplainEE(spec) && specNeedExplainTemporalOp(spec)
             // spec is composed by !, \/, /\, AA, temporal operators
             if(!needCreatePath(spec,n)){
@@ -1937,15 +1944,15 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 // the tester of spec is not empty, and spec has NOT EE and AA operators
                 SMVModule DT = (SMVModule) getDesign(); // DT is the parallel composition of design and the tester of spec
                 BDD temp, fulfill;
-                int idx_addedIniRestrict=DT.restrictIni(fromState); // restrict the set of initial states to be fromState
-                BDD feasStates = DT.feasible(); // feasStates is the set of feasible states from fromState
-                DT.removeIniRestriction(idx_addedIniRestrict);
+
+                if(feasibleStatesForWitnessE==null) feasibleStatesForWitnessE = DT.feasible();
+                // feasibleStatesForWitnessE is the set of feasible states of the composition of the original model and the tester
 
                 // saving to the previous restriction state
                 Vector<BDD> old_trans_restrictions = DT.getAllTransRestrictions();
                 //Lines 1-2 are handled by the caller. ("verify")
                 // Line 3
-                DT.restrictTrans(feasStates.and(Env.prime(feasStates)));
+                DT.restrictTrans(feasibleStatesForWitnessE.and(Env.prime(feasibleStatesForWitnessE)));
                 BDD s = fromState;
                 // Lines 5-6
                 while (true) {
@@ -2003,8 +2010,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                                 period.add(path[j]);
 
                             //LXY
-                            vector_period_idx.add((Integer) period.size()-1);
-                            vector_fairness.add("Justice:"+simplifySpecString(weakDes.justiceAt(i).toString(),false));
+                            //vector_period_idx.add((Integer) period.size()-1);
+                            //vector_fairness.add("Justice"+(i+1));
                         }
                     }
                 }
@@ -2023,9 +2030,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                                 // period.elementAt(j).and(design.qCompassionAt(i)).satOne();
                                 if (!fulfill.isZero()) {
                                     //LXY
-                                    vector_period_idx.add((Integer)j);
-                                    vector_fairness.add("Compassion.q:"+simplifySpecString(strongDes.qCompassionAt(i).toString(),false));
-
+                                    //vector_period_idx.add((Integer)j);
+                                    //vector_fairness.add("Compassion.q"+(i+1));
                                     break;
                                 }
                             }
@@ -2039,8 +2045,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                                     period.add(path[j]);
 
                                 //LXY
-                                vector_period_idx.add((Integer)period.size()-1);
-                                vector_fairness.add("Compassion.q:"+simplifySpecString(strongDes.qCompassionAt(i).toString(),false));
+                                //vector_period_idx.add((Integer)period.size()-1);
+                                //vector_fairness.add("Compassion.q"+(i+1));
                             }
                         }
                     }
@@ -2111,7 +2117,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 trunkNodePath.add(fromNodeId);
 
                 for (int i = 1; i < prefix.size(); i++) {
-                    graph.addNode(createdPathNumber, i, prefix.get(i), "");
+                    graph.addNode(createdPathNumber, i, prefix.get(i));
                     cur_nid = createdPathNumber + "." + i;
 
                     trunkNodePath.add(cur_nid);
@@ -2120,8 +2126,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                     e = graph.addArc(edgeId, pred_nid, cur_nid, true);
                     if(first_created_edgeId==null) {
                         first_created_edgeId=edgeId;
-                        graph.edgeAddAnnotation(edgeId,
-                                "Path" + createdPathNumber + "|=" + simplifySpecString(spec.toString(), false));
+//                        graph.edgeAddAnnotation(edgeId,
+//                                "Path" + createdPathNumber + "|=" + simplifySpecString(spec.toString(), false));
                     }
                     pred_nid = cur_nid;
                 }
@@ -2147,17 +2153,19 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
 
                 DT.setAllTransRestrictions(old_trans_restrictions);
 
-                trunkNodePaths.add(new NodePath(trunkNodePath, loopNodeIdx));
-                int pathIndex = trunkNodePaths.size()-1;
+                NodePath nodePath = new NodePath(trunkNodePaths.size(), trunkNodePath, loopNodeIdx);
+                trunkNodePaths.add(nodePath);
 
-//                trunkNodePaths.add(trunkNodePath);
-//                loopNodeIndexes.add((Integer)loopNodeIdx);
-//                int pathIndex = loopNodeIndexes.size()-1;
-
-                return explainPath(spec, pathIndex, 0);
+                SpecExp se = (SpecExp) spec;
+                Operator op = se.getOperator();
+                Spec[] child = se.getChildren();
+                if(!op.isTemporalOp()){
+                    // spec is NOT a principally temporal formula, it need to be show before calling explainPath(spec...)
+                    graph.edgeAddSpec(first_created_edgeId,spec,nodePath,0,true);
+                }
+                return explainPath(spec, nodePath, 0);
             }
         }
-        return true;
     }
 */
 
