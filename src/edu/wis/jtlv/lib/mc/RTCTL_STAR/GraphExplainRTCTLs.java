@@ -177,7 +177,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
 
         int specNum=n.getAttribute("spriteSpecNumber");
         //check if spec is already in this node
-        for(int i=1;i<=specNum;i++){
+        for(int i=1; i<=specNum; i++){
             Sprite s=n.getAttribute("spriteSpec"+i);
             Spec nspec=s.getAttribute("spec");
             if(nspec.toString().equals(spec.toString())) return false;
