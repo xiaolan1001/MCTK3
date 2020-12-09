@@ -1166,7 +1166,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             n.setAttribute("ui.class", "initialState");
 
 //            graph.nodeAddSpec(n.getId(), chkProp);
-            boolean ok = witness(chkProp, n, null);
+            boolean ok = witness(chkProp, n);
 
             String returned_msg = "";
             returned_msg = "*** Property is FALSE ***\n";
@@ -1334,20 +1334,17 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 Operator op=se.getOperator();
                 Spec[] child=se.getChildren();
 
-
                 if(op==Operator.EE)
-                    witnessE(spec,n);
+                    witnessE(child[0],n);
                 else if(op==Operator.AND){
-                    witness(child[0],n,null);
-                    witness(child[1],n,null);
+                    witness(child[0],n);
+                    witness(child[1],n);
                 }else if(op==Operator.OR){
                     BDD lc = tester.cacheGetSpecBdd(child[0]); if(lc==null) return false; //SpecBDDMap.get(child[0]);
                     BDD state=graph.nodeGetBDD(nodeId);
-                    if (!state.and(lc).isZero()) witness(child[0],n,null);
-                    else witness(child[1],n,null);
+                    if (!state.and(lc).isZero()) witness(child[0],n);
+                    else witness(child[1],n);
                 }
-
-//                if(op==Operator.EE) witnessE(spec,n);
 
                 s.setAttribute("explained",true);
             }
@@ -1438,7 +1435,6 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             return false;
     }
 
-/*
     // Premises: n|=spec and spec is a state formula
     // Results: generate witnesses for spec from node n
     public boolean witness(
@@ -1472,65 +1468,132 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         }
         return true;
     }
-*/
 
 
-    // Premises: !specNeedExplainEE(spec) && specNeedExplainTemporalOp(spec); n|=E spec
-    // Results: return true if spec need to be explained over a new lasso path
+    // Premises: n |= E spec
+    // Results: return true if it is necessary to create a new lasso path to explain formula spec
     // 			return false if it is enough to explain spec only over node n
-    boolean needCreatePath(Spec spec, Node n){
-        if(spec.isStateSpec()) return false;
-        //now spec is NOT a state formula
+    // needCrtPath() is invoked by witnessE()
+    boolean needCrtPath(Spec spec, Node n){
+        if(!specNeedExplainEE(spec) && !specNeedExplainTemporalOp(spec)) return false;
+        //now specNeedExplainEE(spec) || specNeedExplainTemporalOp(spec)
 
-        BDD state=graph.nodeGetBDD(n.getId());
+        BDD state=graph.nodeGetBDD(n.getId()); if(state==null) return false;
 
         SpecExp se=(SpecExp)spec;
         Operator op=se.getOperator();
         Spec[] child=se.getChildren();
 
-        if(op==Operator.AND)
-            return needCreatePath(child[0],n) || needCreatePath(child[1],n);
-        else if(op==Operator.OR){
-            BDD lc=tester.cacheGetSpecBdd(child[0]); if(lc==null) return false;  //SpecBDDMap.get(child[0]);
-            BDD rc=tester.cacheGetSpecBdd(child[1]); if(rc==null) return false;  //SpecBDDMap.get(child[1]);
-            if(child[0].isPropSpec() && !state.and(lc).isZero()) // f is prop formula && n|=f
-                return false;
-		    else if(child[1].isPropSpec() && !state.and(rc).isZero()) // g is prop formula && n|=g
-		        return false;
-            if(!state.and(lc).isZero()) //n|=f
-                return needCreatePath(child[0],n);
-            else // n|=g
-                return needCreatePath(child[1],n);
+        if(op==Operator.AND) // spec=f/\g
+            return needCrtPath(child[0],n) || needCrtPath(child[1],n);
+        else if(op==Operator.OR){ // spec=f\/g
+            BDD f=tester.cacheGetSpecBdd(child[0]); if(f==null) return false;  //SpecBDDMap.get(child[0]);
+            BDD g=tester.cacheGetSpecBdd(child[1]); if(g==null) return false;  //SpecBDDMap.get(child[1]);
+            if(!state.and(f).isZero() && state.and(g).isZero()) return needCrtPath(child[0],n); // n.s|=f and n.s|=\=g
+            else if(state.and(f).isZero() && !state.and(g).isZero()) return needCrtPath(child[1],n); // n.s|=\=f and n.s|=g
+            else if(!state.and(f).isZero() && !state.and(g).isZero()) return !needCrtPath(child[0],n) || !needCrtPath(child[1],n); // n.s|=f and n.s|=g
+            else return false;
         }else if(op.isTemporalOp()) { // spec is a principally temporal formula
             if(op==Operator.UNTIL){
                 BDD g=tester.cacheGetSpecBdd(child[1]);
-                if(!state.and(g).isZero()) return needCreatePath(child[1],n); else return true; // n|=g
+                if(!state.and(g).isZero()) // n|=g
+                    return needCrtPath(child[1],n);
+                else return true;
             }else if(op==Operator.RELEASES){
                 BDD f=tester.cacheGetSpecBdd(child[0]);
                 BDD g=tester.cacheGetSpecBdd(child[1]);
-                if(!state.and(f.and(g)).isZero()) return needCreatePath(child[0],n) || needCreatePath(child[1],n); else return true; // n|=f/\g
+                if(!state.and(f.and(g)).isZero()) // n|=f/\g
+                    return needCrtPath(child[0],n) || needCrtPath(child[1],n);
+                else return true;
             }else if(op==Operator.B_UNTIL){
                 SpecRange range = (SpecRange) child[1];
                 int a = range.getFrom();
                 BDD g=tester.cacheGetSpecBdd(child[2]); // spec=f U 0..b g
-                if(a==0 && !state.and(g).isZero()) return needCreatePath(child[2],n); else return true; // a=0 & n|=g
+                if(a==0 && !state.and(g).isZero()) // a=0 & n|=g
+                    return needCrtPath(child[2],n);
+                else return true;
             }else if(op==Operator.B_RELEASES){
                 SpecRange range = (SpecRange) child[1];
                 int a = range.getFrom();
                 int b = range.getTo();
                 BDD f=tester.cacheGetSpecBdd(child[0]);
                 BDD g=tester.cacheGetSpecBdd(child[2]);
-                if(a==0 && b==0 && !state.and(g).isZero()) return needCreatePath(child[2],n); // a=b=0 & n|=g
-                else if(a==0 && b>0 && !state.and(f.and(g)).isZero())return needCreatePath(child[0],n) || needCreatePath(child[2],n); // a=0 & b>0 & n|=f/\g
+                if(a==0 && b==0 && !state.and(g).isZero()) return needCrtPath(child[2],n); // a=b=0 & n|=g
+                else if(a==0 && b>0 && !state.and(f.and(g)).isZero()) return needCrtPath(child[0],n) || needCrtPath(child[2],n); // a=0 & b>0 & n|=f/\g
                 else return true;
-            }else return true;
-        }else // op==!, EE or AA
-            return false;
+            }else // op = X
+                return true;
+        }else { // op==EE
+            return needCrtPath(spec,n);
+        }
+    }
+
+    // Premises: n |= E spec; !needCrtPath(spec,n)
+    // Results: return true if it is necessary to create a new lasso path to explain formula spec
+    // 			return false if it is enough to explain spec only over node n
+    // explainOnNode() is invoked by witnessE()
+    void explainOnNode(Spec spec, Node n) throws SpecException {
+        if(!specNeedExplainEE(spec) && !specNeedExplainTemporalOp(spec)) {
+            graph.nodeAddSpec(n.getId(),spec);
+            return;
+        }
+        //now specNeedExplainEE(spec) || specNeedExplainTemporalOp(spec)
+
+        BDD state=graph.nodeGetBDD(n.getId()); if(state==null) return;
+
+        SpecExp se=(SpecExp)spec;
+        Operator op=se.getOperator();
+        Spec[] child=se.getChildren();
+
+        if(op==Operator.AND) { // spec=f/\g
+            explainOnNode(child[0], n);
+            explainOnNode(child[1], n);
+        }else if(op==Operator.OR){ // spec=f\/g
+            BDD f=tester.cacheGetSpecBdd(child[0]); if(f==null) return;
+            BDD g=tester.cacheGetSpecBdd(child[1]); if(g==null) return;
+            if(!state.and(f).isZero() && state.and(g).isZero()) explainOnNode(child[0],n); // n.s|=f and n.s|=\=g
+            else if(state.and(f).isZero() && !state.and(g).isZero()) explainOnNode(child[1],n); // n.s|=\=f and n.s|=g
+            else if(!state.and(f).isZero() && !state.and(g).isZero()) { // n.s|=f and n.s|=g
+                if(!needCrtPath(child[0],n)) explainOnNode(child[0],n); else explainOnNode(child[1],n);
+            }
+        }else if(op.isTemporalOp()) { // spec is a principally temporal formula
+            if(op==Operator.UNTIL){
+                BDD g=tester.cacheGetSpecBdd(child[1]);
+                if(!state.and(g).isZero()) // n|=g
+                    explainOnNode(child[1],n);
+            }else if(op==Operator.RELEASES){
+                BDD f=tester.cacheGetSpecBdd(child[0]);
+                BDD g=tester.cacheGetSpecBdd(child[1]);
+                if(!state.and(f.and(g)).isZero()) { // n|=f/\g
+                    explainOnNode(child[0], n);
+                    explainOnNode(child[1], n);
+                }
+            }else if(op==Operator.B_UNTIL){
+                SpecRange range = (SpecRange) child[1];
+                int a = range.getFrom();
+                BDD g=tester.cacheGetSpecBdd(child[2]); // spec=f U 0..b g
+                if(a==0 && !state.and(g).isZero()) // a=0 & n|=g
+                    explainOnNode(child[2],n);
+            }else if(op==Operator.B_RELEASES){
+                SpecRange range = (SpecRange) child[1];
+                int a = range.getFrom();
+                int b = range.getTo();
+                BDD f=tester.cacheGetSpecBdd(child[0]);
+                BDD g=tester.cacheGetSpecBdd(child[2]);
+                if(a==0 && b==0 && !state.and(g).isZero()) explainOnNode(child[2],n); // a=b=0 & n|=g
+                else if(a==0 && b>0 && !state.and(f.and(g)).isZero()) { // a=0 & b>0 & n|=f/\g
+                    explainOnNode(child[0],n);
+                    explainOnNode(child[2],n);
+                }
+            }
+        }else { // op==EE
+            explainOnNode(child[0],n);
+        }
     }
 
     // Premises: !specNeedExplainEE(spec) && specNeedExplainTemporalOp(spec); n|=E spec; !needCreatePath(spec,n)
     // Results: explain spec only over node n
-    boolean explainOnNode(Spec spec, Node n) throws ModelCheckException, SpecException, ModelCheckAlgException, SMVParseException, ModuleException {
+    boolean explainOnNode_old(Spec spec, Node n) throws ModelCheckException, SpecException, ModelCheckAlgException, SMVParseException, ModuleException {
         if(spec.isStateSpec())
             //return witness(spec,n);
             return graph.nodeAddSpec(n.getId(),spec);
@@ -1543,7 +1606,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         Spec[] child=se.getChildren();
 
         if(op==Operator.AND)
-            return explainOnNode(child[0],n) || explainOnNode(child[1],n);
+            return explainOnNode_old(child[0],n) || explainOnNode_old(child[1],n);
         else if(op==Operator.OR){
             BDD lc=tester.cacheGetSpecBdd(child[0]); if(lc==null) return false;  //SpecBDDMap.get(child[0]);
             BDD rc=tester.cacheGetSpecBdd(child[1]); if(rc==null) return false;  //SpecBDDMap.get(child[1]);
@@ -1554,30 +1617,30 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 //return witness(child[1],n);
                 graph.nodeAddSpec(n.getId(),child[1]);
             if(!state.and(lc).isZero()) //n|=f
-                return explainOnNode(child[0],n);
+                return explainOnNode_old(child[0],n);
             else // n|=g
-                return explainOnNode(child[1],n);
+                return explainOnNode_old(child[1],n);
         }else if(op.isTemporalOp()) { // spec is a principally temporal formula
             if(op==Operator.UNTIL){
                 BDD g=tester.cacheGetSpecBdd(child[1]);
-                if(!state.and(g).isZero()) return witness(child[1],n,null); else return false;// n|=g
+                if(!state.and(g).isZero()) return witness(child[1],n); else return false;// n|=g
             }else if(op==Operator.RELEASES){
                 BDD f=tester.cacheGetSpecBdd(child[0]);
                 BDD g=tester.cacheGetSpecBdd(child[1]);
-                if(!state.and(f.and(g)).isZero()) return witness(child[0],n,null) && witness(child[1],n,null); else return false; // n|=f/\g
+                if(!state.and(f.and(g)).isZero()) return witness(child[0],n) && witness(child[1],n); else return false; // n|=f/\g
             }else if(op==Operator.B_UNTIL){
                 SpecRange range = (SpecRange) child[1];
                 int a = range.getFrom();
                 BDD g=tester.cacheGetSpecBdd(child[2]); // spec=f U 0..b g
-                if(a==0 && !state.and(g).isZero()) return witness(child[2],n,null); else return false; // a=0 & n|=g
+                if(a==0 && !state.and(g).isZero()) return witness(child[2],n); else return false; // a=0 & n|=g
             }else if(op==Operator.B_RELEASES){
                 SpecRange range = (SpecRange) child[1];
                 int a = range.getFrom();
                 int b = range.getTo();
                 BDD f=tester.cacheGetSpecBdd(child[0]);
                 BDD g=tester.cacheGetSpecBdd(child[2]);
-                if(a==0 && b==0 && !state.and(g).isZero()) return witness(child[2],n,null); // a=b=0 & n|=g
-                else if(a==0 && b>0 && !state.and(f.and(g)).isZero()) return witness(child[0],n,null) && witness(child[2],n,null); // a=0 & b>0 & n|=f/\g
+                if(a==0 && b==0 && !state.and(g).isZero()) return witness(child[2],n); // a=b=0 & n|=g
+                else if(a==0 && b>0 && !state.and(f.and(g)).isZero()) return witness(child[0],n) && witness(child[2],n); // a=0 & b>0 & n|=f/\g
                 else return false;
             }else return false;
         }else // op==!, EE or AA
@@ -1585,6 +1648,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     }
 
 
+/*
     // Notation: the advantage of this version is that: for a formula with E f and more than one principally temporal subformulas to be witnessed,
     //          only one node path is constructed for all principally temporal subformulas.
     // Premises:
@@ -1636,13 +1700,31 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         }
         return true;
     }
+*/
 
-    // premise: spec=Ef and n.s|=Ef
-    // generate the witness for n.s|=Ef
+    // Premise: all states in destStates are feasible states from aState
+    // Results: returns a state in destStates that is closest to aState
+    public BDD closest(SMVModule D, BDD destStates, BDD aState){
+        BDD succs=aState, r=null;
+        while(true){
+            r = succs.and(destStates);
+            if(!r.isZero())
+                return r.satOne(D.moduleUnprimeVars(), false);
+            else
+                succs=D.succ(succs);
+        }
+    }
+
+    // premise: n.s |= E spec
+    // generate the witness for n.s |= E spec
     public boolean witnessE(Spec spec,
                             Node n
     ) throws SpecException, ModelCheckException, ModelCheckAlgException, SMVParseException, ModuleException {
         if(n==null) return false;
+
+        if(!needCrtPath(spec,n)) {explainOnNode(spec, n); return true;}
+        // now needCrtPath(spec,n)
+
         BDD feasibleStates=null;
         BDD fromState = n.getAttribute("BDD");
         int pathNo = n.getAttribute("pathNo");
@@ -1654,13 +1736,10 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         Operator op = se.getOperator();
         Spec[] child = se.getChildren();
 
-        if(op!=Operator.EE) return false;
-
-        //-------------------------------------------------------------------------------------
-        // a new path p' from node n will be constructed
         //-------------------------------------------------------------------------------------
         // create a feasible lasso path pi from n such that pi|=spec; and then explainPath(spec, pi, 0);
         // the tester of spec is not empty, and spec has NOT EE and AA operators
+        //-------------------------------------------------------------------------------------
         SMVModule DT = (SMVModule) getDesign(); // DT is the parallel composition of design and the tester of spec
         BDD temp, fulfill;
 
@@ -1875,20 +1954,14 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         NodePath nodePath = new NodePath(trunkNodePaths.size(), trunkNodePath, loopNodeIdx);
         trunkNodePaths.add(nodePath);
 
-        // spec=Ef
-        SpecExp fse = (SpecExp) child[0];
-        Operator fop = fse.getOperator();
-        Spec[] fchild = fse.getChildren();
-        if(!fop.isTemporalOp()){
-            // if f is NOT a principally temporal subformula, it need to be show before calling explainPath(f...)
-            graph.edgeAddSpec(first_created_edgeId, child[0], nodePath, 0, true);
+        if(!op.isTemporalOp()){
+            // if spec is NOT a principally temporal subformula, it need to be show before calling explainPath(spec...)
+            graph.edgeAddSpec(first_created_edgeId, spec, nodePath, 0, true);
         }
-        //return explainPath(child[0], nodePath, 0);
 
         //-------------------------------------------------------------------------------------
-        // invoke witness(f,n,p')
+        return explainPath(spec, nodePath, 0);
         //-------------------------------------------------------------------------------------
-        return witness(child[0], n, nodePath);
     }
 
     /*
@@ -2193,7 +2266,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             Spec[] child=se.getChildren();
 
             if(op==Operator.AND){
-                boolean b1=explainPath(child[0],path,pos);
+                boolean b1= explainPath(child[0],path,pos);
                 return b1 && explainPath(child[1],path,pos);
             }else if(op==Operator.OR){ //spec=f OR g
                 boolean fNeedExplain = specNeedExplainEE(child[0]) || specNeedExplainTemporalOp(child[0]);

@@ -168,7 +168,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
     }
 
     // Premises: spec is a state formula and nodeId|=spec
-    // Results: spec is putted into the spec map of this node, if spec need to be explained
+    // Results: spec is putted into the spec map of this node, if spec need to be explained; the property 'explained' is set automatically
     public boolean nodeAddSpec(String nodeId,
                                Spec spec
     ) throws SpecException {
@@ -200,6 +200,28 @@ public class GraphExplainRTCTLs extends MultiGraph {
 
         nodeLayoutSprites(nodeId);
         return true;
+    }
+
+    public boolean nodeSetSpecExplained(String nodeId,
+                               Spec spec,
+                               boolean explained
+    ){
+        Node n = getNode(nodeId); if(n==null) return false;
+        if(spec==null) return false;
+
+        int specNum=n.getAttribute("spriteSpecNumber");
+        //check if spec is already in this node
+        int i;
+        for(i=1; i<=specNum; i++){
+            Sprite s=n.getAttribute("spriteSpec"+i);
+            Spec nspec=s.getAttribute("spec");
+            if(nspec.toString().equals(spec.toString())) {
+                // found spec
+                s.setAttribute("explained", explained);
+                return true;
+            }
+        }
+        return false;
     }
 
     public int nodeGetPathNo(String nodeID) {
