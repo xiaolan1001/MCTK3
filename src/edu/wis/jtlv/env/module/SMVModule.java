@@ -403,6 +403,12 @@ public class SMVModule extends ModuleWithStrongFairness {
 
 	private Vector<BDD> tempTransRestriction = new Vector<BDD>();
 
+	// LXY:
+	public int getTransRestrictionsSize(){
+		return tempTransRestriction.size();
+	}
+	public BDD getTransRestriction(int id) { return tempTransRestriction.get(id); }
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -421,7 +427,9 @@ public class SMVModule extends ModuleWithStrongFairness {
 	 */
 	public void removeTransRestriction(int id) {
 		this.cacheTrans = null;
-		tempTransRestriction.set(id, Env.TRUE());
+		// tempTransRestriction.set(id, Env.TRUE());   // JTLV original code commented by LXY
+
+		tempTransRestriction.removeElementAt(id); // added by LXY
 	}
 
 	/*
