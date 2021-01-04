@@ -1801,7 +1801,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             t2=glue.satOne(DT.moduleUnprimeVars(), false);
             glue=glue.id().and(t2.not()); // glue = glue - {t2}
             // (21)
-            scc2=DT.allSucc(t2).and(DT.allPred(t2));
+            scc2=DT.allPred(t2); // DT.allSucc(t2).and(DT.allPred(t2));
             // (22)
             if(scc.isZero() || scc2.satCount(DT.moduleUnprimeVars())<scc.satCount(DT.moduleUnprimeVars())) {
                 scc=scc2; t=t2;
