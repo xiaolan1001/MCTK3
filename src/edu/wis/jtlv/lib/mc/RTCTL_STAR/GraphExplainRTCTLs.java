@@ -188,7 +188,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
         s.setAttribute("spec",spec);
 
         if(spec.isPropSpec() && spec.toBDD().isOne()) return true;  // do not explain TRUE
-        boolean needExplained = RTCTL_STAR_ModelCheckAlg.specNeedExplainEE(spec) || RTCTL_STAR_ModelCheckAlg.specNeedExplainTemporalOp(spec);
+        boolean needExplained = RTCTL_STAR_ModelCheckAlg.needExpE(spec) || RTCTL_STAR_ModelCheckAlg.needExpT(spec);
         s.setAttribute("needExplained", needExplained);
 
         s.setAttribute("explained", false);
@@ -337,7 +337,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
 
         if(spec.isPropSpec() && spec.toBDD().isOne()) return true;  // do not explain TRUE
         boolean needExplained = !onlyShow &&
-                (RTCTL_STAR_ModelCheckAlg.specNeedExplainEE(spec) || RTCTL_STAR_ModelCheckAlg.specNeedExplainTemporalOp(spec));
+                (RTCTL_STAR_ModelCheckAlg.needExpE(spec) || RTCTL_STAR_ModelCheckAlg.needExpT(spec));
         s.setAttribute("needExplained", needExplained);
 
         s.setAttribute("path",path);

@@ -1121,7 +1121,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     public AlgResultString modelCheckingOneSpec(Spec aProperty) throws SpecException, ModelCheckException, ModuleException, ModelCheckAlgException, SMVParseException {
         consoleOutput(0,"emph","Model checking RTCTL* property: " + simplifySpecString(aProperty,false) +"\n");
         if(statistic==null) statistic=new Statistic();
-        else statistic.beginStatistic(true,true);
+        else statistic.beginStatistic(true,false);
 
         Spec chkProp;
         if (!aProperty.isStateSpec()) {
@@ -1400,7 +1400,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     // Premise: spec must be a NNF formula, whose logical connectives are only !, /\ and \/, and ! only preceded assertions
     // Results: return true if spec is composition of operator op_to_explain and other operators, composed by /\ or \/
     //          return false otherwise
-    static boolean specNeedExplainEE(Spec spec){
+    static boolean needExpE(Spec spec){
         if(spec instanceof SpecBDD) return false;
         SpecExp se=(SpecExp)spec;
         Operator op=se.getOperator();
@@ -1410,7 +1410,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         if(op==Operator.EE) return true;
 
         if(op==Operator.AND || op==Operator.OR) {
-            return specNeedExplainEE(child[0]) || specNeedExplainEE(child[1]);
+            return needExpE(child[0]) || needExpE(child[1]);
         }else if(op==Operator.NOT || op==Operator.AA) return false;
         else // op is temporal operator
             return false;
@@ -1419,7 +1419,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     // Premise: spec must be a NNF formula, whose logical connectives are only !, /\ and \/, and ! only preceded assertions
     // Results: return true if spec is composition of temporal operators and other operators, composed by /\ or \/
     //          return false otherwise
-    static boolean specNeedExplainTemporalOp(Spec spec){
+    static boolean needExpT(Spec spec){
         if(spec instanceof SpecBDD) return false;
         SpecExp se=(SpecExp)spec;
         Operator op=se.getOperator();
@@ -1429,7 +1429,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         if(op.isTemporalOp()) return true;
 
         if(op==Operator.AND || op==Operator.OR) {
-            return specNeedExplainTemporalOp(child[0]) || specNeedExplainTemporalOp(child[1]);
+            return needExpT(child[0]) || needExpT(child[1]);
         }else if(op==Operator.NOT || op==Operator.AA || op==Operator.EE) return false;
         else // op is other operator
             return false;
@@ -1444,7 +1444,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         if(n==null) return false;
         BDD state = n.getAttribute("BDD");
 
-        if(!specNeedExplainEE(spec)){
+        if(!needExpE(spec)){
             // spec is a state formula composed by !, /\, \/ and AA, note that ! only restrict assertions
             graph.nodeAddSpec(n.getId(),spec);
         }else{ // specNeedExplainEE(spec)=true
@@ -1456,9 +1456,12 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             if(op==Operator.AND){
                 witness(child[0],n);
                 witness(child[1],n);
-            }else if(op==Operator.OR){
-                BDD lc=tester.cacheGetSpecBdd(child[0]); if(lc==null) return false;
-                if (!state.and(lc).isZero()) witness(child[0],n);
+            }else if(op==Operator.OR){ // spec=f\/g
+                BDD f=tester.cacheGetSpecBdd(child[0]); if(f==null) return false;
+                BDD g=tester.cacheGetSpecBdd(child[1]); if(g==null) return false;
+                if (!state.and(f).isZero() && !needExpE(child[0])) witness(child[0],n);
+                else if (!state.and(g).isZero() && !needExpE(child[1])) witness(child[1],n);
+                else if (!state.and(f).isZero()) witness(child[0],n);
                 else witness(child[1],n);
             }else if(op==Operator.EE){ // spec=Ef will be explained by clicking on the node n
                 graph.nodeAddSpec(n.getId(),spec);
@@ -1475,7 +1478,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     // 			return false if it is enough to explain spec only over node n
     // needCrtPath() is invoked by witnessE()
     boolean needCrtPath(Spec spec, Node n){
-        if(!specNeedExplainEE(spec) && !specNeedExplainTemporalOp(spec)) return false;
+        if(!needExpE(spec) && !needExpT(spec)) return false;
         //now specNeedExplainEE(spec) || specNeedExplainTemporalOp(spec)
 
         BDD state=graph.nodeGetBDD(n.getId()); if(state==null) return false;
@@ -1489,10 +1492,13 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         else if(op==Operator.OR){ // spec=f\/g
             BDD f=tester.cacheGetSpecBdd(child[0]); if(f==null) return false;  //SpecBDDMap.get(child[0]);
             BDD g=tester.cacheGetSpecBdd(child[1]); if(g==null) return false;  //SpecBDDMap.get(child[1]);
-            if(!state.and(f).isZero() && state.and(g).isZero()) return needCrtPath(child[0],n); // n.s|=f and n.s|=\=g
-            else if(state.and(f).isZero() && !state.and(g).isZero()) return needCrtPath(child[1],n); // n.s|=\=f and n.s|=g
-            else if(!state.and(f).isZero() && !state.and(g).isZero()) return !needCrtPath(child[0],n) || !needCrtPath(child[1],n); // n.s|=f and n.s|=g
-            else return false;
+            if(!state.and(f).isZero() && state.and(g).isZero()) // n.s|=f and n.s|=\=g
+                return needCrtPath(child[0],n);
+            else if(state.and(f).isZero() && !state.and(g).isZero()) // n.s|=\=f and n.s|=g
+                return needCrtPath(child[1],n);
+            else if(!needCrtPath(child[0],n)) // n.s|=f and n.s|=g
+                return false;
+            else return needCrtPath(child[1],n);
         }else if(op.isTemporalOp()) { // spec is a principally temporal formula
             if(op==Operator.UNTIL){
                 BDD g=tester.cacheGetSpecBdd(child[1]);
@@ -1518,8 +1524,10 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 int b = range.getTo();
                 BDD f=tester.cacheGetSpecBdd(child[0]);
                 BDD g=tester.cacheGetSpecBdd(child[2]);
-                if(a==0 && b==0 && !state.and(g).isZero()) return needCrtPath(child[2],n); // a=b=0 & n|=g
-                else if(a==0 && b>0 && !state.and(f.and(g)).isZero()) return needCrtPath(child[0],n) || needCrtPath(child[2],n); // a=0 & b>0 & n|=f/\g
+                if(a==0 && b==0 && !state.and(g).isZero()) // a=b=0 & n|=g
+                    return needCrtPath(child[2],n);
+                else if(a==0 && b>0 && !state.and(f.and(g)).isZero()) // a=0 & b>0 & n|=f/\g
+                    return needCrtPath(child[0],n) || needCrtPath(child[2],n);
                 else return true;
             }else // op = X
                 return true;
@@ -1532,68 +1540,70 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     // Results: return true if it is necessary to create a new lasso path to explain formula spec
     // 			return false if it is enough to explain spec only over node n
     // explainOnNode() is invoked by witnessE()
-    void explainOnNode(Spec spec, Node n) throws SpecException {
-        if(!specNeedExplainEE(spec) && !specNeedExplainTemporalOp(spec)) {
+    void witnessEonNode(Spec spec, Node n) throws SpecException {
+        if(!needExpE(spec) && !needExpT(spec)) {
             graph.nodeAddSpec(n.getId(),spec);
             return;
         }
         //now specNeedExplainEE(spec) || specNeedExplainTemporalOp(spec)
 
         BDD state=graph.nodeGetBDD(n.getId()); if(state==null) return;
-
         SpecExp se=(SpecExp)spec;
         Operator op=se.getOperator();
         Spec[] child=se.getChildren();
 
         if(op==Operator.AND) { // spec=f/\g
-            explainOnNode(child[0], n);
-            explainOnNode(child[1], n);
+            witnessEonNode(child[0], n);
+            witnessEonNode(child[1], n);
         }else if(op==Operator.OR){ // spec=f\/g
             BDD f=tester.cacheGetSpecBdd(child[0]); if(f==null) return;
             BDD g=tester.cacheGetSpecBdd(child[1]); if(g==null) return;
-            if(!state.and(f).isZero() && state.and(g).isZero()) explainOnNode(child[0],n); // n.s|=f and n.s|=\=g
-            else if(state.and(f).isZero() && !state.and(g).isZero()) explainOnNode(child[1],n); // n.s|=\=f and n.s|=g
-            else if(!state.and(f).isZero() && !state.and(g).isZero()) { // n.s|=f and n.s|=g
-                if(!needCrtPath(child[0],n)) explainOnNode(child[0],n); else explainOnNode(child[1],n);
-            }
+            if(!state.and(f).isZero() && state.and(g).isZero()) // n.s|=f and n.s|=\=g
+                witnessEonNode(child[0],n);
+            else if(state.and(f).isZero() && !state.and(g).isZero()) // n.s|=\=f and n.s|=g
+                witnessEonNode(child[1],n);
+            else if(!needCrtPath(child[0],n)) // n.s|=f and n.s|=g
+                witnessEonNode(child[0],n);
+            else
+                witnessEonNode(child[1],n);
         }else if(op.isTemporalOp()) { // spec is a principally temporal formula
             if(op==Operator.UNTIL){
                 BDD g=tester.cacheGetSpecBdd(child[1]);
                 if(!state.and(g).isZero()) // n|=g
-                    explainOnNode(child[1],n);
+                    witnessEonNode(child[1],n);
             }else if(op==Operator.RELEASES){
                 BDD f=tester.cacheGetSpecBdd(child[0]);
                 BDD g=tester.cacheGetSpecBdd(child[1]);
                 if(!state.and(f.and(g)).isZero()) { // n|=f/\g
-                    explainOnNode(child[0], n);
-                    explainOnNode(child[1], n);
+                    witnessEonNode(child[0], n);
+                    witnessEonNode(child[1], n);
                 }
             }else if(op==Operator.B_UNTIL){
                 SpecRange range = (SpecRange) child[1];
                 int a = range.getFrom();
                 BDD g=tester.cacheGetSpecBdd(child[2]); // spec=f U 0..b g
                 if(a==0 && !state.and(g).isZero()) // a=0 & n|=g
-                    explainOnNode(child[2],n);
+                    witnessEonNode(child[2],n);
             }else if(op==Operator.B_RELEASES){
                 SpecRange range = (SpecRange) child[1];
                 int a = range.getFrom();
                 int b = range.getTo();
                 BDD f=tester.cacheGetSpecBdd(child[0]);
                 BDD g=tester.cacheGetSpecBdd(child[2]);
-                if(a==0 && b==0 && !state.and(g).isZero()) explainOnNode(child[2],n); // a=b=0 & n|=g
+                if(a==0 && b==0 && !state.and(g).isZero()) witnessEonNode(child[2],n); // a=b=0 & n|=g
                 else if(a==0 && b>0 && !state.and(f.and(g)).isZero()) { // a=0 & b>0 & n|=f/\g
-                    explainOnNode(child[0],n);
-                    explainOnNode(child[2],n);
+                    witnessEonNode(child[0],n);
+                    witnessEonNode(child[2],n);
                 }
             }
         }else { // op==EE
-            explainOnNode(child[0],n);
+            witnessEonNode(child[0],n);
         }
     }
 
     // Premises: !specNeedExplainEE(spec) && specNeedExplainTemporalOp(spec); n|=E spec; !needCreatePath(spec,n)
     // Results: explain spec only over node n
-    boolean explainOnNode_old(Spec spec, Node n) throws ModelCheckException, SpecException, ModelCheckAlgException, SMVParseException, ModuleException {
+    boolean witnessEonNode_old(Spec spec, Node n) throws ModelCheckException, SpecException, ModelCheckAlgException, SMVParseException, ModuleException {
         if(spec.isStateSpec())
             //return witness(spec,n);
             return graph.nodeAddSpec(n.getId(),spec);
@@ -1606,7 +1616,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         Spec[] child=se.getChildren();
 
         if(op==Operator.AND)
-            return explainOnNode_old(child[0],n) || explainOnNode_old(child[1],n);
+            return witnessEonNode_old(child[0],n) || witnessEonNode_old(child[1],n);
         else if(op==Operator.OR){
             BDD lc=tester.cacheGetSpecBdd(child[0]); if(lc==null) return false;  //SpecBDDMap.get(child[0]);
             BDD rc=tester.cacheGetSpecBdd(child[1]); if(rc==null) return false;  //SpecBDDMap.get(child[1]);
@@ -1617,9 +1627,9 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 //return witness(child[1],n);
                 graph.nodeAddSpec(n.getId(),child[1]);
             if(!state.and(lc).isZero()) //n|=f
-                return explainOnNode_old(child[0],n);
+                return witnessEonNode_old(child[0],n);
             else // n|=g
-                return explainOnNode_old(child[1],n);
+                return witnessEonNode_old(child[1],n);
         }else if(op.isTemporalOp()) { // spec is a principally temporal formula
             if(op==Operator.UNTIL){
                 BDD g=tester.cacheGetSpecBdd(child[1]);
@@ -1715,15 +1725,52 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         }
     }
 
-    // premise: n.s |= E spec
-    // generate the witness for n.s |= E spec
-    // this algorithm construct a lasso path with shortest prefix and the loop within a SCC with minimal number of states
     public boolean witnessE(Spec spec,
+                             Node n
+    ) throws SpecException, ModelCheckException, ModelCheckAlgException, SMVParseException, ModuleException {
+        if (n == null) return false;
+
+        BDD state = n.getAttribute("BDD");
+        int pathNo = n.getAttribute("pathNo");
+        int stateNo = n.getAttribute("stateNo");
+        String fromNodeId = pathNo + "." + stateNo;
+        if (state == null || state.isZero()) return false;
+
+        SpecExp se = (SpecExp) spec;
+        Operator op = se.getOperator();
+        Spec[] child = se.getChildren();
+
+        if (!needExpE(spec) && !needExpT(spec))
+            graph.nodeAddSpec(n.getId(),spec);
+        else if (needExpE(spec)) {
+            if (op==Operator.AND) {
+                witnessE(child[0],n);
+                witnessE(child[1],n);
+            }else if (op==Operator.OR) { // spec = f \/ g
+                BDD f=tester.cacheGetSpecBdd(child[0]); if(f==null) return false;
+                BDD g=tester.cacheGetSpecBdd(child[1]); if(g==null) return false;
+                if (!state.and(f).isZero() && !needExpE(child[0]) && !needExpT(child[0])) witnessE(child[0],n);
+                else if (!state.and(g).isZero() && !needExpE(child[1]) && !needExpE(child[1])) witnessE(child[1],n);
+                else if (!state.and(f).isZero()) witnessE(child[0],n);
+                else witnessE(child[1],n);
+            }else{ // spec=Ef
+                graph.nodeAddSpec(n.getId(),spec);
+            }
+        }else{ // !needExpE(spec) && needExpT(spec)
+            if(needCrtPath(spec,n)) lassoPath(spec,n);
+            else witnessEonNode(spec,n);
+        }
+        return true;
+    }
+
+    // premise: n.s |= E spec
+    // construct a lasso path r s.t. r|=spec;
+    // r's prefix is shortest and r's loop is within a SCC with minimal number of states
+    public boolean lassoPath(Spec spec,
                             Node n
     ) throws SpecException, ModelCheckException, ModelCheckAlgException, SMVParseException, ModuleException {
         if(n==null) return false;
 
-        BDD feasibleStates=null;
         BDD fromState = n.getAttribute("BDD");
         int pathNo = n.getAttribute("pathNo");
         int stateNo = n.getAttribute("stateNo");
@@ -1732,7 +1779,6 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
 
         SpecExp se = (SpecExp) spec;
         Operator op = se.getOperator();
-        Spec[] child = se.getChildren();
 
         //-------------------------------------------------------------------------------------
         // create a feasible lasso path pi from n such that pi|=spec; and then explainPath(spec, pi, 0);
@@ -1781,44 +1827,56 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             addedTransRestrictions.add(DT.getTransRestriction(oldTransRestrictionsSize));
             DT.removeTransRestriction(oldTransRestrictionsSize);
         }
+        // (16)
         Zp=fromState;
         BDD reach=fromState, glue; // "glue" is the set of states that glues the prefix and the loop together
-        // (17) while Z' ∧ Z = ⊥ do Z' := Z' ◦ R ;
         glue=Zp.and(Z);
-        while (glue.isZero()) {
-            Zp=DT.succ(Zp.id()).and(reach.not()); // Y is the set of new successors that have never visited before
-            reach=reach.id().or(Zp); // "reach" is the set of states visited before
+        while (glue.isZero()) { // (17)
+            Zp=DT.succ(Zp.id()).and(reach.not()); // (18) Y is the set of new successors that have never visited before
+            reach=reach.id().or(Zp); // (19) "reach" is the set of states visited before
             glue=Zp.and(Z);
         }
+        // now "glue" is the set of states that glues the prefix and the loop together
 
         // restore new trans restrictions
         for(int i=0; i<addedTransRestrictions.size(); i++) { DT.restrictTrans(addedTransRestrictions.get(i).id()); }
-        // (18)
+
+        // the following two lines randomly choose one state from "glue"
+/*        BDD t=glue.satOne(DT.moduleUnprimeVars(), false);
+        BDD scc=DT.allPred(t);
+*/
+
+        BDD scc, t;
+        t = glue.satOne(DT.moduleUnprimeVars(), false);
+        scc = DT.allPred(t);
+/*
+        // (20)
         BDD scc=Env.FALSE(), scc2, t=Env.FALSE(), t2;
-        // (19)
-        while (!glue.isZero()) {
-            // (20)
+        while (!glue.isZero()) { // (21)
+            // (22)
             t2=glue.satOne(DT.moduleUnprimeVars(), false);
             glue=glue.id().and(t2.not()); // glue = glue - {t2}
-            // (21)
+            // (23)
             scc2=DT.allPred(t2); // DT.allSucc(t2).and(DT.allPred(t2));
-            // (22)
+            // (24)
             if(scc.isZero() || scc2.satCount(DT.moduleUnprimeVars())<scc.satCount(DT.moduleUnprimeVars())) {
                 scc=scc2; t=t2;
             }
         }
+*/
 
-        // (23-24)
+        // (25-26)
         // restore old trans restrictions
         while(DT.getTransRestrictionsSize()>oldTransRestrictionsSize) { DT.removeTransRestriction(oldTransRestrictionsSize); }
         Vector<BDD> prefix = new Vector<BDD>();
         BDD[] path = DT.shortestPath(fromState, t);
         for (int i = 0; i < path.length-1; i++) // abandon the last state of "path" because it is the first state of the glued loop
             prefix.add(path[i]);
-        // (25)
+
+        // (27)
         DT.restrictTrans(scc.id());
 
-        // (26)
+        // (28)
         Vector<BDD> period = new Vector<BDD>();
         period.add(t);
 
@@ -2010,7 +2068,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     ) throws SpecException, ModelCheckException, ModelCheckAlgException, SMVParseException, ModuleException {
         if(n==null) return false;
 
-        if(!needCrtPath(spec,n)) {explainOnNode(spec, n); return true;}
+        if(!needCrtPath(spec,n)) {
+            witnessEonNode(spec, n); return true;}
         // now needCrtPath(spec,n)
 
         BDD feasibleStates=null;
@@ -2557,7 +2616,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 boolean b1= explainPath(child[0],path,pos);
                 return b1 && explainPath(child[1],path,pos);
             }else if(op==Operator.OR){ //spec=f OR g
-                boolean fNeedExplain = specNeedExplainEE(child[0]) || specNeedExplainTemporalOp(child[0]);
+                boolean fNeedExplain = needExpE(child[0]) || needExpT(child[0]);
                 Spec p,q;
                 if(!fNeedExplain) {p=child[0]; q=child[1];} else {p=child[1]; q=child[0];}
                 BDD pBdd = tester.cacheGetSpecBdd(p); if(pBdd==null) return false; // SpecBDDMap.get(p);
