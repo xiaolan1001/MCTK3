@@ -15,7 +15,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.*;
 
-import static swing.MCTK2Frame.modelTextPaneChanged;
+import static swing.MCTKFrame.modelTextPaneChanged;
 
 class modelDocumentListener implements DocumentListener {
     public void insertUpdate(DocumentEvent e) {
@@ -31,7 +31,7 @@ class modelDocumentListener implements DocumentListener {
 
 
 public class EditorJPanel implements KeyListener, ActionListener, ChangeListener {
-    MCTK2Frame indexJFrame;
+    MCTKFrame indexJFrame;
     static JTextPane rowTextPane;
     static JTextPane modelTextPane =new JTextPane();
     JScrollPane rowScrollPane, textScrollPane;
@@ -46,7 +46,7 @@ public class EditorJPanel implements KeyListener, ActionListener, ChangeListener
 
     //Font  DeFont=new Font("TimesRoman",0,14);
     Font  DeFont=new Font("System",0, VerifyActionListener.inputFontSize);
-    public EditorJPanel(MCTK2Frame indexJFrame)
+    public EditorJPanel(MCTKFrame indexJFrame)
     {
         this.indexJFrame=indexJFrame;
         clipboard=Toolkit.getDefaultToolkit().getSystemClipboard();

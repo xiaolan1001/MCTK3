@@ -14,14 +14,14 @@ import net.sf.javabdd.BDDVarSet;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import org.graphstream.ui.spriteManager.Sprite;
-import swing.MCTK2Frame;
+import swing.MCTKFrame;
 import swing.Statistic;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
-import static swing.MCTK2Frame.*;
+import static swing.MCTKFrame.*;
 
 class CacheSpecTesterInfo {
     Spec spec;
@@ -130,7 +130,7 @@ class NodePath {
 
 
 public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
-    MCTK2Frame mainFrame;
+    MCTKFrame mainFrame;
     private Spec property;
 
     //private Spec chkProp; // the property actually checked
@@ -194,7 +194,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
      *
      * @param design The design to check.
      */
-    public RTCTL_STAR_ModelCheckAlg(MCTK2Frame mainFrame, Module design) {
+    public RTCTL_STAR_ModelCheckAlg(MCTKFrame mainFrame, Module design) {
         super(design);
         this.mainFrame=mainFrame;
 //		this.tester = user_tester;

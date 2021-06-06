@@ -9,16 +9,16 @@ import java.io.*;
 import java.util.Vector;
 
 import static swing.EditorJPanel.modelTextPane;
-import static swing.MCTK2Frame.*;
+import static swing.MCTKFrame.*;
 
 
 public class FileOperation {
     JFileChooser filechoose = new JFileChooser();
-    MCTK2Frame mainFrame;
+    MCTKFrame mainFrame;
     public static String currentPathFileName ="";
     String fileName;
 
-    public FileOperation(MCTK2Frame mainFrame) {
+    public FileOperation(MCTKFrame mainFrame) {
         this.mainFrame = mainFrame;
         filechoose.setAcceptAllFileFilterUsed(false);
         filechoose.addChoosableFileFilter(new MyFileFilter("SMV Code(.smv)", ".smv"));//����ļ�������
@@ -53,7 +53,7 @@ public class FileOperation {
                 Env.seperateSpecsFromSMVfile(content, moduleSpecAnns);
 
                 modelTextPane.setText(moduleSpecAnns.get(0)[0]);
-                MCTK2Frame.modelTextPaneChanged=false;
+                MCTKFrame.modelTextPaneChanged=false;
 
                 if (initSpecAnns!=null) initSpecAnns.clear(); else initSpecAnns=new Vector<String[]>();
                 for(int i=1; i<moduleSpecAnns.size(); i++) {
@@ -80,7 +80,7 @@ public class FileOperation {
     public boolean saveFile() throws IOException {
         if (!currentPathFileName.equals(""))
         {
-            if(!MCTK2Frame.modelTextPaneChanged && !mainFrame.specsTableChanged()){
+            if(!MCTKFrame.modelTextPaneChanged && !mainFrame.specsTableChanged()){
                 consoleOutput(0,"warning", "There is not any change in the model and specification list. Don't need to save the opening file.\n");
                 return true;
             }
@@ -123,7 +123,7 @@ public class FileOperation {
     public boolean saveFile4verification() throws IOException {
         if (!currentPathFileName.equals(""))
         {
-            if(!MCTK2Frame.modelTextPaneChanged && !mainFrame.specsTableChanged()){
+            if(!MCTKFrame.modelTextPaneChanged && !mainFrame.specsTableChanged()){
                 return true;
             }
             Object[] options = {"Save", "Cancel"};

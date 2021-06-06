@@ -17,12 +17,12 @@ import java.io.IOException;
 import static swing.EditorJPanel.modelTextPane;
 import static swing.EditorJPanel.setRowContent;
 import static swing.FileOperation.currentPathFileName;
-import static swing.MCTK2Frame.modelTextPaneChanged;
-import static swing.MCTK2Frame.specsTableChanged;
+import static swing.MCTKFrame.modelTextPaneChanged;
+import static swing.MCTKFrame.specsTableChanged;
 
 public class MenuToolBarJPanel implements ActionListener{
 
-	MCTK2Frame mainFrame;
+	MCTKFrame mainFrame;
 	FileOperation fileOperation;
 	JMenuBar menuBar;
 	public static UndoManager uo;
@@ -39,7 +39,7 @@ public class MenuToolBarJPanel implements ActionListener{
 			//compileButton,
 			helpButton;
 
-	public MenuToolBarJPanel(MCTK2Frame mainFrame)
+	public MenuToolBarJPanel(MCTKFrame mainFrame)
 	{
 		this.mainFrame = mainFrame;
 		fileOperation=new FileOperation(mainFrame);
@@ -130,7 +130,7 @@ public class MenuToolBarJPanel implements ActionListener{
 		about.addActionListener(this);
 
 //		toolBar.setLayout(new FlowLayout(FlowLayout.LEFT));
-		Icon newIcon = new ImageIcon(MCTK2Frame.class.getResource("/swing/Icons/new.png"));
+		Icon newIcon = new ImageIcon(MCTKFrame.class.getResource("/swing/Icons/new.png"));
 		Icon openIcon=new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/open.png"));
 		Icon saveIcon=new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/save.png"));
 		Icon saveAsIcon=new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/saveas.png"));

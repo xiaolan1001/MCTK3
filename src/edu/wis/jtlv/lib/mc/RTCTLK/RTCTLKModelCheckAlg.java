@@ -14,7 +14,7 @@ import net.sf.javabdd.BDD;
 import net.sf.javabdd.BDDVarSet;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
-import swing.MCTK2Frame;
+import swing.MCTKFrame;
 import swing.VerifyActionListener;
 
 import java.awt.*;
@@ -41,9 +41,9 @@ public class RTCTLKModelCheckAlg extends CTLModelCheckAlg{
     @Override
     public AlgResultI preAlgorithm() throws AlgExceptionI {
         if (getProperty() == null)
-            MCTK2Frame.addDocument(MCTK2Frame.outputTextPane,  "\n Cannot model check a null specification.", VerifyActionListener.outputFontSize, Color.RED,1);
+            MCTKFrame.addDocument(MCTKFrame.outputTextPane,  "\n Cannot model check a null specification.", VerifyActionListener.outputFontSize, Color.RED,1);
         else if (!getProperty().isRTCTLKSpec())
-            MCTK2Frame.addDocument(MCTK2Frame.outputTextPane,  "\nCannot model check non RTCTLK specification: " + getProperty(), VerifyActionListener.outputFontSize, Color.RED,1);
+            MCTKFrame.addDocument(MCTKFrame.outputTextPane,  "\nCannot model check non RTCTLK specification: " + getProperty(), VerifyActionListener.outputFontSize, Color.RED,1);
         return null;
     }
 

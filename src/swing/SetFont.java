@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import static swing.MCTK2Frame.editorPanel;
+import static swing.MCTKFrame.editorPanel;
 
 
 public class SetFont implements ActionListener {
@@ -17,8 +17,8 @@ public class SetFont implements ActionListener {
 	JComboBox fontValue;
 	JComboBox styleValue;
 	JComboBox sizeValue;
-	MCTK2Frame indexJFrame;
-	public SetFont(MCTK2Frame indexJFrame)
+	MCTKFrame indexJFrame;
+	public SetFont(MCTKFrame indexJFrame)
 	{
 		this.indexJFrame=indexJFrame;
 		setFontDialog=new JDialog(this.indexJFrame);
@@ -71,7 +71,7 @@ public class SetFont implements ActionListener {
 		setFontDialog.add("West",names);
 		setFontDialog.add("Center", values);
 		setFontDialog.add("South", contral);
-		setFontDialog.setLocation(MCTK2Frame.width/3, MCTK2Frame.height/3);
+		setFontDialog.setLocation(MCTKFrame.width/3, MCTKFrame.height/3);
 		setFontDialog.setSize(240, 210);
 		setFontDialog.setVisible(true);
 	}

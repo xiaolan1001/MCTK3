@@ -14,7 +14,7 @@ import org.graphstream.ui.swingViewer.ViewPanel;
 import org.graphstream.ui.view.Viewer;
 import org.graphstream.ui.view.ViewerListener;
 import org.graphstream.ui.view.ViewerPipe;
-import swing.MCTK2Frame;
+import swing.MCTKFrame;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -24,7 +24,7 @@ import java.awt.event.*;
 
 import static edu.wis.jtlv.lib.mc.RTCTL_STAR.RTCTL_STAR_ModelCheckAlg.simplifySpecString;
 import static java.lang.Double.parseDouble;
-import static swing.MCTK2Frame.consoleOutput;
+import static swing.MCTKFrame.consoleOutput;
 
 public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, MouseMotionListener {
     protected boolean loop = true;
@@ -72,7 +72,7 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
             @Override
             public void windowClosing(WindowEvent e) {
                 super.windowClosing(e);
-                MCTK2Frame.isOpeningCounterexampleWindow=false;
+                MCTKFrame.isOpeningCounterexampleWindow=false;
                 ceFrame.dispose();
             }
         });
@@ -80,7 +80,7 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
         ceFrame.setSize(1280, 800);
         // 把新窗口的位置设置到 relativeWindow 窗口的中心
         //ceFrame.setLocationRelativeTo(this.indexJFrame);
-        Image logoIcon = new ImageIcon(MCTK2Frame.class.getResource("/swing/Icons/logo.png")).getImage();
+        Image logoIcon = new ImageIcon(MCTKFrame.class.getResource("/swing/Icons/logo.png")).getImage();
         ceFrame.setIconImage(logoIcon);
         // 点击窗口关闭按钮, 执行销毁窗口操作（如果设置为 EXIT_ON_CLOSE, 则点击新窗口关闭按钮后, 整个进程将结束）
         ceFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -180,7 +180,7 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
     }
 
     public void viewClosed(String id) {
-        MCTK2Frame.isOpeningCounterexampleWindow=false;
+        MCTKFrame.isOpeningCounterexampleWindow=false;
         loop = false;
     }
 

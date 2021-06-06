@@ -27,7 +27,7 @@ import static swing.VerifyActionListener.addDocument;
 
 public class SetGraphThread implements Runnable, ViewerListener, ActionListener {
     MultiGraph graph;
-    MCTK2Frame indexJFrame;
+    MCTKFrame indexJFrame;
     JFrame newJFrame;
     JTextPane nodeConsole = new JTextPane();
 
@@ -39,7 +39,7 @@ public class SetGraphThread implements Runnable, ViewerListener, ActionListener 
     JMenuItem copy = new JMenuItem("Copy(C)"), clear = new JMenuItem("Clear");
     protected boolean loop = true;
 
-    public SetGraphThread(String spec, MultiGraph graph, MCTK2Frame indexJFrame) {
+    public SetGraphThread(String spec, MultiGraph graph, MCTKFrame indexJFrame) {
         this.graph = graph;
         this.indexJFrame = indexJFrame;
         // 创建一个新窗口
@@ -47,7 +47,7 @@ public class SetGraphThread implements Runnable, ViewerListener, ActionListener 
         newJFrame.setSize((int) (indexJFrame.width * 0.6f), (int) (indexJFrame.height * 0.7f));
         // 把新窗口的位置设置到 relativeWindow 窗口的中心
         newJFrame.setLocationRelativeTo(this.indexJFrame);
-        Image logoIcon = new ImageIcon(MCTK2Frame.class.getResource("/swing/Icons/logo.png")).getImage();
+        Image logoIcon = new ImageIcon(MCTKFrame.class.getResource("/swing/Icons/logo.png")).getImage();
         newJFrame.setIconImage(logoIcon);
         // 点击窗口关闭按钮, 执行销毁窗口操作（如果设置为 EXIT_ON_CLOSE, 则点击新窗口关闭按钮后, 整个进程将结束）
         newJFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);

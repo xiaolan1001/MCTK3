@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Vector;
 
-import static swing.MCTK2Frame.controlPanel;
-import static swing.MCTK2Frame.editorPanel;
+import static swing.MCTKFrame.controlPanel;
+import static swing.MCTKFrame.editorPanel;
 
 
 public class VerifyActionListener implements ActionListener {
@@ -26,7 +26,7 @@ public class VerifyActionListener implements ActionListener {
 
     public static int specInputLineHeight =40;
 
-    MCTK2Frame indexJFrame;
+    MCTKFrame indexJFrame;
     MultiGraph graph;
     JPanel buttonsSpecsPanel, witnessPanel;
     JPopupMenu jPopMenu;
@@ -50,7 +50,7 @@ public class VerifyActionListener implements ActionListener {
     final String atltips = "Please input a RTCTL*SPEC...";
 
 
-    public VerifyActionListener(MCTK2Frame indexJFrame) {
+    public VerifyActionListener(MCTKFrame indexJFrame) {
         this.indexJFrame = indexJFrame;
         clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         buttonsSpecsPanel = new JPanel(new BorderLayout());// (new GridLayout(3,1));
@@ -124,7 +124,7 @@ public class VerifyActionListener implements ActionListener {
      * @author LiangSen
      */
     public JButton createBtn(String text, String icon, int width, int height) {
-        JButton btn = new JButton(text, new ImageIcon(MCTK2Frame.class.getResource(icon)));
+        JButton btn = new JButton(text, new ImageIcon(MCTKFrame.class.getResource(icon)));
         //btn.setUI(new BasicButtonUI());// 恢复基本视觉效果
         btn.setPreferredSize(new Dimension(width, height));// 设置按钮大小
         btn.setForeground(Color.BLUE);
