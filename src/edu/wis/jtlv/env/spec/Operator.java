@@ -22,6 +22,8 @@ public enum Operator {
 	EE, AA,
 	// ATL*
 	CAN_ENFORCE, CANNOT_AVOID,
+	// LDL
+	LDL_REPEAT, LDL_TEST,
 
 	// (2) BINARY............
 	// Prop
@@ -34,6 +36,8 @@ public enum Operator {
 	B_FINALLY, B_GLOBALLY,
 	// EPISTEMIC
 	KNOW, SKNOW,
+	// LDL
+	LDL_OR, LDL_AND, LDL_CONC, LDL_BOUNDED_REPEAT,
 
 	// (3) TRIPLET............
 	// RTLTL
@@ -56,7 +60,7 @@ public enum Operator {
 	public static final Operator[] binaryOp = { AND, OR, XOR, XNOR, IFF,
 			IMPLIES, RELEASES, SINCE, TRIGGERED, UNTIL, ABF, ABG, EBF, EBG, AU,
 			EU, B_FINALLY, B_GLOBALLY, KNOW, NKNOW, SKNOW, NSKNOW };
-	public static final Operator[] tripletOp = { ABU, EBU, B_UNTIL, B_UNTIL0, B_RELEASES};
+	public static final Operator[] tripletOp = {ABU, EBU, B_UNTIL, B_UNTIL0, B_RELEASES};
 
 	// is it propositional, or TL operator.
 	public static final Operator[] propOp = { NOT, AND, OR, XOR, XNOR, IFF,	IMPLIES };

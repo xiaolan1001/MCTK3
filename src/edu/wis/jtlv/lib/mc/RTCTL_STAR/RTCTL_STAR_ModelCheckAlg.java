@@ -5,10 +5,7 @@ import edu.wis.jtlv.env.core.smv.SMVParseException;
 import edu.wis.jtlv.env.core.smv.eval.*;
 import edu.wis.jtlv.env.module.*;
 import edu.wis.jtlv.env.spec.*;
-import edu.wis.jtlv.lib.AlgExceptionI;
-import edu.wis.jtlv.lib.AlgResultI;
-import edu.wis.jtlv.lib.AlgResultPath;
-import edu.wis.jtlv.lib.AlgResultString;
+import edu.wis.jtlv.lib.*;
 import edu.wis.jtlv.lib.mc.ModelCheckAlgException;
 import edu.wis.jtlv.lib.mc.ModelCheckAlgI;
 import edu.wis.jtlv.old_lib.mc.ModelCheckException;
@@ -1118,6 +1115,64 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
 */
     }
 
+    public BDD allPredsIn(BDD p, BDD q) {
+        Module design = getDesign();
+        for (FixPoint<BDD> ires = new FixPoint<BDD>(); ires.advance(q);)
+            q = q.id().or(p.and(design.pred(q.id())));
+        return q;
+    }
+
+    /**
+     * <p>
+     * Li-on's ce_fair_g package <br>
+     * Compute all accessible states satisfying e_fair_g p
+     * </p>
+     * Handles both justice and compassion using Lions algorithm.
+     *
+     * @param p
+     * @return
+     */
+    public BDD ce_fair_g(BDD p) {
+        // some kind of variant to feasible algorithm.
+        ModuleWithStrongFairness design = (ModuleWithStrongFairness) getDesign();
+        // saving the previous restriction state.
+        Vector<BDD> trans_restriction = design.getAllTransRestrictions();
+        BDD res = design.allSucc(design.initial()).and(p);  // Line 2
+
+        // Line 3
+        design.restrictTrans(res.id().and(Env.prime(res.id())));
+
+        for (FixPoint<BDD> ires = new FixPoint<BDD>(); ires.advance(res);) {
+            // I'm doing reverse so it will be completely identical to the
+            // original TLV implementation.
+            for (int i = design.justiceNum() - 1; i >= 0; i--) {
+                res = res.id().and(design.justiceAt(i));
+                res = design.allPred(res.id()).and(design.allSucc(res.id())); // res is the set of states in the SCC, in which each circle path must past Justice i
+                //if (printable) System.out.println("justice No. " + i);
+                design.restrictTrans(res.id().and(Env.prime(res.id())));
+            }
+
+            for (int i = design.compassionNum() - 1; i >= 0; i--) {
+                BDD tmp = res.id().and(design.qCompassionAt(i));
+                tmp = design.allPred(tmp.id()).and(design.allSucc(tmp.id()));
+                res = tmp.or(res.id().and(design.pCompassionAt(i).not()));
+                //if (printable) System.out.println("compassion No. " + i);
+                design.restrictTrans(res.id().and(Env.prime(res.id())));
+            }
+
+            design.removeAllTransRestrictions();
+            BDD resPreds = design.pred(res.id());
+            BDD resSuccs = design.succ(res.id());
+            res = res.id().and(resSuccs).and(resPreds);
+            design.restrictTrans(res.id().and(Env.prime(res.id())));
+        }
+        design.removeAllTransRestrictions();
+
+        // returning to the previous restriction state.
+        design.setAllTransRestrictions(trans_restriction);
+        return this.allPredsIn(p.id(), res.id());
+    }
+
     public AlgResultString modelCheckingOneSpec(Spec aProperty) throws SpecException, ModelCheckException, ModuleException, ModelCheckAlgException, SMVParseException {
         consoleOutput(0,"emph","Model checking RTCTL* property: " + simplifySpecString(aProperty,false) +"\n");
         if(statistic==null) statistic=new Statistic();
@@ -1146,6 +1201,8 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         Vector<BDD> old_ini_restrictions = design.getAllIniRestrictions();
         int chkBdd_idx = design.restrictIni(chkBdd);
         BDD feas = design.feasible();// feas = the feasible states of D||T from design.init /\ chkBdd
+//        BDD feas = ce_fair_g(Env.TRUE());
+
         BDD Init_unSat = feas.and(design.initial()).and(chkBdd);
         // the initial_condition seems redundant
         design.removeIniRestriction(chkBdd_idx);
@@ -1845,11 +1902,12 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
 /*        BDD t=glue.satOne(DT.moduleUnprimeVars(), false);
         BDD scc=DT.allPred(t);
 */
-
+        /*
         BDD scc, t;
         t = glue.satOne(DT.moduleUnprimeVars(), false);
         scc = DT.allPred(t);
-/*
+         */
+
         // (20)
         BDD scc=Env.FALSE(), scc2, t=Env.FALSE(), t2;
         while (!glue.isZero()) { // (21)
@@ -1863,7 +1921,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
                 scc=scc2; t=t2;
             }
         }
-*/
+
 
         // (25-26)
         // restore old trans restrictions

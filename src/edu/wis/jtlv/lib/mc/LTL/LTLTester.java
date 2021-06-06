@@ -176,7 +176,7 @@ public class LTLTester {
                     case GLOBALLY:
                         p_aux = Env.prime(aux);
                         tester.conjunctTrans(aux.biimp(c1.and(p_aux))); // aux <-> (c1 /\ aux')
-                        tester.addJustice(c1.not().or(aux)); // c1 -> aux
+                        tester.addJustice(c1.not().or(aux)); // c1 -> aux  !aux -> !c1
                         break;
                     case PREV:
                         p_aux = Env.prime(aux);

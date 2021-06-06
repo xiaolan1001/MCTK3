@@ -567,6 +567,100 @@ public class InitSpec {
 		return mk_no_check(input, start, exp_str);
 	}
 
+	public static InternalSpec mk_ldl_know(TokenStream input, Token start, String exp_str, InternalSpec l, InternalSpec r)
+			throws SpecParseException {
+
+		if(l.toString().equals(""))
+			throw new SpecParseException("The knowledge formula " + exp_str + " has a NULL agent name.",
+					input, start, null );
+
+		return new InternalSpecExp(exp_str, InternalOp.KNOW, l, r, start);
+	}
+
+	public static InternalSpec mk_ldl_sknow(TokenStream input, Token start, String exp_str, InternalSpec l, InternalSpec r)
+			throws SpecParseException {
+
+		if(l.toString().equals(""))
+			throw new SpecParseException("The knowledge formula " + exp_str + " has a NULL agent name.",
+					input, start, null );
+
+		return new InternalSpecExp(exp_str, InternalOp.SKNOW, l, r, start);
+	}
+
+	public static InternalSpec mk_ldl_or(TokenStream input, Token start, String exp_str, InternalSpec l, InternalSpec r)
+			throws SpecParseException {
+		return new InternalSpecExp(exp_str, InternalOp.LDL_OR, l, r, start);
+	}
+
+	public static InternalSpec mk_ldl_and(TokenStream input, Token start, String exp_str, InternalSpec l, InternalSpec r)
+			throws SpecParseException {
+		return new InternalSpecExp(exp_str, InternalOp.LDL_AND, l, r, start);
+	}
+
+	public static InternalSpec mk_ldl_conc(TokenStream input, Token start, String exp_str, InternalSpec l, InternalSpec r)
+			throws SpecParseException {
+		return new InternalSpecExp(exp_str, InternalOp.LDL_CONC, l, r, start);
+	}
+
+	public static InternalSpec mk_ldl_bounded_repeat(TokenStream input, Token start, String exp_str, InternalSpec l, InternalSpec r)
+			throws SpecParseException {
+		return new InternalSpecExp(exp_str, InternalOp.LDL_BOUNDED_REPEAT, l, r, start);
+	}
+
+	public static InternalSpec mk_ldl_repeat(TokenStream input, Token start, String exp_str, InternalSpec l)
+			throws SpecParseException {
+		return new InternalSpecExp(exp_str, InternalOp.LDL_REPEAT, l, start);
+	}
+
+	public static InternalSpec mk_ldl_test(TokenStream input, Token start, String exp_str, InternalSpec l)
+			throws SpecParseException {
+		return new InternalSpecExp(exp_str, InternalOp.LDL_TEST, l, start);
+	}
+
+	public static InternalSpec mk_ldl_canEnforce(TokenStream input, Token start, String exp_str, WAArrayOfSpec agent_list, InternalSpec l)
+			throws SpecParseException {
+		Vector<InternalSpecAgentIdentifier> agents = new Vector<InternalSpecAgentIdentifier>();
+		HashSet<String> agts_set = new HashSet<String>();
+		for (InternalSpec spec: agent_list.specs ) { // eliminate duplicate agent names
+			InternalSpecAgentIdentifier agt = (InternalSpecAgentIdentifier) spec;
+			if(agts_set.add(agt.getAgentName())) // agt is not duplicate agent name
+				agents.add(agt);
+			else
+				throw new SpecParseException("The ATL* formula \'" + exp_str + "\' has a duplicate agent name \'" + agt.getAgentName() + "\'.",
+						input, start, null );
+		}
+
+		InternalSpec[] elements = new InternalSpec[agents.size()+1];
+		for (int i = 0; i < agents.size(); i++) {
+			elements[i] = agents.elementAt(i);
+		}
+		elements[elements.length-1] = l; // the last element is the subformula l
+
+		return new InternalSpecExp(exp_str, InternalOp.CAN_ENFORCE, elements, start);
+	}
+
+	public static InternalSpec mk_ldl_cannotAvoid(TokenStream input, Token start, String exp_str, WAArrayOfSpec agent_list, InternalSpec l)
+			throws SpecParseException {
+		Vector<InternalSpecAgentIdentifier> agents = new Vector<InternalSpecAgentIdentifier>();
+		HashSet<String> agts_set = new HashSet<String>();
+		for (InternalSpec spec: agent_list.specs ) { // eliminate duplicate agent names
+			InternalSpecAgentIdentifier agt = (InternalSpecAgentIdentifier) spec;
+			if(agts_set.add(agt.getAgentName())) // agt is not duplicate agent name
+				agents.add(agt);
+			else
+				throw new SpecParseException("The ATL* formula \'" + exp_str + "\' has a duplicate agent name \'" + agt.getAgentName() + "\'.",
+						input, start, null );
+		}
+
+		InternalSpec[] elements = new InternalSpec[agents.size()+1];
+		for (int i = 0; i < agents.size(); i++) {
+			elements[i] = agents.elementAt(i);
+		}
+		elements[elements.length-1] = l; // the last element is the subformula l
+
+		return new InternalSpecExp(exp_str, InternalOp.CANNOT_AVOID, elements, start);
+	}
+
 	// ////////////////////////////////////////////////////////////////////////
 	// deleted ////////////////////////////////////////////////////////////////
 	// ////////////////////////////////////////////////////////////////////////

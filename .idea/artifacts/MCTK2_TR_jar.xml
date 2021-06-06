@@ -2,7 +2,7 @@
   <artifact type="jar" name="MCTK2-TR:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/MCTK2_TR_jar</output-path>
     <root id="archive" name="MCTK2-TR.jar">
-      <element id="module-output" name="MCTK2-TR" />
+      <element id="module-output" name="MCTK3" />
       <element id="extracted-dir" path="$PROJECT_DIR$/PARSERS/antlrworks-1.1.7.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/beautyeye_lnf.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/gs-algo-1.3.jar" path-in-jar="/" />

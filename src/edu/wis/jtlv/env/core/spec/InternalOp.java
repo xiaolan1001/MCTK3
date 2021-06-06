@@ -33,8 +33,15 @@ public enum InternalOp {
 	// CTL
 	ABU, EBU,
 	//RTLTL
-	B_RELEASES;
+	B_RELEASES,
 
+	// LDL
+	LDL_OR,
+	LDL_AND,
+	LDL_CONC,
+	LDL_TEST,
+	LDL_REPEAT,
+	LDL_BOUNDED_REPEAT;
 
 	// Extra Prop - Binary
 	// EQ, NEQ, LT, GT, LE, GE, SETIN, UNION, LSHIFT, RSHIFT, MOD, PLUS, MINUS,

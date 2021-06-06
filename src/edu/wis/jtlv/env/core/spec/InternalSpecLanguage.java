@@ -6,5 +6,6 @@ public enum InternalSpecLanguage { // all language includes real-time intervals 
 	LTL,
 	RTCTLs, // RTCTL*
 	ATLs, // ATL*
+	LDL, // RTLDL + RTCTL*
 	INVAR
 }
