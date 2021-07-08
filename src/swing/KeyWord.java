@@ -15,7 +15,7 @@ public class KeyWord {
 				"swconst", "T", "toint", "TRANS", "TRUE", "typeof","union", "unsigned", "uwconst", "V", "VAR", "Word", "word",
 				"word1", "AGENT"};
 		spcKeyWords=new String[]{
-				"INVARSPEC","LTLSPEC", "SPEC","CTLSPEC","PSLSPEC","ATL","ATL*SPEC","RTCTL","RTCTL*SPEC"};
+				"INVARSPEC","LTLSPEC", "SPEC","CTLSPEC","PSLSPEC","ATL","ATL*SPEC","RTCTL","RTCTL*SPEC","RTCDL*SPEC"};
 		operKeyWords=new String[]{
 				"[", "]", ":", "]",	"!",
 "/", "mod", "+", "-",

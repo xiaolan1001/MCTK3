@@ -340,7 +340,7 @@ public class MenuToolBarJPanel implements ActionListener{
 			}.start();//start this thread
 		} else if(e.getActionCommand().equals("About")||e.getSource()==helpButton){
 			Object[] options = {"OK"};
-			JOptionPane.showOptionDialog(mainFrame, "MCTK 2.0.0 : A Symbolic Model Checker for Real-Time Computation Tree Logic RTCTL*\n" +
+			JOptionPane.showOptionDialog(mainFrame, "MCTK 3.0.0 : A Symbolic Model Checker for Real-Time Branching Time Dynamic Logic RTCDL*\n" +
 							"Developers:\n" +
 							"    Xiangyu Luo, Huaqiao University, luoxy@hqu.edu.cn\n" +
 							"    Sen Liang, Huaqiao University, liangsen@hqu.edu.cn\n" +

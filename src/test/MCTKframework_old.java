@@ -130,7 +130,7 @@ public class MCTKframework_old extends WindowAdapter {
         protected MCTKframework_old framework = null;
 
         public mctkFrame(MCTKframework_old controller) {
-            super("MCTK 2.0");
+            super("MCTK 3.0");
             framework = controller;
             setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             addWindowListener(framework);

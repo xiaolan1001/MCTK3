@@ -223,6 +223,24 @@ public class InternalSpecExp extends InternalSpec {
 		if (op == InternalOp.B_UNTIL)
 			return "(" + ch[1] + " BU " + ch[0] + " " + ch[2] + ")";
 
+		// LDL
+		if (op == InternalOp.LDL_TEST)
+			return "(" + ch[0] + ")?";
+		if (op == InternalOp.LDL_AND)
+			return ch[0] + "&&" + ch[1];
+		if (op == InternalOp.LDL_OR)
+			return ch[0] + "||" + ch[1];
+		if (op == InternalOp.LDL_CONC)
+			return ch[0] + "," + ch[1];
+		if (op == InternalOp.LDL_REPEAT)
+			return "(" + ch[0] + ")[*]";
+		if (op == InternalOp.LDL_BOUNDED_REPEAT)
+			return "(" + ch[0] + ")[*" + ch[1] + "]";
+		if (op == InternalOp.LDL_SERE_SAT)
+			return "(" + ch[0] + "):-(" + ch[1] + ")";
+		if (op == InternalOp.LDL_SERE_IMP)
+			return "(" + ch[0] + "):=(" + ch[1] + ")";
+
 		// simple unary
 		if (op.isUnary())
 			return "(" + op + " " + ch[0] + ")";

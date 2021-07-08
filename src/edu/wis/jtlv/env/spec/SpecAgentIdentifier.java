@@ -107,6 +107,23 @@ public class SpecAgentIdentifier implements Spec {
 		return true;
 	}
 
+	@Override
+	public boolean isLDLSpec(StringBuilder syntaxMsg) {
+		syntaxMsg.delete(0,syntaxMsg.length());
+		return true;
+	}
+
+	@Override
+	public boolean isSereSpec(StringBuilder syntaxMsg) {
+		syntaxMsg.delete(0,syntaxMsg.length());
+		return true;
+	}
+
+	@Override
+	public boolean isCDLstarSpec(StringBuilder syntaxMsg) throws SpecException {
+		return true;
+	}
+
 	/* (non-Javadoc)
 	 * @see edu.wis.jtlv.env.spec.Spec#hasTemporalOperators()
 	 */
@@ -150,6 +167,11 @@ public class SpecAgentIdentifier implements Spec {
 	 */
 	public String toString() {
 		return getAgentName();
+	}
+
+	@Override
+	public String toStringBracketed(String lBracket, String rBracket){
+		return this.toString();
 	}
 
 	/* (non-Javadoc)

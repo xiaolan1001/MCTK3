@@ -567,7 +567,7 @@ public class InitSpec {
 		return mk_no_check(input, start, exp_str);
 	}
 
-	public static InternalSpec mk_ldl_know(TokenStream input, Token start, String exp_str, InternalSpec l, InternalSpec r)
+	public static InternalSpec mk_cdls_know(TokenStream input, Token start, String exp_str, InternalSpec l, InternalSpec r)
 			throws SpecParseException {
 
 		if(l.toString().equals(""))
@@ -577,7 +577,7 @@ public class InitSpec {
 		return new InternalSpecExp(exp_str, InternalOp.KNOW, l, r, start);
 	}
 
-	public static InternalSpec mk_ldl_sknow(TokenStream input, Token start, String exp_str, InternalSpec l, InternalSpec r)
+	public static InternalSpec mk_cdls_sknow(TokenStream input, Token start, String exp_str, InternalSpec l, InternalSpec r)
 			throws SpecParseException {
 
 		if(l.toString().equals(""))
@@ -617,7 +617,7 @@ public class InitSpec {
 		return new InternalSpecExp(exp_str, InternalOp.LDL_TEST, l, start);
 	}
 
-	public static InternalSpec mk_ldl_canEnforce(TokenStream input, Token start, String exp_str, WAArrayOfSpec agent_list, InternalSpec l)
+	public static InternalSpec mk_cdls_canEnforce(TokenStream input, Token start, String exp_str, WAArrayOfSpec agent_list, InternalSpec l)
 			throws SpecParseException {
 		Vector<InternalSpecAgentIdentifier> agents = new Vector<InternalSpecAgentIdentifier>();
 		HashSet<String> agts_set = new HashSet<String>();
@@ -639,7 +639,7 @@ public class InitSpec {
 		return new InternalSpecExp(exp_str, InternalOp.CAN_ENFORCE, elements, start);
 	}
 
-	public static InternalSpec mk_ldl_cannotAvoid(TokenStream input, Token start, String exp_str, WAArrayOfSpec agent_list, InternalSpec l)
+	public static InternalSpec mk_cdls_cannotAvoid(TokenStream input, Token start, String exp_str, WAArrayOfSpec agent_list, InternalSpec l)
 			throws SpecParseException {
 		Vector<InternalSpecAgentIdentifier> agents = new Vector<InternalSpecAgentIdentifier>();
 		HashSet<String> agts_set = new HashSet<String>();
@@ -659,6 +659,14 @@ public class InitSpec {
 		elements[elements.length-1] = l; // the last element is the subformula l
 
 		return new InternalSpecExp(exp_str, InternalOp.CANNOT_AVOID, elements, start);
+	}
+
+    public static InternalSpec mk_ldl_sere_sat(TokenStream input, Token start, String exp_str, InternalSpec ret, InternalSpec ret1) throws SpecParseException {
+		return new InternalSpecExp(exp_str, InternalOp.LDL_SERE_SAT, ret, ret1, start);
+    }
+
+	public static InternalSpec mk_ldl_sere_imp(TokenStream input, Token start, String exp_str, InternalSpec ret, InternalSpec ret1) throws SpecParseException {
+		return new InternalSpecExp(exp_str, InternalOp.LDL_SERE_IMP, ret, ret1, start);
 	}
 
 	// ////////////////////////////////////////////////////////////////////////

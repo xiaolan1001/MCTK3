@@ -7,6 +7,7 @@ import edu.wis.jtlv.env.module.SMVModule;
 import edu.wis.jtlv.env.spec.Spec;
 import edu.wis.jtlv.env.spec.SpecException;
 import edu.wis.jtlv.lib.mc.ModelCheckAlgException;
+import edu.wis.jtlv.lib.mc.RTCDLs.RTCDLs_ModelCheckAlg;
 import edu.wis.jtlv.lib.mc.RTCTL_STAR.RTCTL_STAR_ModelCheckAlg;
 import edu.wis.jtlv.lib.mc.RTCTL_STAR.ViewerExplainRTCTLs;
 import edu.wis.jtlv.old_lib.mc.ModelCheckException;
@@ -34,7 +35,7 @@ class SpecsTableModel extends AbstractTableModel {
 	private String[] columnNames = {
 			"No",
 			"Logic",
-			"RTCTL* Spec",
+			"RTCDL* Spec",
 			"Annotation"};
 	private Object[][] data = {
 	};
@@ -262,7 +263,7 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 		Image logoIcon = new ImageIcon(MCTKFrame.class.getResource("/swing/Icons/logo.png")).getImage();
 		this.setIconImage(logoIcon);
 		initBackgroundPanel();
-		this.setTitle("  MCTK 2.0  ");
+		this.setTitle("  MCTK 3.0  ");
 		this.setSize((int) (width * 0.8f), (int) (height));
 		this.setVisible(true);
 		this.setLocationRelativeTo(null);
@@ -449,12 +450,11 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 
 			@Override
 			public boolean isCellEditable(int row, int column) {
-				if(column<colSpec) return false;
+				if(column<colLogic) return false;
 				return true;
 			}
 
 		};
-
 
 		DefaultTableCellRenderer  r  =  new DefaultTableCellRenderer();
 		r.setHorizontalAlignment(JTextField.CENTER);
@@ -464,10 +464,15 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 		TableColumn c=specsTable.getColumn("No");
 		c.setCellRenderer(r);
 
-		setColumnSize(specsTable, colLogic,60,60,60);
+		setColumnSize(specsTable, colLogic,85,85,85);
 		specsTable.getColumn("Logic").setCellRenderer(r);
 		c=specsTable.getColumn("Logic");
 		c.setCellRenderer(r);
+
+		JComboBox logicComboBox = new JComboBox();
+		logicComboBox.addItem("RTCDL*");
+		logicComboBox.addItem("RTCTL*");
+		c.setCellEditor(new DefaultCellEditor(logicComboBox));
 
 		setColumnSize(specsTable,colSpec,1000,30,3000);
 
@@ -540,8 +545,6 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 		verifyLabel.setName("Verify");
 	}
 */
-
-
 
 	public JLabel CreateMenuLabel(JLabel jlabel, String text, String name, JPanel jpanel) {
 		Icon icon = new ImageIcon(MCTKFrame.class.getResource("/swing/Icons/" + name + ".png"));
@@ -662,7 +665,7 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 			//System.out.println("add spec clicked");
 			int row=specsTable.getRowCount();
 
-			insertSpec(row, "RTCTL*","", "");
+			insertSpec(row, "RTCDL*","", "");
 
 			specsTable.setEditingRow(row);
 			specsTable.setEditingColumn(2); // spec column
@@ -674,7 +677,7 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 			if(specsTable.getRowCount()<=0 || specsTable.getSelectedRow()==-1) row=0;
 			else row=specsTable.getSelectedRow();
 
-			insertSpec(row, "RTCTL*","", "");
+			insertSpec(row, "RTCDL*","", "");
 
 			specsTable.setEditingRow(row);
 			specsTable.setEditingColumn(2); // spec column
@@ -686,7 +689,7 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 		if(e.getSource()==verifySpecButton){
 			try {
 				verifyEditingModel();
-			} catch (IOException ex) {
+			} catch (IOException | SpecException | SMVParseException | ModelCheckException | ModuleException | ModelCheckAlgException ex) {
 				ex.printStackTrace();
 			}
 		}
@@ -706,7 +709,7 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 
 	}
 
-	public void verifyEditingModel() throws IOException {
+	public void verifyEditingModel() throws IOException, SpecException, SMVParseException, ModelCheckException, ModuleException, ModelCheckAlgException {
 		if(isOpeningCounterexampleWindow){
 			consoleOutput(0,"warning", "Please close the counterexample window before verification.\n");
 			return;
@@ -719,7 +722,7 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 				return;
 			}else {
 				if(specsTableModel.getRowCount()<=0){
-					consoleOutput(0,"warning", "Please input a RTCTL*SPEC specification.\n");
+					consoleOutput(0,"warning", "Please input a specification.\n");
 					return;
 				}else { // the model and the spec list both are not empty, but the filename is empty, try to saveAs
 					Object[] options = {"Save", "Cancel"};
@@ -757,28 +760,28 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 		row=specsTable.getSelectedRow();
 		if(row==-1) { consoleOutput(0,"warning", "Select one specification please.\n"); return; }
 
+		String logicStr=(String)specsTableModel.getValueAt(row, colLogic);
 		String specStr=(String)specsTableModel.getValueAt(row, colSpec);
 		Spec spec=generateSpec(row);
+		StringBuilder syntaxMsg=new StringBuilder("");
 		if(spec==null) {
 			consoleOutput(0,"error", "There is syntax error in specification "+specStr+"\n");
 			return;
+		}else if(logicStr.equals("RTCTL*") && !spec.isCTLStarSpec()) {
+			consoleOutput(0,"error", "The inputted specification \""+specStr+"\" is not RTCTL*\n");
+			return;
+		}else if(logicStr.equals("RTCDL*") && !spec.isLDLSpec(syntaxMsg)) {
+			consoleOutput(0,"error", "The specification \""+specStr+"\" is not RTCDL*. The reason is that \"" + syntaxMsg + "\"\n");
+			return;
 		}
 
-		RTCTL_STAR_ModelCheckAlg alg = new RTCTL_STAR_ModelCheckAlg(this, smvModule);
-		try {
+		if(logicStr.equals("RTCTL*")) {
+			RTCTL_STAR_ModelCheckAlg alg = new RTCTL_STAR_ModelCheckAlg(this, smvModule);
 			alg.modelCheckingOneSpec(spec);
-		} catch (SpecException ex) {
-			ex.printStackTrace();
-		} catch (ModelCheckException ex) {
-			ex.printStackTrace();
-		} catch (ModuleException ex) {
-			ex.printStackTrace();
-		} catch (ModelCheckAlgException ex) {
-			ex.printStackTrace();
-		} catch (SMVParseException ex) {
-			ex.printStackTrace();
-		}
-
+		}else if(logicStr.equals("RTCDL*")) {
+			RTCDLs_ModelCheckAlg alg = new RTCDLs_ModelCheckAlg(this, smvModule);
+			alg.modelCheckingOneSpec(spec);
+		}else return;
 	}
 
 	@Override
@@ -800,7 +803,7 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 		String inputSpec = ((String) specsTableModel.getValueAt(row, colSpec)).trim();
 
 		if(inputSpec!=null && inputSpec!=""){
-			String aLine="RTCTL*SPEC "+inputSpec.trim();
+			String aLine=((String) specsTableModel.getValueAt(row, colLogic)).trim() + "SPEC " + inputSpec.trim() + " ;";
 			Spec[] specs = Env.loadSpecString(aLine);
 			if(specs==null || specs[0]==null) return null;
 			else return specs[0];
@@ -811,12 +814,13 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 	public String generateSpecsString(boolean checkSyntax){
 		String s="";
 		for(int row=0; row<specsTableModel.getRowCount();row++){
+			String inputLogic = ((String) specsTableModel.getValueAt(row, colLogic)).trim();
 			String inputSpec = ((String) specsTableModel.getValueAt(row, colSpec)).trim();
 			String inputAnn = ((String) specsTableModel.getValueAt(row, colAnnotation)).trim();
 			Spec spec=null;
 			if(checkSyntax) spec=generateSpec(row);
 			if(!checkSyntax || (checkSyntax && spec!=null)){
-				String aLine="RTCTL*SPEC "+inputSpec.trim()+";";
+				String aLine = ((String) specsTableModel.getValueAt(row, colLogic)).trim() + "SPEC " + inputSpec.trim() + ";";
 				if(!inputAnn.equals("")) aLine+=" --"+inputAnn+"\r\n"; else aLine+="\r\n";
 				s+=aLine;
 			}else{
@@ -842,16 +846,19 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 
 	public static boolean specsTableChanged(){
 		if(specsTable.isEditing()) specsTable.getCellEditor().stopCellEditing();
+
 		if(initSpecAnns==null && specsTableModel.getRowCount()==0) return false;
-		if(initSpecAnns==null && specsTableModel.getRowCount()>00) return true;
+		if(initSpecAnns==null && specsTableModel.getRowCount()>0) return true;
 
 		if(initSpecAnns.size()!=specsTableModel.getRowCount()) return true;
 
 		for(int row=0; row<specsTableModel.getRowCount(); row++){
+			String logic=((String)specsTableModel.getValueAt(row,colLogic)).trim();
 			String spec=((String)specsTableModel.getValueAt(row,colSpec)).trim();
 			String ann=((String)specsTableModel.getValueAt(row,colAnnotation)).trim();
-			if(!spec.equals(initSpecAnns.get(row)[0])) return true;
-			if(!ann.equals(initSpecAnns.get(row)[1])) return true;
+			if(!logic.equals(initSpecAnns.get(row)[0])) return true;
+			if(!spec.equals(initSpecAnns.get(row)[1])) return true;
+			if(!ann.equals(initSpecAnns.get(row)[2])) return true;
 		}
 		return false;
 	}

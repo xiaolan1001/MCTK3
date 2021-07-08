@@ -37,7 +37,7 @@ public enum Operator {
 	// EPISTEMIC
 	KNOW, SKNOW,
 	// LDL
-	LDL_OR, LDL_AND, LDL_CONC, LDL_BOUNDED_REPEAT,
+	LDL_OR, LDL_AND, LDL_CONC, LDL_BOUNDED_REPEAT, LDL_SERE_SAT, LDL_SERE_IMP,
 
 	// (3) TRIPLET............
 	// RTLTL
@@ -56,10 +56,11 @@ public enum Operator {
 	// number of operands...
 	public static final Operator[] unaryOp = { NOT, FINALLY, GLOBALLY,
 			HISTORICALLY, NEXT, NOT_PREV_NOT, ONCE, PREV, EX, EF, EG, AX, AF,
-			AG, EE, AA, CAN_ENFORCE, CANNOT_AVOID};
+			AG, EE, AA, CAN_ENFORCE, CANNOT_AVOID, LDL_REPEAT, LDL_TEST};
 	public static final Operator[] binaryOp = { AND, OR, XOR, XNOR, IFF,
 			IMPLIES, RELEASES, SINCE, TRIGGERED, UNTIL, ABF, ABG, EBF, EBG, AU,
-			EU, B_FINALLY, B_GLOBALLY, KNOW, NKNOW, SKNOW, NSKNOW };
+			EU, B_FINALLY, B_GLOBALLY, KNOW, NKNOW, SKNOW, NSKNOW,
+			LDL_OR, LDL_AND, LDL_CONC, LDL_BOUNDED_REPEAT, LDL_SERE_SAT, LDL_SERE_IMP};
 	public static final Operator[] tripletOp = {ABU, EBU, B_UNTIL, B_UNTIL0, B_RELEASES};
 
 	// is it propositional, or TL operator.
@@ -79,6 +80,10 @@ public enum Operator {
 
 	public static final Operator[] CTLsPathOp = { EE, AA };
 	public static final Operator[] ATLsPathOp = {CAN_ENFORCE, CANNOT_AVOID};
+
+	public static final Operator[] LDLPathOp = {LDL_SERE_SAT, LDL_SERE_IMP};
+	public static final Operator[] LDLSereOp = {LDL_TEST, LDL_OR, LDL_AND, LDL_CONC, LDL_REPEAT, LDL_BOUNDED_REPEAT};
+
 
 	private boolean in(Operator[] set) {
 		for (Operator op : set)
@@ -196,6 +201,13 @@ public enum Operator {
 		return this.in(ATLsPathOp);
 	}
 
+	public boolean isLDLPathOp() {
+		return this.in(LDLPathOp);
+	}
+
+	public boolean isLDLSereOp() {
+		return this.in(LDLSereOp);
+	}
 
 	/**
 	 * <p>

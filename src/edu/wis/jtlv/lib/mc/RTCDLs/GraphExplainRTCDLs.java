@@ -1,4 +1,4 @@
-package edu.wis.jtlv.lib.mc.LDL;
+package edu.wis.jtlv.lib.mc.RTCDLs;
 
 import edu.wis.jtlv.env.Env;
 import edu.wis.jtlv.env.spec.Spec;
@@ -72,21 +72,21 @@ class GraphEdgeSpecInfo{
     }
 }
 
-public class GraphExplainLDL extends MultiGraph {
+public class GraphExplainRTCDLs extends MultiGraph {
     private SpriteManager sman;
     public String negSpecStr="";
 
-    public LDLModelCheckAlg getChecker() {
+    public RTCDLs_ModelCheckAlg getChecker() {
         return checker;
     }
 
-    public void setChecker(LDLModelCheckAlg checker) {
+    public void setChecker(RTCDLs_ModelCheckAlg checker) {
         this.checker = checker;
     }
 
-    private LDLModelCheckAlg checker;
+    private RTCDLs_ModelCheckAlg checker;
 
-    public GraphExplainLDL(String specStr, String negSpecStr, LDLModelCheckAlg checker) {
+    public GraphExplainRTCDLs(String specStr, String negSpecStr, RTCDLs_ModelCheckAlg checker) {
         super("A counterexample of " + specStr);
         this.negSpecStr=negSpecStr;
         this.checker = checker;
@@ -188,11 +188,11 @@ public class GraphExplainLDL extends MultiGraph {
         s.setAttribute("spec",spec);
 
         if(spec.isPropSpec() && spec.toBDD().isOne()) return true;  // do not explain TRUE
-        boolean needExplained = LDLModelCheckAlg.needExpE(spec) || LDLModelCheckAlg.needExpT(spec);
+        boolean needExplained = RTCDLs_ModelCheckAlg.needExpE(spec) || RTCDLs_ModelCheckAlg.needExpT(spec);
         s.setAttribute("needExplained", needExplained);
 
         s.setAttribute("explained", false);
-        s.setAttribute("ui.label","⊨"+ LDLModelCheckAlg.simplifySpecString(spec,false));
+        s.setAttribute("ui.label","⊨"+ RTCDLs_ModelCheckAlg.simplifySpecString(spec,false));
         s.attachToNode(nodeId);
 
         n.setAttribute("spriteSpec"+specNum, s);
@@ -253,7 +253,7 @@ public class GraphExplainLDL extends MultiGraph {
             Sprite s=n.getAttribute("spriteSpec"+i);
             Spec spec=s.getAttribute("spec");
             String d=""; if(ret.equals("")) d=""; else d="\n";
-            ret+=d+ LDLModelCheckAlg.simplifySpecString(spec,false);
+            ret+=d+ RTCDLs_ModelCheckAlg.simplifySpecString(spec,false);
         }
         return ret;
     }
@@ -337,7 +337,7 @@ public class GraphExplainLDL extends MultiGraph {
 
         if(spec.isPropSpec() && spec.toBDD().isOne()) return true;  // do not explain TRUE
         boolean needExplained = !onlyShow &&
-                (LDLModelCheckAlg.needExpE(spec) || LDLModelCheckAlg.needExpT(spec));
+                (RTCDLs_ModelCheckAlg.needExpE(spec) || RTCDLs_ModelCheckAlg.needExpT(spec));
         s.setAttribute("needExplained", needExplained);
 
         s.setAttribute("path",path);
@@ -346,7 +346,7 @@ public class GraphExplainLDL extends MultiGraph {
         s.setAttribute("explained", false);
         s.setAttribute("ui.label",
                 "path"+(path.pathIndex+1)+((pos==0)?"":","+pos)
-                        +"⊨"+ LDLModelCheckAlg.simplifySpecString(spec,false));
+                        +"⊨"+ RTCDLs_ModelCheckAlg.simplifySpecString(spec,false));
         s.attachToEdge(edgeId);
 
         e.setAttribute("spriteSpec"+specNum, s);

@@ -47,7 +47,7 @@ public class VerifyActionListener implements ActionListener {
     Icon minIcon = new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/minusm.gif"));
     Icon witIcon = new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/witm.gif"));
     Icon verIcon = new ImageIcon(MenuToolBarJPanel.class.getResource("/swing/Icons/verm.gif"));
-    final String atltips = "Please input a RTCTL*SPEC...";
+    final String atltips = "Please input a RTCDL*SPEC...";
 
 
     public VerifyActionListener(MCTKFrame indexJFrame) {
@@ -168,9 +168,9 @@ public class VerifyActionListener implements ActionListener {
             if (atltips.equalsIgnoreCase(specific) || specific.equals("") || specific.trim().startsWith("--"))
                 addDocument(outputTextPane, "\n Sorry,please input a specification !", outputFontSize, Color.red, 2);
             else if (specific.endsWith(";"))
-                runModelChecking("RTCTL*SPEC ".concat(specific), false);
+                runModelChecking("RTCDL*SPEC ".concat(specific), false);
             else
-                runModelChecking("RTCTL*SPEC ".concat(specific) + ";", false);
+                runModelChecking("RTCDL*SPEC ".concat(specific) + ";", false);
         } else if (((JButton) e.getSource()).getText().equals("Extract Spec")) {
             if (ExtractSpec()) {
                 Object[] options = {"OK"};
@@ -233,7 +233,7 @@ public class VerifyActionListener implements ActionListener {
         addButton.setActionCommand("atlADD");
         JButton delButton = new JButton("-"); //minIcon);
 
-        String tips = "Please input a RTCTL*SPEC...";
+        String tips = "Please input a RTCDL*SPEC...";
         JTextArea specTextArea = new JTextArea();// 文本窗格
         specTextArea.setPreferredSize(new Dimension(650, specInputLineHeight));
         specTextArea.setText("");
@@ -307,9 +307,9 @@ public class VerifyActionListener implements ActionListener {
                     if (tips.equalsIgnoreCase(specific) || specific.equals("") || specific.trim().startsWith("--"))
                         addDocument(outputTextPane, "\n Sorry,please input a specification !", outputFontSize, Color.red, 2);
                     else if (specific.endsWith(";"))
-                        runModelChecking("RTCTL*SPEC ".concat(specific), false);
+                        runModelChecking("RTCDL*SPEC ".concat(specific), false);
                     else
-                        runModelChecking("RTCTL*SPEC ".concat(specific) + ";", false);
+                        runModelChecking("RTCDL*SPEC ".concat(specific) + ";", false);
                 }
             }
         });
@@ -325,9 +325,9 @@ public class VerifyActionListener implements ActionListener {
             String s = itatll.next().getText();
             if (!"".equals(s) && !s.equals("Please input a ATL*SPEC...") && !s.trim().startsWith("--"))
                 if (!s.endsWith(";"))
-                    atlstr += "\nRTCTL*SPEC " + s + ";";
+                    atlstr += "\nRTCDL*SPEC " + s + ";";
                 else
-                    atlstr += "\nRTCTL*SPEC " + s;
+                    atlstr += "\nRTCDL*SPEC " + s;
         }
         return atlstr;
     }
@@ -341,7 +341,7 @@ public class VerifyActionListener implements ActionListener {
         } else
             addDocument(outputTextPane, "\n =====Automatic Loading Specs=======", outputFontSize, Color.GREEN, 1);
         for (int i = 0; i < all_specs.length; i++) {
-            if (all_specs[i].startsWith("RTCTL*SPEC")) {
+            if (all_specs[i].startsWith("RTCDL*SPEC")) {
                 if (atltips.equals(specTextArea.getText()))
                     specTextArea.setText(all_specs[i].replaceAll("RTCTL\\*SPEC", "").toString());
                 else

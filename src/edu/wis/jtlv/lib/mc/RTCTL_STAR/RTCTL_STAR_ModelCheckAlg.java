@@ -128,7 +128,6 @@ class NodePath {
 }
 
 
-
 public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     MCTKFrame mainFrame;
     private Spec property;

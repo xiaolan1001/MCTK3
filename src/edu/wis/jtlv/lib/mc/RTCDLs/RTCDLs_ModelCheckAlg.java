@@ -1,4 +1,4 @@
-package edu.wis.jtlv.lib.mc.LDL;
+package edu.wis.jtlv.lib.mc.RTCDLs;
 
 import edu.wis.jtlv.env.Env;
 import edu.wis.jtlv.env.core.smv.SMVParseException;
@@ -37,7 +37,7 @@ class CacheSpecTesterInfo {
 
 // the tester contains the initial conditions and transitions of ALL temporal operators in a spec
 // including these temporal operators restricted by path quantifier E or A
-class LDLTester {
+class RTCDLsTester {
     SMVModule module;
     Vector<String> auxVarNames;
     LinkedHashMap<String, CacheSpecTesterInfo> cacheSpecsInfo;
@@ -46,7 +46,7 @@ class LDLTester {
         // for element <specStr, bdd>, specStr is the string of a principally temporal spec
         // bdd is the BDD of the spec's output formula
 
-    LDLTester(){
+    RTCDLsTester(){
         module=new SMVModule("Tester");
         module.conjunctTrans(Env.TRUE());
         auxVarNames=new Vector<String>();
@@ -58,7 +58,7 @@ class LDLTester {
     }
 
     CacheSpecTesterInfo cachePutSpec(Spec spec, BDD specBdd){
-        return cacheSpecsInfo.put(spec.toString(), new CacheSpecTesterInfo(spec,specBdd));
+        return cacheSpecsInfo.put(spec.toString(),new CacheSpecTesterInfo(spec,specBdd));
     }
 
     CacheSpecTesterInfo cacheGetSpec(String specStr){
@@ -128,7 +128,7 @@ class NodePath {
 }
 
 
-public class LDLModelCheckAlg extends ModelCheckAlgI {
+public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
     MCTKFrame mainFrame;
     private Spec property;
 
@@ -138,7 +138,7 @@ public class LDLModelCheckAlg extends ModelCheckAlgI {
 
     private BDD feasibleStatesForWitnessE=null;
 
-    private LDLTester tester=null;
+    private RTCDLsTester tester=null;
 
     private int tester_id = 0;
     private int field_id = 0;
@@ -146,12 +146,12 @@ public class LDLModelCheckAlg extends ModelCheckAlgI {
 
     private Vector<NodePath> trunkNodePaths = new Vector<NodePath>();
 
-    private GraphExplainLDL graph; //used for displaying witness graph
+    private GraphExplainRTCDLs graph; //used for displaying witness graph
 
-    public void setGraph(GraphExplainLDL g){
+    public void setGraph(GraphExplainRTCDLs g){
         this.graph = g;
     }
-    public GraphExplainLDL getGraph() {
+    public GraphExplainRTCDLs getGraph() {
         return this.graph;
     }
 
@@ -179,7 +179,7 @@ public class LDLModelCheckAlg extends ModelCheckAlgI {
      * @param design   The design to check.
      * @param property The property to check.
      */
-    public LDLModelCheckAlg(Module design, Spec property) {
+    public RTCDLs_ModelCheckAlg(Module design, Spec property) {
         super(design);
         this.property = property;
     }
@@ -193,7 +193,7 @@ public class LDLModelCheckAlg extends ModelCheckAlgI {
      *
      * @param design The design to check.
      */
-    public LDLModelCheckAlg(MCTKFrame mainFrame, Module design) {
+    public RTCDLs_ModelCheckAlg(MCTKFrame mainFrame, Module design) {
         super(design);
         this.mainFrame=mainFrame;
 //		this.tester = user_tester;
@@ -230,7 +230,7 @@ public class LDLModelCheckAlg extends ModelCheckAlgI {
         SMVModule design = (SMVModule) getDesign();
         SpecExp se = (SpecExp) spec;
         Operator op = se.getOperator();
-        Spec[] child = se.getChildren();
+        Spec[] ch = se.getChildren();
         BDD lc = null, rc = null;
         ModuleBDDField x = null;
         BDD xBdd; // output variable of the tester
@@ -240,21 +240,24 @@ public class LDLModelCheckAlg extends ModelCheckAlgI {
         // logical connectives
         //-----------------------------------------------------------------------------------------------------------
         if (op == Operator.NOT) {
-            lc = sat(child[0]);
+            lc = sat(ch[0]);
             specBdd = lc.not();
-            tester.cachePutSpec(spec,specBdd); return specBdd;
+            tester.cachePutSpec(spec,specBdd);
+            return specBdd;
         }
         if (op == Operator.AND) {
-            lc = sat(child[0]);
-            rc = sat(child[1]);
+            lc = sat(ch[0]);
+            rc = sat(ch[1]);
             specBdd=lc.and(rc);
-            tester.cachePutSpec(spec,specBdd); return specBdd;
+            tester.cachePutSpec(spec,specBdd);
+            return specBdd;
         }
         if (op == Operator.OR) {
-            lc = sat(child[0]);
-            rc = sat(child[1]);
+            lc = sat(ch[0]);
+            rc = sat(ch[1]);
             specBdd=lc.or(rc);
-            tester.cachePutSpec(spec,specBdd); return specBdd;
+            tester.cachePutSpec(spec,specBdd);
+            return specBdd;
         }
         //-----------------------------------------------------------------------------------------------------------
         // path quantifiers
@@ -268,32 +271,35 @@ public class LDLModelCheckAlg extends ModelCheckAlgI {
         // the tester of the temporal formula spec will be composited into specTester
         //-----------------------------------------------------------------------------------------------------------
         if (op == Operator.NEXT) {
-            lc = sat(child[0]);
+            lc = sat(ch[0]);
             x = tester.module.addVar("X" + (++field_id)); // boolean variable
             xBdd = x.getDomain().ithVar(1);
             BDD p_lc = Env.prime(lc);
             tester.module.conjunctTrans(xBdd.imp(p_lc));
-            tester.cachePutSpec(spec,xBdd); return xBdd;
+            tester.cachePutSpec(spec,xBdd);
+            return xBdd;
         }
         if (op == Operator.UNTIL) {
-            lc = sat(child[0]);
-            rc = sat(child[1]);
+            lc = sat(ch[0]);
+            rc = sat(ch[1]);
             x = tester.module.addVar("X" + (++field_id)); // boolean variable
             xBdd = x.getDomain().ithVar(1);
             BDD p_x = Env.prime(xBdd);
             //tester.addInitial(xBdd.imp(c1.or(c2)));
             tester.module.conjunctTrans(xBdd.imp(rc.or(lc.and(p_x))));
             tester.module.addJustice(xBdd.imp(rc));
-            tester.cachePutSpec(spec,xBdd); return xBdd;
+            tester.cachePutSpec(spec,xBdd);
+            return xBdd;
         }
         if (op == Operator.RELEASES) {
-            lc = sat(child[0]);
-            rc = sat(child[1]);
+            lc = sat(ch[0]);
+            rc = sat(ch[1]);
             x = tester.module.addVar("X" + (++field_id)); // boolean variable
             xBdd = x.getDomain().ithVar(1);
             BDD p_x = Env.prime(xBdd);
             tester.module.conjunctTrans(xBdd.imp(rc.and(lc.or(p_x))));
-            tester.cachePutSpec(spec,xBdd); return xBdd;
+            tester.cachePutSpec(spec,xBdd);
+            return xBdd;
         }
         if (op == Operator.B_UNTIL) {
             return satBUNTIL(spec);
@@ -301,8 +307,35 @@ public class LDLModelCheckAlg extends ModelCheckAlgI {
         if (op == Operator.B_RELEASES) {
             return satBRELEASE(spec);
         }
+
+        // LDL operators
+        if(op == Operator.LDL_SERE_SAT){ // <ch[0]> ch[1]
+            return satLDLsereSAT(spec);
+        }
+        if(op == Operator.LDL_SERE_IMP){ // [ch[0]] ch[1]
+            return satLDLsereIMP(spec);
+        }
+
         //otherwise
         throw new ModelCheckException("Cannot handle the specification " + spec + ".");
+    }
+
+    // Premise: sereSpec!=null and sereSpec is SERE formula
+    public static boolean isTestOnly(Spec sereSpec) throws SpecException {
+        if(sereSpec instanceof SpecAgentIdentifier || sereSpec instanceof SpecRange)
+            throw new SpecException("Syntax Error: "+RTCDLs_ModelCheckAlg.simplifySpecString(sereSpec,false)+" is not SERE sub-formula.");
+        if(sereSpec instanceof SpecBDD) return false;
+        // now sereSpec is SpecExp
+        SpecExp se = (SpecExp) sereSpec;
+        Operator op=se.getOperator();
+        Spec[] ch=se.getChildren();
+        if(op.isPropOp()){
+            for(Spec c : ch)
+                if(!isTestOnly(c)) return false;
+            return true;
+        }else if(op==Operator.LDL_TEST){
+            return true;
+        }else return false;
     }
 
     private SMVModule context_module = null; // the context module used for bexp()
@@ -366,7 +399,7 @@ public class LDLModelCheckAlg extends ModelCheckAlgI {
             return c2;
         }
 
-        // now 0<=a<=b and !(a=0 and b=0)
+        // now 0<=a<=b and !(a=0 and b=0
         c1 = sat(child[0]);
         c2 = sat(child[2]);
 
@@ -648,6 +681,182 @@ public class LDLModelCheckAlg extends ModelCheckAlgI {
         return specBdd;
     }
 
+    // spec = <ch[0]>ch[1]
+    public BDD satLDLsereSAT(Spec spec) throws SpecException, SMVParseException, ModelCheckException, ModuleException, ModelCheckAlgException {
+        SMVModule design = (SMVModule) getDesign();
+        SpecExp se = (SpecExp) spec;
+        Operator op = se.getOperator();
+        if (op != Operator.LDL_SERE_SAT) return null;
+
+        Spec[] ch = se.getChildren();
+        BDD lc = null, rc = null;
+        ModuleBDDField x = null;
+        BDD xBdd; // output variable of the tester
+
+        if(ch[0] instanceof SpecAgentIdentifier || ch[0] instanceof SpecRange)
+            throw new SpecException("Syntax Error: \"" + spec + "\" is not SERE sub-formula.");
+
+        if(ch[0].isPropSpec()){
+            // if ch[0] is prop. sub-formula (including SpecBDD), then add transition x -> (ch[0) & ch[1]')
+            x = tester.module.addVar("X" + (++field_id)); // boolean variable
+            xBdd = x.getDomain().ithVar(1);
+            lc = sat(ch[0]); tester.cachePutSpec(ch[0],lc);
+            rc = sat(ch[1]); tester.cachePutSpec(ch[1],rc);
+            BDD p_rc = Env.prime(rc);
+            tester.module.conjunctTrans(xBdd.imp(lc.and(p_rc)));
+            tester.cachePutSpec(spec,xBdd);
+            return xBdd;
+        }else{// ch[0] must be SpecExp
+            SpecExp ch0se = (SpecExp) ch[0];
+            Operator ch0op = ch0se.getOperator();
+            Spec[] ch0ch = ch0se.getChildren();
+            if(ch0op == Operator.LDL_TEST){
+                // ch[0] = ch0ch[0]?
+                StringBuilder sb = new StringBuilder("");
+                if(!ch0ch[0].isLDLSpec(sb))
+                    throw new SpecException("Syntax Error: " + RTCDLs_ModelCheckAlg.simplifySpecString(sb.toString(),false));
+                // now ch0ch[0] is LDL sub-formula, and ch[0]=ch0ch[0]?
+                BDD b0 = sat(ch0ch[0]).and(sat(ch[1]));
+                tester.cachePutSpec(spec,b0);
+                return b0;
+            }else if(ch0op == Operator.LDL_OR){
+                // ch[0] = ch0ch[0] || ch0ch[1]
+                Spec spec0=new SpecExp(Operator.LDL_SERE_SAT,ch0ch[0],ch[1]);
+                BDD b0=sat(spec0); // b0=sat(<ch0ch[0]>ch[1])
+                tester.cachePutSpec(spec0,b0);
+
+                Spec spec1=new SpecExp(Operator.LDL_SERE_SAT,ch0ch[1],ch[1]);
+                BDD b1=sat(spec1); // b1=sat(<ch0ch[1]>ch[1])
+                tester.cachePutSpec(spec1,b1);
+
+                BDD b2=b0.or(b1);
+                tester.cachePutSpec(spec,b2);
+                return b2;
+            }else if(ch0op == Operator.LDL_AND){
+                throw new SpecException("Current version does not support SERE operator LDL_AND.");
+            }else if(ch0op == Operator.LDL_CONC){
+                // ch[0] = ch0ch[0] , ch0ch[1]
+                Spec spec1=new SpecExp(Operator.LDL_SERE_SAT,ch0ch[1],ch[1]);
+                BDD b1=sat(spec1); // b1=sat(<ch0ch[1]>ch[1])
+                tester.cachePutSpec(spec1,b1);
+
+                BDD b0=sat(new SpecExp(Operator.LDL_SERE_SAT,ch0ch[0],new SpecBDD(b1))); // b0=sat(<ch0ch[0]>b1)
+                tester.cachePutSpec(spec,b0);
+                return b0;
+            }else if(ch0op == Operator.LDL_REPEAT){ // spec = <ch[0]>ch[1]
+                // ch[0] = ch0ch[0][*]
+                if(RTCDLs_ModelCheckAlg.isTestOnly(ch0ch[0])){
+                    // ch0ch[0] is test-only
+                    rc = sat(ch[1]);
+                    tester.cachePutSpec(spec,rc);
+                    return rc;
+                }
+                // now ch0ch[0] is NOT test-only
+
+                x = tester.module.addVar("X" + (++field_id)); // boolean variable
+                xBdd = x.getDomain().ithVar(1);
+                BDD b0=sat(new SpecExp(Operator.LDL_SERE_SAT,ch0ch[0],new SpecBDD(xBdd))); // b0=sat(<ch0ch[0]>x)
+                rc = sat(ch[1]);
+                tester.module.conjunctTrans(xBdd.imp(rc.or(b0)));
+                tester.module.addJustice(xBdd.imp(rc));
+                tester.cachePutSpec(spec,xBdd);
+                return xBdd;
+            }else{ //ch0op is LDL_BOUNDED_REPEAT or other operators){
+                throw new SpecException("Current version does not support the operator "+ch0op);
+            }
+        }
+
+    }
+
+    // spec = [ch[0]]ch[1]
+    public BDD satLDLsereIMP(Spec spec) throws SpecException, SMVParseException, ModelCheckException, ModuleException, ModelCheckAlgException {
+        SMVModule design = (SMVModule) getDesign();
+        SpecExp se = (SpecExp) spec;
+        Operator op = se.getOperator();
+        if (op != Operator.LDL_SERE_IMP) return null;
+
+        Spec[] ch = se.getChildren();
+        BDD lc = null, rc = null;
+        ModuleBDDField x = null;
+        BDD xBdd; // output variable of the tester
+
+        if(ch[0] instanceof SpecAgentIdentifier || ch[0] instanceof SpecRange)
+            throw new SpecException("Syntax Error: \"" + spec + "\" is not SERE sub-formula.");
+
+        if(ch[0].isPropSpec()){
+            // if ch[0] is prop. sub-formula (including SpecBDD), then add transition x -> (ch[0) -> ch[1]')
+            x = tester.module.addVar("X" + (++field_id)); // boolean variable
+            xBdd = x.getDomain().ithVar(1);
+            lc = sat(ch[0]); tester.cachePutSpec(ch[0],lc);
+            rc = sat(ch[1]); tester.cachePutSpec(ch[1],rc);
+            BDD p_rc = Env.prime(rc);
+            tester.module.conjunctTrans(xBdd.imp(lc.imp(p_rc)));
+            tester.cachePutSpec(spec,xBdd);
+            return xBdd;
+        }else{// ch[0] must be SpecExp
+            SpecExp ch0se = (SpecExp) ch[0];
+            Operator ch0op = ch0se.getOperator();
+            Spec[] ch0ch = ch0se.getChildren();
+            if(ch0op == Operator.LDL_TEST){
+                // ch[0] = ch0ch[0]?
+                StringBuilder sb = new StringBuilder("");
+                if(!ch0ch[0].isLDLSpec(sb))
+                    throw new SpecException("Syntax Error: " + RTCDLs_ModelCheckAlg.simplifySpecString(sb.toString(),false));
+                // now ch0ch[0] is LDL sub-formula, and ch[0]=ch0ch[0]?
+                Spec neg_ch0ch0 = new SpecExp(Operator.NOT,ch0ch[0]);
+                BDD sat_neg_ch0ch0 = sat(neg_ch0ch0); tester.cachePutSpec(neg_ch0ch0,sat_neg_ch0ch0);
+                rc = sat(ch[1]); tester.cachePutSpec(ch[1],rc);
+                BDD b = sat_neg_ch0ch0.or(rc); // b = !ch0ch[0] \/ ch[1]
+                tester.cachePutSpec(spec,b);
+                return b;
+            }else if(ch0op == Operator.LDL_OR){
+                // ch[0] = ch0ch[0] || ch0ch[1]
+                Spec spec0=new SpecExp(Operator.LDL_SERE_IMP,ch0ch[0],ch[1]);
+                BDD b0=sat(spec0); // b0=sat([ch0ch[0]]ch[1])
+                tester.cachePutSpec(spec0,b0);
+
+                Spec spec1=new SpecExp(Operator.LDL_SERE_IMP,ch0ch[1],ch[1]);
+                BDD b1=sat(spec1); // b1=sat([ch0ch[1]]ch[1])
+                tester.cachePutSpec(spec1,b1);
+
+                BDD b=b0.and(b1);
+                tester.cachePutSpec(spec,b);
+                return b;
+            }else if(ch0op == Operator.LDL_AND){
+                throw new SpecException("Current version does not support SERE operator LDL_AND.");
+            }else if(ch0op == Operator.LDL_CONC){
+                // ch[0] = ch0ch[0] , ch0ch[1]
+                Spec spec1=new SpecExp(Operator.LDL_SERE_IMP,ch0ch[1],ch[1]);
+                BDD b1=sat(spec1); // b1=sat([ch0ch[1]]ch[1])
+                tester.cachePutSpec(spec1,b1);
+
+                BDD b0=sat(new SpecExp(Operator.LDL_SERE_IMP,ch0ch[0],new SpecBDD(b1))); // b0=sat([ch0ch[0]]b1)
+                tester.cachePutSpec(spec,b0);
+                return b0;
+            }else if(ch0op == Operator.LDL_REPEAT){ // spec = [ch[0]]ch[1]
+                // ch[0] = ch0ch[0][*]
+                if(RTCDLs_ModelCheckAlg.isTestOnly(ch0ch[0])){
+                    // ch0ch[0] is test-only
+                    rc = sat(ch[1]);
+                    tester.cachePutSpec(spec,rc);
+                    return rc;
+                }
+                // now ch0ch[0] is NOT test-only
+
+                x = tester.module.addVar("X" + (++field_id)); // boolean variable
+                xBdd = x.getDomain().ithVar(1);
+                BDD b0=sat(new SpecExp(Operator.LDL_SERE_IMP,ch0ch[0],new SpecBDD(xBdd))); // b0=sat([ch0ch[0]]x)
+                rc = sat(ch[1]);
+                tester.module.conjunctTrans(xBdd.imp(rc.and(b0)));
+                tester.cachePutSpec(spec,xBdd);
+                return xBdd;
+            }else{ //ch0op is LDL_BOUNDED_REPEAT or other operators){
+                throw new SpecException("Current version does not support the operator "+ch0op);
+            }
+        }
+
+    }
+
     //------------------------------------------------------------------------------------------------------------------
     // return the Negation Normal Form of spec, which includes the following operators:
     //   -- logic connectives NOT, AND, OR,
@@ -678,7 +887,8 @@ public class LDLModelCheckAlg extends ModelCheckAlgI {
                 || op == Operator.AA
                 || op == Operator.CAN_ENFORCE
                 || op == Operator.CANNOT_AVOID
-                ) {
+            )
+        {
             return new SpecExp(op, NNF(child[0]));
         }
 
@@ -809,6 +1019,17 @@ public class LDLModelCheckAlg extends ModelCheckAlgI {
                 ) {
             return new SpecExp(op, child[0], NNF(child[1]));
         }
+        // LDL operators
+        if (op == Operator.LDL_SERE_SAT
+                || op == Operator.LDL_SERE_IMP) {
+            // NNF(<ch[0]>ch[1]) = <ch[0]>NNF(ch[1])
+            // NNF([ch[0]]ch[1]) = [ch[0]]NNF(ch[1])
+            return new SpecExp(op, child[0], NNF(child[1]));
+        }
+
+
+        if (op != Operator.NOT) return spec; // if op is not NOT and is not handled by the above code, then return spec itself
+
         //---------------------------------------------------------------
         // when spec=!f, return the NNF of !f
         //---------------------------------------------------------------
@@ -976,6 +1197,29 @@ public class LDLModelCheckAlg extends ModelCheckAlgI {
                     return new SpecExp(Operator.B_UNTIL, negC1, newRange, negC1_U_negC2);
                 }
             }
+            // epistemic operators
+            if (fOp == Operator.KNOW) { // ! (c1 KNOW c2) == c1 NKNOW !c2
+                return new SpecExp(Operator.NKNOW, fChild[0], NNF(new SpecExp(Operator.NOT, fChild[1])));
+            }
+            if (fOp == Operator.NKNOW) { // ! (c1 NKNOW c2) == c1 KNOW !c2
+                return new SpecExp(Operator.KNOW, fChild[0], NNF(new SpecExp(Operator.NOT, fChild[1])));
+            }
+            if (fOp == Operator.SKNOW) { // ! (c1 SKNOW c2) == c1 NSKNOW !c2
+                return new SpecExp(Operator.NSKNOW, fChild[0], NNF(new SpecExp(Operator.NOT, fChild[1])));
+            }
+            if (fOp == Operator.NSKNOW) { // ! (c1 NSKNOW c2) == c1 SKNOW !c2
+                return new SpecExp(Operator.SKNOW, fChild[0], NNF(new SpecExp(Operator.NOT, fChild[1])));
+            }
+
+            // LDL operators
+            if (fOp == Operator.LDL_SERE_SAT) { // !<c1>c2 == [c1]!c2
+                return new SpecExp(Operator.LDL_SERE_IMP, fChild[0], NNF(new SpecExp(Operator.NOT, fChild[1])));
+            }
+            if (fOp == Operator.LDL_SERE_IMP) { // ![c1]c2 == <c1>!c2
+                return new SpecExp(Operator.LDL_SERE_SAT, fChild[0], NNF(new SpecExp(Operator.NOT, fChild[1])));
+            }
+
+            return spec; // if op is not NOT and is not handled by the above code, then return spec itself
         } // end of the case of spec=!f
 
         throw new ModelCheckException("Failed to construct the Negation Normal Form of " + spec);
@@ -1172,17 +1416,17 @@ public class LDLModelCheckAlg extends ModelCheckAlgI {
         return this.allPredsIn(p.id(), res.id());
     }
 
-    public AlgResultString modelCheckingOneSpec(Spec aProperty) throws SpecException, ModelCheckException, ModuleException, ModelCheckAlgException, SMVParseException {
-        consoleOutput(0,"emph","Model checking RTCTL* property: " + simplifySpecString(aProperty,false) +"\n");
+    public AlgResultString modelCheckingOneSpec(Spec aSpec) throws SpecException, ModelCheckException, SMVParseException, ModuleException, ModelCheckAlgException {
+        consoleOutput(0,"emph","Model checking RTCDL* property: " + simplifySpecString(aSpec,false) +"\n");
         if(statistic==null) statistic=new Statistic();
         else statistic.beginStatistic(true,false);
 
         Spec chkProp;
-        if (!aProperty.isStateSpec()) {
+        if (!aSpec.isStateSpec()) {
             chkProp = NNF(new SpecExp(Operator.EE,
-                    new SpecExp(Operator.NOT, aProperty))); // newp = E !property
+                    new SpecExp(Operator.NOT, aSpec))); // newp = E !property
         } else { // the property is a state formula
-            chkProp = NNF(new SpecExp(Operator.NOT, aProperty)); // newp = !property
+            chkProp = NNF(new SpecExp(Operator.NOT, aSpec)); // newp = !property
         }
         //consoleOutput(0,"normal","The negative propperty: " + simplifySpecString(chkProp,false)+"\n");
         visibleVars = this.getRelevantVars(getDesign(), chkProp);
@@ -1191,7 +1435,7 @@ public class LDLModelCheckAlg extends ModelCheckAlgI {
         SMVModule design = (SMVModule) getDesign(); // now design does not contain the tester
         restoreOriginalModuleData();
 
-        tester = new LDLTester();
+        tester = new RTCDLsTester();
         design.syncComposition(tester.module); // the tester will be built in the following function sat()
         BDD chkBdd = sat(chkProp);
         // now design is the composition of the original model and the tester of the verified property
@@ -1213,7 +1457,7 @@ public class LDLModelCheckAlg extends ModelCheckAlgI {
             consoleOutput(0,"weak", statistic.getUsedInfo(true,true,true,true));
             return new AlgResultString(true, res);
         } else {
-            graph = new GraphExplainLDL(simplifySpecString(aProperty, false), simplifySpecString(chkProp,false),this);
+            graph = new GraphExplainRTCDLs(simplifySpecString(aSpec, false), simplifySpecString(chkProp,false),this);
             graph.addAttribute("ui.title", graph.getId());
             // design with the composed tester...
             // create the initial node
@@ -1232,7 +1476,7 @@ public class LDLModelCheckAlg extends ModelCheckAlgI {
             new Thread(){@Override
                 public void run() {
                     isOpeningCounterexampleWindow=true;
-                    new ViewerExplainLDL(graph);
+                    new ViewerExplainRTCDLs(graph);
                 }
             }.start();
             //design.decompose(tester.module); // delay the decomposition of tester to reserve the tester during showing the counterexample

@@ -54,7 +54,7 @@ public final class Env {
 
     /**
      * <p>
-     * MCTK 2.0.0
+     * MCTK 3.0.0
      * JTLV version 1.4.1.
      * </p>
      */
@@ -562,7 +562,6 @@ public final class Env {
      *
      * @param is The input stream to parse.
      * @return An array of Specifications.
-     * @see Env#loadSpecString(String[])
      * @see edu.wis.jtlv.env.Env#loadSpecFile(String)
      */
     public static Spec[] loadSpecInputStream(InputStream is) throws IOException {
@@ -619,7 +618,6 @@ public final class Env {
      * @return An array of Specifications.
      * @throws IOException When there where problems reading the file.
      * @see edu.wis.jtlv.env.Env#loadSpecInputStream(InputStream)
-     * @see Env#loadSpecString(String[])
      */
     public static Spec[] loadSpecFile(String filename) throws IOException {
         try {
@@ -841,8 +839,8 @@ public final class Env {
             return;
         }
 
-//        String regEx = "((CTLSPEC|LTLSPEC|SPEC|RTCTL\\*SPEC)[^;]*;( *--.*(\r\n)?)?)|((CTLSPEC|LTLSPEC|SPEC|RTCTL\\*SPEC)[^;]*;( *(\r\n)?)?)";
-        String regEx = "(CTLSPEC|LTLSPEC|SPEC|RTCTL\\*SPEC)[^;]*;( *--.*(\r\n)?)?";
+//        String regEx = "((CTLSPEC|LTLSPEC|SPEC|RTCTL\\*SPEC)[^;]*;( *--.*(\r\n)?)?)|((CTLSPEC|LTLSPEC|SPEC|RTCTL\\*SPEC|RTCDL\\*SPEC)[^;]*;( *(\r\n)?)?)";
+        String regEx = "(CTLSPEC|LTLSPEC|SPEC|RTCTL\\*SPEC|RTCDL\\*SPEC)[^;]*;( *--.*(\r\n)?)?";
         // 编译正则表达式,匹配以;结尾的规范
         Pattern pattern = Pattern.compile(regEx,Pattern.MULTILINE);
         Matcher matcher = pattern.matcher(moduleStr);
@@ -850,10 +848,12 @@ public final class Env {
         ArrayList<String> annList = new ArrayList<String>();
         while(matcher.find()){
             String specAnn=matcher.group();
-            String[] s = specAnn.split(";( *--)?",2);
-            String[] oneSpec = new String[2];
-            oneSpec[0]=s[0].replaceAll("\r\n","");
-            if(s.length>1) oneSpec[1]=s[1].replaceAll("\r\n",""); else oneSpec[1]="";
+            String[] s1 = specAnn.split(";( *--)?",2); // s1[0]--logic+spec; s1[1]--annotation
+            String[] s2 = s1[0].split("SPEC ",2); // s2[0]--logic; s2[1]--spec
+            String[] oneSpec = new String[3]; // 0--logic; 1--spec; 2--annotation
+            oneSpec[0]=s2[0].replaceAll("\r\n","").trim();
+            if(s2.length>1) oneSpec[1]=s2[1].replaceAll("\r\n","").trim(); else oneSpec[1]="";
+            if(s1.length>1) oneSpec[2]=s1[1].replaceAll("\r\n","").trim(); else oneSpec[2]="";
 
             moduleSpecAnns.add(oneSpec);
 
@@ -2408,7 +2408,6 @@ public final class Env {
      * Creates a pair object which can then be used to associate two BDD fields.
      * </p>
      *
-     * @param i The factory to make the pair to.
      * @return A new BDD pair.
      * @throws ArrayIndexOutOfBoundsException If addressed a non existing factory.
      */

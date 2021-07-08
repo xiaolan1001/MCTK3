@@ -2,6 +2,7 @@ package edu.wis.jtlv.env.spec;
 
 import edu.wis.jtlv.env.Env;
 import edu.wis.jtlv.env.core.spec.InternalSpecLanguage;
+import edu.wis.jtlv.lib.mc.RTCDLs.RTCDLs_ModelCheckAlg;
 import net.sf.javabdd.BDD;
 import net.sf.javabdd.BDDVarSet;
 
@@ -284,7 +285,9 @@ public class SpecExp implements Spec {
 			for (Spec s : this.getChildren())
 				if(!s.isStateSpec()) return false;
 			return true;
-		}else if (op.isLTLOp() || op.isRTLTLOp()) // temporal operators
+		}else if (op.isLTLOp() ||
+				op.isRTLTLOp() ||
+				op.isLDLSereOp()) // temporal operators
 			return false;
 		else { // other operators, including path quantifiers and epistemic modalities
 			return true;
@@ -313,6 +316,90 @@ public class SpecExp implements Spec {
 				return false;
 		// checking that I'm prop
 		return this.getOperator().isPropOp();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see edu.wis.jtlv.env.spec.Spec#isCTLStarSpec()
+	 */
+	public boolean isLDLSpec(StringBuilder syntaxMsg) throws SpecException {
+		Operator op = this.getOperator();
+		Spec[] ch = this.getChildren();
+		boolean b=false;
+
+		if(this.isPropSpec()){
+			syntaxMsg.delete(0,syntaxMsg.length());
+			return true;
+		}else if(op.isPropOp()){
+			b=ch[0].isLDLSpec(syntaxMsg);
+			if(!b) return false;
+			else if(op.numOfOperands()>1){
+				return ch[1].isLDLSpec(syntaxMsg);
+			}else{
+				syntaxMsg.delete(0,syntaxMsg.length());
+				return true;
+			}
+		}else if(op==Operator.LDL_SERE_IMP || op==Operator.LDL_SERE_SAT){
+			b=ch[0].isSereSpec(syntaxMsg);
+			if(!b) return false;
+			return ch[1].isLDLSpec(syntaxMsg);
+		}else{
+			syntaxMsg.replace(0,syntaxMsg.length(), RTCDLs_ModelCheckAlg.simplifySpecString(this,false) + " is not LDL sub-formula.");
+			return false;
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * syntaxMsg -- the outputted message to show why this spec is NOT SERE formula
+	 * @see edu.wis.jtlv.env.spec.Spec#isCTLStarSpec()
+	 */
+	public boolean isSereSpec(StringBuilder syntaxMsg) throws SpecException {
+		Operator op = this.getOperator();
+		Spec[] ch = this.getChildren();
+		boolean b=false;
+
+		if(this.isPropSpec()) {
+			syntaxMsg.delete(0,syntaxMsg.length());
+			return true;
+		}else if(op==Operator.LDL_TEST) {
+			return ch[0].isLDLSpec(syntaxMsg);
+		}else if(op==Operator.LDL_OR || op==Operator.LDL_AND || op==Operator.LDL_CONC) {
+			StringBuilder s0=new StringBuilder(""),s1=new StringBuilder("");
+			b = ch[0].isSereSpec(s0) && ch[1].isSereSpec(s1);
+			if(!b){
+				if(!s0.equals(""))
+					syntaxMsg.replace(0,syntaxMsg.length(), s0.toString());
+				else
+					syntaxMsg.replace(0,syntaxMsg.length(), s1.toString());
+				return false;
+			}else {
+				syntaxMsg.delete(0,syntaxMsg.length());
+				return true;
+			}
+		}else if(op==Operator.LDL_REPEAT)
+			return ch[0].isSereSpec(syntaxMsg);
+		else if(op==Operator.LDL_BOUNDED_REPEAT)
+			return ch[0].isSereSpec(syntaxMsg);
+		else {
+			syntaxMsg.replace(0,syntaxMsg.length(), RTCDLs_ModelCheckAlg.simplifySpecString(this,false) + " is not SERE sub-formula.");
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isCDLstarSpec(StringBuilder syntaxMsg) throws SpecException {
+		for (Spec s : this.getChildren())
+			if (!s.isCDLstarSpec(syntaxMsg))
+				return false;
+		Operator op = this.getOperator();
+		return op.isPropOp()
+				| op.isLTLOp()
+				| op.isRTLTLOp()
+				| op.isCTLsPathOp()
+				| op.isATLsPathOp()
+				| op.isEpistemicOp();
 	}
 
 	/*
@@ -408,6 +495,18 @@ public class SpecExp implements Spec {
 		return this.theOp.isATLsPathOp();
 	}
 
+	@Override
+	public String toStringBracketed(String lBracket, String rBracket) {
+		String s = this.toString();
+		if( (s.startsWith("(") && s.endsWith(")")) ||
+				(s.startsWith("[") && s.endsWith("]")) ||
+				(s.startsWith("{") && s.endsWith("}")) ||
+				(s.startsWith("<") && s.endsWith(">"))
+		) // spec has outermost bracket
+			return s;
+		else // spec has NOT outermost bracket
+			return lBracket+s+rBracket;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -494,6 +593,46 @@ public class SpecExp implements Spec {
 			boolean b2=false; if(ch[2] instanceof SpecExp){ SpecExp se=(SpecExp)ch[2]; if(!se.getOperator().isUnary()) b2=true;}
 			return (b1?"(":"") + ch[0] + (b1?") ":" ") + o + " " + ch[1] + (b2?" (":" ") + ch[2] + (b2?")":"");
 		}
+
+		// LDL
+		String ch0Str=ch[0].toStringBracketed("(",")");
+		String ch1Str="";
+		if(ch.length>1) ch1Str=ch[1].toStringBracketed("(",")");
+
+		if (op == Operator.LDL_TEST)
+			return ch0Str + "?";
+		if (op == Operator.LDL_AND)
+			return ch0Str + "&&" + ch1Str;
+		if (op == Operator.LDL_OR)
+			return ch0Str + "||" + ch1Str;
+		if (op == Operator.LDL_CONC)
+			return ch0Str + "," + ch1Str;
+		if (op == Operator.LDL_REPEAT)
+			return ch0Str + "[*]";
+		if (op == Operator.LDL_BOUNDED_REPEAT)
+			return ch0Str + "[*" + ch[1] + "]";
+		if (op == Operator.LDL_SERE_SAT)
+			return ch0Str + ":-" + ch1Str;
+		if (op == Operator.LDL_SERE_IMP)
+			return ch0Str + ":=" + ch1Str;
+/*
+		if (op == Operator.LDL_TEST)
+			return "(" + ch[0] + ")?";
+		if (op == Operator.LDL_AND)
+			return ch[0] + "&&" + ch[1];
+		if (op == Operator.LDL_OR)
+			return ch[0] + "||" + ch[1];
+		if (op == Operator.LDL_CONC)
+			return ch[0] + "," + ch[1];
+		if (op == Operator.LDL_REPEAT)
+			return "(" + ch[0] + ")[*]";
+		if (op == Operator.LDL_BOUNDED_REPEAT)
+			return "(" + ch[0] + ")[*" + ch[1] + "]";
+		if (op == Operator.LDL_SOMEPATH)
+			return "(" + ch[0] + ")#(" + ch[1] + ")";
+		if (op == Operator.LDL_ALLPATH)
+			return "(" + ch[0] + ")@(" + ch[1] + ")";
+*/
 
 		// simple unary
 		if (op.isUnary()) {

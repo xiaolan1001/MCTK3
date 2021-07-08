@@ -1,4 +1,4 @@
-// $ANTLR 3.0.1 /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g 2021-06-04 12:03:14
+// $ANTLR 3.0.1 /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g 2021-07-08 23:31:48
 
 package edu.wis.jtlv.env.core.spec;
 
@@ -12,32 +12,33 @@ public class SPCLexer extends Lexer {
     public static final int TOK_UNARY_MINUS_T=14;
     public static final int TOK_XOR=38;
     public static final int ARRAY_INDEX_T=13;
-    public static final int TOK_TEST=106;
     public static final int TOK_ABG=79;
     public static final int TOK_ABF=77;
     public static final int TOK_TIMES=57;
     public static final int AGENT_SET_LIST_T=29;
     public static final int TOK_EBG=78;
     public static final int TOK_EBF=76;
-    public static final int Tokens=120;
+    public static final int Tokens=122;
     public static final int TOK_LP=61;
     public static final int TOK_LT=43;
     public static final int CTLS_KNOW_T=25;
-    public static final int TOK_COLON=109;
-    public static final int JTOK_MULTI_COMMENT=118;
+    public static final int TOK_COLON=110;
+    public static final int JTOK_MULTI_COMMENT=120;
     public static final int PURE_RE_T=18;
     public static final int TOK_SETIN=47;
+    public static final int TOK_LDL_OR=104;
     public static final int SPEC_LIST_T=5;
     public static final int TOK_BRELEASE=99;
     public static final int TOK_EQUAL=41;
     public static final int TOK_LB=81;
-    public static final int TOK_TRUEEXP=113;
+    public static final int TOK_TRUEEXP=115;
     public static final int TOK_BUNTIL=85;
     public static final int TOK_LE=45;
     public static final int TOK_OP_BGLOBALLY=101;
     public static final int TOK_UNTIL=82;
-    public static final int TOK_DOT=107;
+    public static final int TOK_DOT=108;
     public static final int SUBRANGE_T=6;
+    public static final int TOK_CDLs_SPEC=34;
     public static final int TOK_RTCTL_STAR_SPEC=33;
     public static final int CASE_ELEMENT_EXPR_T=11;
     public static final int TOK_CTL_SKNOW_T=24;
@@ -48,21 +49,20 @@ public class SPCLexer extends Lexer {
     public static final int TOK_WAWRITE=69;
     public static final int TOK_RB=83;
     public static final int TOK_OP_ONCE=98;
-    public static final int TOK_REPEAT_LB=105;
     public static final int TOK_CTL_KNOW_T=22;
-    public static final int TOK_SEMI=104;
+    public static final int TOK_SEMI=111;
     public static final int TOK_OP_BFINALLY=100;
     public static final int TOK_AA=80;
-    public static final int TOK_NUMBER_FRAC=116;
+    public static final int TOK_NUMBER_FRAC=118;
     public static final int TOK_MINUS=56;
-    public static final int TOK_NUMBER_WORD=110;
+    public static final int TOK_NUMBER_WORD=112;
     public static final int PURE_RTCTL_STAR_T=28;
     public static final int TOK_IMPLIES=35;
     public static final int TOK_KNOW=86;
     public static final int TOK_AX=71;
-    public static final int JTOK_WS=117;
+    public static final int JTOK_WS=119;
     public static final int TOK_OP_GLOBALLY=95;
-    public static final int TOK_FALSEEXP=112;
+    public static final int TOK_FALSEEXP=114;
     public static final int TOK_RP=62;
     public static final int VALUE_T=7;
     public static final int TOK_RSHIFT=53;
@@ -79,24 +79,26 @@ public class SPCLexer extends Lexer {
     public static final int TOK_GT=44;
     public static final int PURE_RTCTLS_T=27;
     public static final int TOK_TRIGGERED=91;
+    public static final int TOK_LDL_TEST=102;
     public static final int TOK_AGENT_NAME_T=26;
+    public static final int TOK_LDL_SERE_SAT=106;
     public static final int TOK_CASE=66;
     public static final int TOK_IFF=36;
-    public static final int TOK_CTL_STAR_SPEC=114;
+    public static final int TOK_CTL_STAR_SPEC=116;
     public static final int TOK_GE=46;
     public static final int SET_LIST_EXP_T=8;
     public static final int CASE_LIST_EXPR_T=10;
-    public static final int TOK_2OR=102;
-    public static final int TOK_LDL_SPEC=34;
-    public static final int TOK_TWODOTS=111;
+    public static final int TOK_TWODOTS=113;
     public static final int NOP=4;
     public static final int TOK_COMMA=51;
+    public static final int TOK_LDL_AND=105;
     public static final int TOK_UNION=48;
-    public static final int TOK_NUMBER=108;
+    public static final int TOK_NUMBER=109;
     public static final int TOK_LTL_SPEC=32;
     public static final int TOK_ESAC=67;
     public static final int TOK_SKNOW=87;
     public static final int TOK_LCB=49;
+    public static final int TOK_LDL_REPEAT_LB=103;
     public static final int TOK_DIVIDE=58;
     public static final int TOK_OP_NEXT=92;
     public static final int PURE_CTL_EPISTEMIC_T=20;
@@ -105,25 +107,25 @@ public class SPCLexer extends Lexer {
     public static final int TOK_RELEASE=90;
     public static final int PURE_CTL_T=15;
     public static final int TOK_NOTEQUAL=42;
-    public static final int TOK_2AND=103;
     public static final int RTCTLS_PURE_CTL_T=19;
     public static final int BIT_SELECT_T=12;
     public static final int TOK_INVAR_SPEC=30;
+    public static final int PURE_CDLs_T=17;
     public static final int TOK_EE=84;
     public static final int EOF=-1;
     public static final int TOK_BOOL=63;
     public static final int PURE_LTL_T=16;
     public static final int TOK_OP_FINALLY=97;
-    public static final int JTOK_LINE_COMMENT=119;
+    public static final int JTOK_LINE_COMMENT=121;
     public static final int TOK_OP_HISTORICALLY=96;
-    public static final int PURE_LDL_T=17;
     public static final int TOK_WORD1=64;
     public static final int TOK_CONCATENATION=59;
     public static final int TOK_NEXT=65;
     public static final int TOK_EX=70;
     public static final int TOK_MOD=54;
-    public static final int TOK_WORD=115;
+    public static final int TOK_WORD=117;
     public static final int TOK_CTL_SPEC=31;
+    public static final int TOK_LDL_SERE_IMP=107;
 
     public String getErrorMessage(RecognitionException e, String[] tokenNames) {
     	String msg = null;
@@ -151,7 +153,7 @@ public class SPCLexer extends Lexer {
     public final void mTOK_CTL_SPEC() throws RecognitionException {
         try {
             int _type = TOK_CTL_SPEC;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1771:17: ( 'CTLSPEC' | 'SPEC' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1863:17: ( 'CTLSPEC' | 'SPEC' )
             int alt1=2;
             int LA1_0 = input.LA(1);
 
@@ -163,13 +165,13 @@ public class SPCLexer extends Lexer {
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1771:1: TOK_CTL_SPEC : ( 'CTLSPEC' | 'SPEC' );", 1, 0, input);
+                    new NoViableAltException("1863:1: TOK_CTL_SPEC : ( 'CTLSPEC' | 'SPEC' );", 1, 0, input);
 
                 throw nvae;
             }
             switch (alt1) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1771:19: 'CTLSPEC'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1863:19: 'CTLSPEC'
                     {
                     match("CTLSPEC"); 
 
@@ -177,7 +179,7 @@ public class SPCLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1771:31: 'SPEC'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1863:31: 'SPEC'
                     {
                     match("SPEC"); 
 
@@ -197,8 +199,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_CTL_STAR_SPEC() throws RecognitionException {
         try {
             int _type = TOK_CTL_STAR_SPEC;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1772:21: ( 'CTL*SPEC' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1772:23: 'CTL*SPEC'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1864:21: ( 'CTL*SPEC' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1864:23: 'CTL*SPEC'
             {
             match("CTL*SPEC"); 
 
@@ -216,8 +218,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_LTL_SPEC() throws RecognitionException {
         try {
             int _type = TOK_LTL_SPEC;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1773:17: ( 'LTLSPEC' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1773:19: 'LTLSPEC'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1865:17: ( 'LTLSPEC' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1865:19: 'LTLSPEC'
             {
             match("LTLSPEC"); 
 
@@ -235,8 +237,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_INVAR_SPEC() throws RecognitionException {
         try {
             int _type = TOK_INVAR_SPEC;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1774:19: ( 'INVARSPEC' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1774:21: 'INVARSPEC'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1866:19: ( 'INVARSPEC' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1866:21: 'INVARSPEC'
             {
             match("INVARSPEC"); 
 
@@ -254,8 +256,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_RTCTL_STAR_SPEC() throws RecognitionException {
         try {
             int _type = TOK_RTCTL_STAR_SPEC;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1775:23: ( 'RTCTL*SPEC' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1775:25: 'RTCTL*SPEC'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1867:23: ( 'RTCTL*SPEC' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1867:25: 'RTCTL*SPEC'
             {
             match("RTCTL*SPEC"); 
 
@@ -269,14 +271,14 @@ public class SPCLexer extends Lexer {
     }
     // $ANTLR end TOK_RTCTL_STAR_SPEC
 
-    // $ANTLR start TOK_LDL_SPEC
-    public final void mTOK_LDL_SPEC() throws RecognitionException {
+    // $ANTLR start TOK_CDLs_SPEC
+    public final void mTOK_CDLs_SPEC() throws RecognitionException {
         try {
-            int _type = TOK_LDL_SPEC;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1776:17: ( 'LDLSPEC' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1776:19: 'LDLSPEC'
+            int _type = TOK_CDLs_SPEC;
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1868:18: ( 'RTCDL*SPEC' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1868:20: 'RTCDL*SPEC'
             {
-            match("LDLSPEC"); 
+            match("RTCDL*SPEC"); 
 
 
             }
@@ -286,14 +288,14 @@ public class SPCLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end TOK_LDL_SPEC
+    // $ANTLR end TOK_CDLs_SPEC
 
     // $ANTLR start TOK_EX
     public final void mTOK_EX() throws RecognitionException {
         try {
             int _type = TOK_EX;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1778:13: ( 'EX' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1778:15: 'EX'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1870:13: ( 'EX' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1870:15: 'EX'
             {
             match("EX"); 
 
@@ -311,8 +313,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_AX() throws RecognitionException {
         try {
             int _type = TOK_AX;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1779:13: ( 'AX' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1779:15: 'AX'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1871:13: ( 'AX' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1871:15: 'AX'
             {
             match("AX"); 
 
@@ -330,8 +332,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_EF() throws RecognitionException {
         try {
             int _type = TOK_EF;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1780:13: ( 'EF' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1780:15: 'EF'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1872:13: ( 'EF' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1872:15: 'EF'
             {
             match("EF"); 
 
@@ -349,8 +351,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_AF() throws RecognitionException {
         try {
             int _type = TOK_AF;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1781:13: ( 'AF' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1781:15: 'AF'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1873:13: ( 'AF' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1873:15: 'AF'
             {
             match("AF"); 
 
@@ -368,8 +370,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_EG() throws RecognitionException {
         try {
             int _type = TOK_EG;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1782:13: ( 'EG' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1782:15: 'EG'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1874:13: ( 'EG' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1874:15: 'EG'
             {
             match("EG"); 
 
@@ -387,8 +389,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_AG() throws RecognitionException {
         try {
             int _type = TOK_AG;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1783:13: ( 'AG' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1783:15: 'AG'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1875:13: ( 'AG' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1875:15: 'AG'
             {
             match("AG"); 
 
@@ -406,8 +408,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_EE() throws RecognitionException {
         try {
             int _type = TOK_EE;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1784:13: ( 'E' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1784:15: 'E'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1876:13: ( 'E' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1876:15: 'E'
             {
             match('E'); 
 
@@ -424,8 +426,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_AA() throws RecognitionException {
         try {
             int _type = TOK_AA;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1785:13: ( 'A' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1785:15: 'A'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1877:13: ( 'A' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1877:15: 'A'
             {
             match('A'); 
 
@@ -442,8 +444,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_BUNTIL() throws RecognitionException {
         try {
             int _type = TOK_BUNTIL;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1786:16: ( 'BU' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1786:18: 'BU'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1878:16: ( 'BU' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1878:18: 'BU'
             {
             match("BU"); 
 
@@ -461,8 +463,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_EBF() throws RecognitionException {
         try {
             int _type = TOK_EBF;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1787:14: ( 'EBF' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1787:16: 'EBF'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1879:14: ( 'EBF' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1879:16: 'EBF'
             {
             match("EBF"); 
 
@@ -480,8 +482,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_ABF() throws RecognitionException {
         try {
             int _type = TOK_ABF;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1788:14: ( 'ABF' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1788:16: 'ABF'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1880:14: ( 'ABF' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1880:16: 'ABF'
             {
             match("ABF"); 
 
@@ -499,8 +501,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_EBG() throws RecognitionException {
         try {
             int _type = TOK_EBG;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1789:14: ( 'EBG' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1789:16: 'EBG'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1881:14: ( 'EBG' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1881:16: 'EBG'
             {
             match("EBG"); 
 
@@ -518,8 +520,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_ABG() throws RecognitionException {
         try {
             int _type = TOK_ABG;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1790:14: ( 'ABG' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1790:16: 'ABG'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1882:14: ( 'ABG' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1882:16: 'ABG'
             {
             match("ABG"); 
 
@@ -537,7 +539,7 @@ public class SPCLexer extends Lexer {
     public final void mTOK_OP_FINALLY() throws RecognitionException {
         try {
             int _type = TOK_OP_FINALLY;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1792:19: ( 'F' | 'FINALLY' | 'EVENTUALLY' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1884:19: ( 'F' | 'FINALLY' | 'EVENTUALLY' )
             int alt2=3;
             int LA2_0 = input.LA(1);
 
@@ -555,20 +557,20 @@ public class SPCLexer extends Lexer {
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1792:1: TOK_OP_FINALLY : ( 'F' | 'FINALLY' | 'EVENTUALLY' );", 2, 0, input);
+                    new NoViableAltException("1884:1: TOK_OP_FINALLY : ( 'F' | 'FINALLY' | 'EVENTUALLY' );", 2, 0, input);
 
                 throw nvae;
             }
             switch (alt2) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1792:21: 'F'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1884:21: 'F'
                     {
                     match('F'); 
 
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1792:27: 'FINALLY'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1884:27: 'FINALLY'
                     {
                     match("FINALLY"); 
 
@@ -576,7 +578,7 @@ public class SPCLexer extends Lexer {
                     }
                     break;
                 case 3 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1792:39: 'EVENTUALLY'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1884:39: 'EVENTUALLY'
                     {
                     match("EVENTUALLY"); 
 
@@ -596,7 +598,7 @@ public class SPCLexer extends Lexer {
     public final void mTOK_OP_ONCE() throws RecognitionException {
         try {
             int _type = TOK_OP_ONCE;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1793:16: ( 'O' | 'ONCE' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1885:16: ( 'O' | 'ONCE' )
             int alt3=2;
             int LA3_0 = input.LA(1);
 
@@ -611,20 +613,20 @@ public class SPCLexer extends Lexer {
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1793:1: TOK_OP_ONCE : ( 'O' | 'ONCE' );", 3, 0, input);
+                    new NoViableAltException("1885:1: TOK_OP_ONCE : ( 'O' | 'ONCE' );", 3, 0, input);
 
                 throw nvae;
             }
             switch (alt3) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1793:18: 'O'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1885:18: 'O'
                     {
                     match('O'); 
 
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1793:24: 'ONCE'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1885:24: 'ONCE'
                     {
                     match("ONCE"); 
 
@@ -644,7 +646,7 @@ public class SPCLexer extends Lexer {
     public final void mTOK_OP_GLOBALLY() throws RecognitionException {
         try {
             int _type = TOK_OP_GLOBALLY;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1794:20: ( 'G' | 'GLOBALLY' | 'ALWAYS' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1886:20: ( 'G' | 'GLOBALLY' | 'ALWAYS' )
             int alt4=3;
             int LA4_0 = input.LA(1);
 
@@ -662,20 +664,20 @@ public class SPCLexer extends Lexer {
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1794:1: TOK_OP_GLOBALLY : ( 'G' | 'GLOBALLY' | 'ALWAYS' );", 4, 0, input);
+                    new NoViableAltException("1886:1: TOK_OP_GLOBALLY : ( 'G' | 'GLOBALLY' | 'ALWAYS' );", 4, 0, input);
 
                 throw nvae;
             }
             switch (alt4) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1794:22: 'G'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1886:22: 'G'
                     {
                     match('G'); 
 
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1794:28: 'GLOBALLY'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1886:28: 'GLOBALLY'
                     {
                     match("GLOBALLY"); 
 
@@ -683,7 +685,7 @@ public class SPCLexer extends Lexer {
                     }
                     break;
                 case 3 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1794:41: 'ALWAYS'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1886:41: 'ALWAYS'
                     {
                     match("ALWAYS"); 
 
@@ -703,7 +705,7 @@ public class SPCLexer extends Lexer {
     public final void mTOK_OP_HISTORICALLY() throws RecognitionException {
         try {
             int _type = TOK_OP_HISTORICALLY;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1795:23: ( 'H' | 'HISTORICALLY' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1887:23: ( 'H' | 'HISTORICALLY' )
             int alt5=2;
             int LA5_0 = input.LA(1);
 
@@ -718,20 +720,20 @@ public class SPCLexer extends Lexer {
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1795:1: TOK_OP_HISTORICALLY : ( 'H' | 'HISTORICALLY' );", 5, 0, input);
+                    new NoViableAltException("1887:1: TOK_OP_HISTORICALLY : ( 'H' | 'HISTORICALLY' );", 5, 0, input);
 
                 throw nvae;
             }
             switch (alt5) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1795:25: 'H'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1887:25: 'H'
                     {
                     match('H'); 
 
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1795:31: 'HISTORICALLY'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1887:31: 'HISTORICALLY'
                     {
                     match("HISTORICALLY"); 
 
@@ -751,7 +753,7 @@ public class SPCLexer extends Lexer {
     public final void mTOK_OP_NEXT() throws RecognitionException {
         try {
             int _type = TOK_OP_NEXT;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1796:17: ( 'X' | 'NEXT' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1888:17: ( 'X' | 'NEXT' )
             int alt6=2;
             int LA6_0 = input.LA(1);
 
@@ -763,20 +765,20 @@ public class SPCLexer extends Lexer {
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1796:1: TOK_OP_NEXT : ( 'X' | 'NEXT' );", 6, 0, input);
+                    new NoViableAltException("1888:1: TOK_OP_NEXT : ( 'X' | 'NEXT' );", 6, 0, input);
 
                 throw nvae;
             }
             switch (alt6) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1796:19: 'X'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1888:19: 'X'
                     {
                     match('X'); 
 
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1796:25: 'NEXT'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1888:25: 'NEXT'
                     {
                     match("NEXT"); 
 
@@ -796,7 +798,7 @@ public class SPCLexer extends Lexer {
     public final void mTOK_OP_PREV() throws RecognitionException {
         try {
             int _type = TOK_OP_PREV;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1797:17: ( 'Y' | 'PREV' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1889:17: ( 'Y' | 'PREV' )
             int alt7=2;
             int LA7_0 = input.LA(1);
 
@@ -808,20 +810,20 @@ public class SPCLexer extends Lexer {
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1797:1: TOK_OP_PREV : ( 'Y' | 'PREV' );", 7, 0, input);
+                    new NoViableAltException("1889:1: TOK_OP_PREV : ( 'Y' | 'PREV' );", 7, 0, input);
 
                 throw nvae;
             }
             switch (alt7) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1797:19: 'Y'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1889:19: 'Y'
                     {
                     match('Y'); 
 
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1797:25: 'PREV'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1889:25: 'PREV'
                     {
                     match("PREV"); 
 
@@ -841,7 +843,7 @@ public class SPCLexer extends Lexer {
     public final void mTOK_UNTIL() throws RecognitionException {
         try {
             int _type = TOK_UNTIL;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1798:15: ( 'Until' | 'U' | 'UNTIL' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1890:15: ( 'Until' | 'U' | 'UNTIL' )
             int alt8=3;
             int LA8_0 = input.LA(1);
 
@@ -863,13 +865,13 @@ public class SPCLexer extends Lexer {
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1798:1: TOK_UNTIL : ( 'Until' | 'U' | 'UNTIL' );", 8, 0, input);
+                    new NoViableAltException("1890:1: TOK_UNTIL : ( 'Until' | 'U' | 'UNTIL' );", 8, 0, input);
 
                 throw nvae;
             }
             switch (alt8) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1798:17: 'Until'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1890:17: 'Until'
                     {
                     match("Until"); 
 
@@ -877,14 +879,14 @@ public class SPCLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1798:27: 'U'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1890:27: 'U'
                     {
                     match('U'); 
 
                     }
                     break;
                 case 3 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1798:33: 'UNTIL'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1890:33: 'UNTIL'
                     {
                     match("UNTIL"); 
 
@@ -904,20 +906,20 @@ public class SPCLexer extends Lexer {
     public final void mTOK_SINCE() throws RecognitionException {
         try {
             int _type = TOK_SINCE;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1799:15: ( 'Since' | 'S' | 'SINCE' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1891:15: ( 'Since' | 'S' | 'SINCE' )
             int alt9=3;
             int LA9_0 = input.LA(1);
 
             if ( (LA9_0=='S') ) {
                 switch ( input.LA(2) ) {
-                case 'i':
-                    {
-                    alt9=1;
-                    }
-                    break;
                 case 'I':
                     {
                     alt9=3;
+                    }
+                    break;
+                case 'i':
+                    {
+                    alt9=1;
                     }
                     break;
                 default:
@@ -926,13 +928,13 @@ public class SPCLexer extends Lexer {
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1799:1: TOK_SINCE : ( 'Since' | 'S' | 'SINCE' );", 9, 0, input);
+                    new NoViableAltException("1891:1: TOK_SINCE : ( 'Since' | 'S' | 'SINCE' );", 9, 0, input);
 
                 throw nvae;
             }
             switch (alt9) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1799:17: 'Since'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1891:17: 'Since'
                     {
                     match("Since"); 
 
@@ -940,14 +942,14 @@ public class SPCLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1799:27: 'S'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1891:27: 'S'
                     {
                     match('S'); 
 
                     }
                     break;
                 case 3 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1799:33: 'SINCE'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1891:33: 'SINCE'
                     {
                     match("SINCE"); 
 
@@ -967,7 +969,7 @@ public class SPCLexer extends Lexer {
     public final void mTOK_RELEASE() throws RecognitionException {
         try {
             int _type = TOK_RELEASE;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1800:16: ( 'Awaits' | 'R' | 'RELEASE' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1892:16: ( 'Awaits' | 'R' | 'RELEASE' )
             int alt10=3;
             int LA10_0 = input.LA(1);
 
@@ -985,13 +987,13 @@ public class SPCLexer extends Lexer {
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1800:1: TOK_RELEASE : ( 'Awaits' | 'R' | 'RELEASE' );", 10, 0, input);
+                    new NoViableAltException("1892:1: TOK_RELEASE : ( 'Awaits' | 'R' | 'RELEASE' );", 10, 0, input);
 
                 throw nvae;
             }
             switch (alt10) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1800:18: 'Awaits'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1892:18: 'Awaits'
                     {
                     match("Awaits"); 
 
@@ -999,14 +1001,14 @@ public class SPCLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1800:29: 'R'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1892:29: 'R'
                     {
                     match('R'); 
 
                     }
                     break;
                 case 3 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1800:35: 'RELEASE'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1892:35: 'RELEASE'
                     {
                     match("RELEASE"); 
 
@@ -1026,7 +1028,7 @@ public class SPCLexer extends Lexer {
     public final void mTOK_TRIGGERED() throws RecognitionException {
         try {
             int _type = TOK_TRIGGERED;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1801:18: ( 'Backto' | 'T' | 'TRIGGERED' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1893:18: ( 'Backto' | 'T' | 'TRIGGERED' )
             int alt11=3;
             int LA11_0 = input.LA(1);
 
@@ -1044,13 +1046,13 @@ public class SPCLexer extends Lexer {
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1801:1: TOK_TRIGGERED : ( 'Backto' | 'T' | 'TRIGGERED' );", 11, 0, input);
+                    new NoViableAltException("1893:1: TOK_TRIGGERED : ( 'Backto' | 'T' | 'TRIGGERED' );", 11, 0, input);
 
                 throw nvae;
             }
             switch (alt11) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1801:20: 'Backto'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1893:20: 'Backto'
                     {
                     match("Backto"); 
 
@@ -1058,14 +1060,14 @@ public class SPCLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1801:31: 'T'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1893:31: 'T'
                     {
                     match('T'); 
 
                     }
                     break;
                 case 3 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1801:37: 'TRIGGERED'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1893:37: 'TRIGGERED'
                     {
                     match("TRIGGERED"); 
 
@@ -1085,8 +1087,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_OP_NOTPREVNOT() throws RecognitionException {
         try {
             int _type = TOK_OP_NOTPREVNOT;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1802:21: ( 'Z' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1802:23: 'Z'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1894:21: ( 'Z' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1894:23: 'Z'
             {
             match('Z'); 
 
@@ -1103,7 +1105,7 @@ public class SPCLexer extends Lexer {
     public final void mTOK_OP_BFINALLY() throws RecognitionException {
         try {
             int _type = TOK_OP_BFINALLY;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1805:20: ( 'BF' | 'BFINALLY' | 'BEVENTUALLY' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1897:20: ( 'BF' | 'BFINALLY' | 'BEVENTUALLY' )
             int alt12=3;
             int LA12_0 = input.LA(1);
 
@@ -1124,20 +1126,20 @@ public class SPCLexer extends Lexer {
                 }
                 else {
                     NoViableAltException nvae =
-                        new NoViableAltException("1805:1: TOK_OP_BFINALLY : ( 'BF' | 'BFINALLY' | 'BEVENTUALLY' );", 12, 1, input);
+                        new NoViableAltException("1897:1: TOK_OP_BFINALLY : ( 'BF' | 'BFINALLY' | 'BEVENTUALLY' );", 12, 1, input);
 
                     throw nvae;
                 }
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1805:1: TOK_OP_BFINALLY : ( 'BF' | 'BFINALLY' | 'BEVENTUALLY' );", 12, 0, input);
+                    new NoViableAltException("1897:1: TOK_OP_BFINALLY : ( 'BF' | 'BFINALLY' | 'BEVENTUALLY' );", 12, 0, input);
 
                 throw nvae;
             }
             switch (alt12) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1805:22: 'BF'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1897:22: 'BF'
                     {
                     match("BF"); 
 
@@ -1145,7 +1147,7 @@ public class SPCLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1805:29: 'BFINALLY'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1897:29: 'BFINALLY'
                     {
                     match("BFINALLY"); 
 
@@ -1153,7 +1155,7 @@ public class SPCLexer extends Lexer {
                     }
                     break;
                 case 3 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1805:42: 'BEVENTUALLY'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1897:42: 'BEVENTUALLY'
                     {
                     match("BEVENTUALLY"); 
 
@@ -1173,41 +1175,41 @@ public class SPCLexer extends Lexer {
     public final void mTOK_OP_BGLOBALLY() throws RecognitionException {
         try {
             int _type = TOK_OP_BGLOBALLY;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1806:20: ( 'BG' | 'BGLOBALLY' | 'BALWAYS' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1898:20: ( 'BG' | 'BGLOBALLY' | 'BALWAYS' )
             int alt13=3;
             int LA13_0 = input.LA(1);
 
             if ( (LA13_0=='B') ) {
                 int LA13_1 = input.LA(2);
 
-                if ( (LA13_1=='G') ) {
-                    int LA13_2 = input.LA(3);
+                if ( (LA13_1=='A') ) {
+                    alt13=3;
+                }
+                else if ( (LA13_1=='G') ) {
+                    int LA13_3 = input.LA(3);
 
-                    if ( (LA13_2=='L') ) {
+                    if ( (LA13_3=='L') ) {
                         alt13=2;
                     }
                     else {
                         alt13=1;}
                 }
-                else if ( (LA13_1=='A') ) {
-                    alt13=3;
-                }
                 else {
                     NoViableAltException nvae =
-                        new NoViableAltException("1806:1: TOK_OP_BGLOBALLY : ( 'BG' | 'BGLOBALLY' | 'BALWAYS' );", 13, 1, input);
+                        new NoViableAltException("1898:1: TOK_OP_BGLOBALLY : ( 'BG' | 'BGLOBALLY' | 'BALWAYS' );", 13, 1, input);
 
                     throw nvae;
                 }
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1806:1: TOK_OP_BGLOBALLY : ( 'BG' | 'BGLOBALLY' | 'BALWAYS' );", 13, 0, input);
+                    new NoViableAltException("1898:1: TOK_OP_BGLOBALLY : ( 'BG' | 'BGLOBALLY' | 'BALWAYS' );", 13, 0, input);
 
                 throw nvae;
             }
             switch (alt13) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1806:22: 'BG'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1898:22: 'BG'
                     {
                     match("BG"); 
 
@@ -1215,7 +1217,7 @@ public class SPCLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1806:29: 'BGLOBALLY'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1898:29: 'BGLOBALLY'
                     {
                     match("BGLOBALLY"); 
 
@@ -1223,7 +1225,7 @@ public class SPCLexer extends Lexer {
                     }
                     break;
                 case 3 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1806:43: 'BALWAYS'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1898:43: 'BALWAYS'
                     {
                     match("BALWAYS"); 
 
@@ -1243,7 +1245,7 @@ public class SPCLexer extends Lexer {
     public final void mTOK_BRELEASE() throws RecognitionException {
         try {
             int _type = TOK_BRELEASE;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1807:17: ( 'BR' | 'BRELEASE' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1899:17: ( 'BR' | 'BRELEASE' )
             int alt14=2;
             int LA14_0 = input.LA(1);
 
@@ -1261,20 +1263,20 @@ public class SPCLexer extends Lexer {
                 }
                 else {
                     NoViableAltException nvae =
-                        new NoViableAltException("1807:1: TOK_BRELEASE : ( 'BR' | 'BRELEASE' );", 14, 1, input);
+                        new NoViableAltException("1899:1: TOK_BRELEASE : ( 'BR' | 'BRELEASE' );", 14, 1, input);
 
                     throw nvae;
                 }
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1807:1: TOK_BRELEASE : ( 'BR' | 'BRELEASE' );", 14, 0, input);
+                    new NoViableAltException("1899:1: TOK_BRELEASE : ( 'BR' | 'BRELEASE' );", 14, 0, input);
 
                 throw nvae;
             }
             switch (alt14) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1807:19: 'BR'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1899:19: 'BR'
                     {
                     match("BR"); 
 
@@ -1282,7 +1284,7 @@ public class SPCLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1807:26: 'BRELEASE'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1899:26: 'BRELEASE'
                     {
                     match("BRELEASE"); 
 
@@ -1302,7 +1304,7 @@ public class SPCLexer extends Lexer {
     public final void mTOK_KNOW() throws RecognitionException {
         try {
             int _type = TOK_KNOW;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1811:13: ( 'K' | 'KNOW' | 'Know' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1903:13: ( 'K' | 'KNOW' | 'Know' )
             int alt15=3;
             int LA15_0 = input.LA(1);
 
@@ -1324,20 +1326,20 @@ public class SPCLexer extends Lexer {
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1811:1: TOK_KNOW : ( 'K' | 'KNOW' | 'Know' );", 15, 0, input);
+                    new NoViableAltException("1903:1: TOK_KNOW : ( 'K' | 'KNOW' | 'Know' );", 15, 0, input);
 
                 throw nvae;
             }
             switch (alt15) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1811:15: 'K'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1903:15: 'K'
                     {
                     match('K'); 
 
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1811:21: 'KNOW'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1903:21: 'KNOW'
                     {
                     match("KNOW"); 
 
@@ -1345,7 +1347,7 @@ public class SPCLexer extends Lexer {
                     }
                     break;
                 case 3 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1811:30: 'Know'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1903:30: 'Know'
                     {
                     match("Know"); 
 
@@ -1365,41 +1367,41 @@ public class SPCLexer extends Lexer {
     public final void mTOK_SKNOW() throws RecognitionException {
         try {
             int _type = TOK_SKNOW;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1812:14: ( 'SK' | 'SKNOW' | 'Sknow' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1904:14: ( 'SK' | 'SKNOW' | 'Sknow' )
             int alt16=3;
             int LA16_0 = input.LA(1);
 
             if ( (LA16_0=='S') ) {
                 int LA16_1 = input.LA(2);
 
-                if ( (LA16_1=='k') ) {
-                    alt16=3;
-                }
-                else if ( (LA16_1=='K') ) {
-                    int LA16_3 = input.LA(3);
+                if ( (LA16_1=='K') ) {
+                    int LA16_2 = input.LA(3);
 
-                    if ( (LA16_3=='N') ) {
+                    if ( (LA16_2=='N') ) {
                         alt16=2;
                     }
                     else {
                         alt16=1;}
                 }
+                else if ( (LA16_1=='k') ) {
+                    alt16=3;
+                }
                 else {
                     NoViableAltException nvae =
-                        new NoViableAltException("1812:1: TOK_SKNOW : ( 'SK' | 'SKNOW' | 'Sknow' );", 16, 1, input);
+                        new NoViableAltException("1904:1: TOK_SKNOW : ( 'SK' | 'SKNOW' | 'Sknow' );", 16, 1, input);
 
                     throw nvae;
                 }
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1812:1: TOK_SKNOW : ( 'SK' | 'SKNOW' | 'Sknow' );", 16, 0, input);
+                    new NoViableAltException("1904:1: TOK_SKNOW : ( 'SK' | 'SKNOW' | 'Sknow' );", 16, 0, input);
 
                 throw nvae;
             }
             switch (alt16) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1812:16: 'SK'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1904:16: 'SK'
                     {
                     match("SK"); 
 
@@ -1407,7 +1409,7 @@ public class SPCLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1812:23: 'SKNOW'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1904:23: 'SKNOW'
                     {
                     match("SKNOW"); 
 
@@ -1415,7 +1417,7 @@ public class SPCLexer extends Lexer {
                     }
                     break;
                 case 3 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1812:33: 'Sknow'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1904:33: 'Sknow'
                     {
                     match("Sknow"); 
 
@@ -1435,8 +1437,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_LP() throws RecognitionException {
         try {
             int _type = TOK_LP;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1817:13: ( '(' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1817:15: '('
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1909:13: ( '(' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1909:15: '('
             {
             match('('); 
 
@@ -1453,8 +1455,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_RP() throws RecognitionException {
         try {
             int _type = TOK_RP;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1818:13: ( ')' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1818:15: ')'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1910:13: ( ')' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1910:15: ')'
             {
             match(')'); 
 
@@ -1471,8 +1473,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_LB() throws RecognitionException {
         try {
             int _type = TOK_LB;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1819:13: ( '[' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1819:15: '['
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1911:13: ( '[' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1911:15: '['
             {
             match('['); 
 
@@ -1489,8 +1491,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_RB() throws RecognitionException {
         try {
             int _type = TOK_RB;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1820:13: ( ']' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1820:15: ']'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1912:13: ( ']' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1912:15: ']'
             {
             match(']'); 
 
@@ -1507,8 +1509,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_LCB() throws RecognitionException {
         try {
             int _type = TOK_LCB;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1821:14: ( '{' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1821:16: '{'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1913:14: ( '{' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1913:16: '{'
             {
             match('{'); 
 
@@ -1525,8 +1527,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_RCB() throws RecognitionException {
         try {
             int _type = TOK_RCB;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1822:14: ( '}' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1822:16: '}'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1914:14: ( '}' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1914:16: '}'
             {
             match('}'); 
 
@@ -1543,8 +1545,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_FALSEEXP() throws RecognitionException {
         try {
             int _type = TOK_FALSEEXP;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1823:17: ( 'FALSE' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1823:19: 'FALSE'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1915:17: ( 'FALSE' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1915:19: 'FALSE'
             {
             match("FALSE"); 
 
@@ -1562,8 +1564,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_TRUEEXP() throws RecognitionException {
         try {
             int _type = TOK_TRUEEXP;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1824:17: ( 'TRUE' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1824:19: 'TRUE'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1916:17: ( 'TRUE' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1916:19: 'TRUE'
             {
             match("TRUE"); 
 
@@ -1581,8 +1583,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_WORD1() throws RecognitionException {
         try {
             int _type = TOK_WORD1;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1828:15: ( 'word1' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1828:17: 'word1'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1920:15: ( 'word1' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1920:17: 'word1'
             {
             match("word1"); 
 
@@ -1600,7 +1602,7 @@ public class SPCLexer extends Lexer {
     public final void mTOK_WORD() throws RecognitionException {
         try {
             int _type = TOK_WORD;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1829:14: ( 'word' | 'Word' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1921:14: ( 'word' | 'Word' )
             int alt17=2;
             int LA17_0 = input.LA(1);
 
@@ -1612,13 +1614,13 @@ public class SPCLexer extends Lexer {
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1829:1: TOK_WORD : ( 'word' | 'Word' );", 17, 0, input);
+                    new NoViableAltException("1921:1: TOK_WORD : ( 'word' | 'Word' );", 17, 0, input);
 
                 throw nvae;
             }
             switch (alt17) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1829:16: 'word'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1921:16: 'word'
                     {
                     match("word"); 
 
@@ -1626,7 +1628,7 @@ public class SPCLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1829:25: 'Word'
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1921:25: 'Word'
                     {
                     match("Word"); 
 
@@ -1646,8 +1648,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_BOOL() throws RecognitionException {
         try {
             int _type = TOK_BOOL;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1830:14: ( 'bool' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1830:16: 'bool'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1922:14: ( 'bool' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1922:16: 'bool'
             {
             match("bool"); 
 
@@ -1665,8 +1667,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_WAREAD() throws RecognitionException {
         try {
             int _type = TOK_WAREAD;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1831:16: ( 'READ' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1831:18: 'READ'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1923:16: ( 'READ' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1923:18: 'READ'
             {
             match("READ"); 
 
@@ -1684,8 +1686,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_WAWRITE() throws RecognitionException {
         try {
             int _type = TOK_WAWRITE;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1832:17: ( 'WRITE' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1832:19: 'WRITE'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1924:17: ( 'WRITE' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1924:19: 'WRITE'
             {
             match("WRITE"); 
 
@@ -1703,8 +1705,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_CASE() throws RecognitionException {
         try {
             int _type = TOK_CASE;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1834:14: ( 'case' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1834:16: 'case'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1926:14: ( 'case' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1926:16: 'case'
             {
             match("case"); 
 
@@ -1722,8 +1724,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_ESAC() throws RecognitionException {
         try {
             int _type = TOK_ESAC;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1835:14: ( 'esac' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1835:16: 'esac'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1927:14: ( 'esac' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1927:16: 'esac'
             {
             match("esac"); 
 
@@ -1741,8 +1743,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_PLUS() throws RecognitionException {
         try {
             int _type = TOK_PLUS;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1836:14: ( '+' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1836:16: '+'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1928:14: ( '+' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1928:16: '+'
             {
             match('+'); 
 
@@ -1759,8 +1761,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_MINUS() throws RecognitionException {
         try {
             int _type = TOK_MINUS;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1837:15: ( '-' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1837:17: '-'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1929:15: ( '-' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1929:17: '-'
             {
             match('-'); 
 
@@ -1777,8 +1779,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_TIMES() throws RecognitionException {
         try {
             int _type = TOK_TIMES;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1838:15: ( '*' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1838:17: '*'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1930:15: ( '*' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1930:17: '*'
             {
             match('*'); 
 
@@ -1795,8 +1797,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_DIVIDE() throws RecognitionException {
         try {
             int _type = TOK_DIVIDE;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1839:16: ( '/' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1839:18: '/'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1931:16: ( '/' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1931:18: '/'
             {
             match('/'); 
 
@@ -1813,8 +1815,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_MOD() throws RecognitionException {
         try {
             int _type = TOK_MOD;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1840:14: ( 'mod' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1840:16: 'mod'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1932:14: ( 'mod' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1932:16: 'mod'
             {
             match("mod"); 
 
@@ -1832,8 +1834,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_LSHIFT() throws RecognitionException {
         try {
             int _type = TOK_LSHIFT;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1841:16: ( '<<' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1841:18: '<<'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1933:16: ( '<<' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1933:18: '<<'
             {
             match("<<"); 
 
@@ -1851,8 +1853,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_RSHIFT() throws RecognitionException {
         try {
             int _type = TOK_RSHIFT;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1842:16: ( '>>' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1842:18: '>>'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1934:16: ( '>>' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1934:18: '>>'
             {
             match(">>"); 
 
@@ -1870,8 +1872,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_EQUAL() throws RecognitionException {
         try {
             int _type = TOK_EQUAL;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1845:15: ( '=' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1845:17: '='
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1937:15: ( '=' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1937:17: '='
             {
             match('='); 
 
@@ -1888,8 +1890,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_NOTEQUAL() throws RecognitionException {
         try {
             int _type = TOK_NOTEQUAL;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1846:17: ( '!=' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1846:19: '!='
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1938:18: ( '!=' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1938:20: '!='
             {
             match("!="); 
 
@@ -1907,8 +1909,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_LE() throws RecognitionException {
         try {
             int _type = TOK_LE;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1847:13: ( '<=' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1847:15: '<='
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1939:13: ( '<=' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1939:15: '<='
             {
             match("<="); 
 
@@ -1926,8 +1928,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_GE() throws RecognitionException {
         try {
             int _type = TOK_GE;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1848:13: ( '>=' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1848:15: '>='
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1940:13: ( '>=' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1940:15: '>='
             {
             match(">="); 
 
@@ -1945,8 +1947,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_LT() throws RecognitionException {
         try {
             int _type = TOK_LT;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1849:13: ( '<' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1849:15: '<'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1941:13: ( '<' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1941:15: '<'
             {
             match('<'); 
 
@@ -1963,8 +1965,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_GT() throws RecognitionException {
         try {
             int _type = TOK_GT;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1850:13: ( '>' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1850:15: '>'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1942:13: ( '>' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1942:15: '>'
             {
             match('>'); 
 
@@ -1981,8 +1983,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_NEXT() throws RecognitionException {
         try {
             int _type = TOK_NEXT;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1851:14: ( 'next' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1851:16: 'next'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1943:14: ( 'next' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1943:16: 'next'
             {
             match("next"); 
 
@@ -2000,8 +2002,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_UNION() throws RecognitionException {
         try {
             int _type = TOK_UNION;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1853:15: ( 'union' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1853:17: 'union'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1945:15: ( 'union' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1945:17: 'union'
             {
             match("union"); 
 
@@ -2019,8 +2021,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_SETIN() throws RecognitionException {
         try {
             int _type = TOK_SETIN;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1854:15: ( 'in' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1854:17: 'in'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1946:15: ( 'in' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1946:17: 'in'
             {
             match("in"); 
 
@@ -2038,8 +2040,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_TWODOTS() throws RecognitionException {
         try {
             int _type = TOK_TWODOTS;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1855:17: ( '..' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1855:19: '..'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1947:17: ( '..' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1947:19: '..'
             {
             match(".."); 
 
@@ -2057,8 +2059,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_DOT() throws RecognitionException {
         try {
             int _type = TOK_DOT;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1856:14: ( '.' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1856:16: '.'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1948:14: ( '.' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1948:16: '.'
             {
             match('.'); 
 
@@ -2075,8 +2077,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_IMPLIES() throws RecognitionException {
         try {
             int _type = TOK_IMPLIES;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1859:17: ( '->' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1859:19: '->'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1951:17: ( '->' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1951:19: '->'
             {
             match("->"); 
 
@@ -2094,8 +2096,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_IFF() throws RecognitionException {
         try {
             int _type = TOK_IFF;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1860:14: ( '<->' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1860:16: '<->'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1952:14: ( '<->' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1952:16: '<->'
             {
             match("<->"); 
 
@@ -2113,8 +2115,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_OR() throws RecognitionException {
         try {
             int _type = TOK_OR;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1861:13: ( '|' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1861:15: '|'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1953:13: ( '|' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1953:15: '|'
             {
             match('|'); 
 
@@ -2131,8 +2133,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_AND() throws RecognitionException {
         try {
             int _type = TOK_AND;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1862:14: ( '&' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1862:16: '&'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1954:14: ( '&' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1954:16: '&'
             {
             match('&'); 
 
@@ -2149,8 +2151,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_XOR() throws RecognitionException {
         try {
             int _type = TOK_XOR;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1863:14: ( 'xor' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1863:16: 'xor'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1955:14: ( 'xor' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1955:16: 'xor'
             {
             match("xor"); 
 
@@ -2168,8 +2170,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_XNOR() throws RecognitionException {
         try {
             int _type = TOK_XNOR;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1864:14: ( 'xnor' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1864:16: 'xnor'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1956:14: ( 'xnor' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1956:16: 'xnor'
             {
             match("xnor"); 
 
@@ -2187,8 +2189,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_NOT() throws RecognitionException {
         try {
             int _type = TOK_NOT;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1865:14: ( '!' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1865:16: '!'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1957:14: ( '!' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1957:16: '!'
             {
             match('!'); 
 
@@ -2205,8 +2207,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_COMMA() throws RecognitionException {
         try {
             int _type = TOK_COMMA;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1867:15: ( ',' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1867:17: ','
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1959:15: ( ',' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1959:17: ','
             {
             match(','); 
 
@@ -2223,8 +2225,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_COLON() throws RecognitionException {
         try {
             int _type = TOK_COLON;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1868:15: ( ':' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1868:17: ':'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1960:15: ( ':' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1960:17: ':'
             {
             match(':'); 
 
@@ -2241,8 +2243,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_SEMI() throws RecognitionException {
         try {
             int _type = TOK_SEMI;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1869:14: ( ';' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1869:16: ';'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1961:14: ( ';' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1961:16: ';'
             {
             match(';'); 
 
@@ -2259,8 +2261,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_CONCATENATION() throws RecognitionException {
         try {
             int _type = TOK_CONCATENATION;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1870:21: ( '::' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1870:23: '::'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1962:22: ( '::' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1962:24: '::'
             {
             match("::"); 
 
@@ -2274,12 +2276,12 @@ public class SPCLexer extends Lexer {
     }
     // $ANTLR end TOK_CONCATENATION
 
-    // $ANTLR start TOK_2OR
-    public final void mTOK_2OR() throws RecognitionException {
+    // $ANTLR start TOK_LDL_OR
+    public final void mTOK_LDL_OR() throws RecognitionException {
         try {
-            int _type = TOK_2OR;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1872:14: ( '||' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1872:16: '||'
+            int _type = TOK_LDL_OR;
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1964:16: ( '||' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1964:18: '||'
             {
             match("||"); 
 
@@ -2291,14 +2293,14 @@ public class SPCLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end TOK_2OR
+    // $ANTLR end TOK_LDL_OR
 
-    // $ANTLR start TOK_2AND
-    public final void mTOK_2AND() throws RecognitionException {
+    // $ANTLR start TOK_LDL_AND
+    public final void mTOK_LDL_AND() throws RecognitionException {
         try {
-            int _type = TOK_2AND;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1873:14: ( '&&' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1873:16: '&&'
+            int _type = TOK_LDL_AND;
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1965:17: ( '&&' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1965:19: '&&'
             {
             match("&&"); 
 
@@ -2310,14 +2312,14 @@ public class SPCLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end TOK_2AND
+    // $ANTLR end TOK_LDL_AND
 
-    // $ANTLR start TOK_REPEAT_LB
-    public final void mTOK_REPEAT_LB() throws RecognitionException {
+    // $ANTLR start TOK_LDL_REPEAT_LB
+    public final void mTOK_LDL_REPEAT_LB() throws RecognitionException {
         try {
-            int _type = TOK_REPEAT_LB;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1874:20: ( '[*' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1874:22: '[*'
+            int _type = TOK_LDL_REPEAT_LB;
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1967:23: ( '[*' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1967:25: '[*'
             {
             match("[*"); 
 
@@ -2329,14 +2331,14 @@ public class SPCLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end TOK_REPEAT_LB
+    // $ANTLR end TOK_LDL_REPEAT_LB
 
-    // $ANTLR start TOK_TEST
-    public final void mTOK_TEST() throws RecognitionException {
+    // $ANTLR start TOK_LDL_TEST
+    public final void mTOK_LDL_TEST() throws RecognitionException {
         try {
-            int _type = TOK_TEST;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1875:14: ( '?' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1875:16: '?'
+            int _type = TOK_LDL_TEST;
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1968:18: ( '?' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1968:20: '?'
             {
             match('?'); 
 
@@ -2347,14 +2349,52 @@ public class SPCLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end TOK_TEST
+    // $ANTLR end TOK_LDL_TEST
+
+    // $ANTLR start TOK_LDL_SERE_SAT
+    public final void mTOK_LDL_SERE_SAT() throws RecognitionException {
+        try {
+            int _type = TOK_LDL_SERE_SAT;
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1969:22: ( ':-' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1969:24: ':-'
+            {
+            match(":-"); 
+
+
+            }
+
+            this.type = _type;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end TOK_LDL_SERE_SAT
+
+    // $ANTLR start TOK_LDL_SERE_IMP
+    public final void mTOK_LDL_SERE_IMP() throws RecognitionException {
+        try {
+            int _type = TOK_LDL_SERE_IMP;
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1970:22: ( ':=' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1970:24: ':='
+            {
+            match(":="); 
+
+
+            }
+
+            this.type = _type;
+        }
+        finally {
+        }
+    }
+    // $ANTLR end TOK_LDL_SERE_IMP
 
     // $ANTLR start TOK_NUMBER_WORD
     public final void mTOK_NUMBER_WORD() throws RecognitionException {
         try {
             int _type = TOK_NUMBER_WORD;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1883:21: ( '0' ( 'b' | 'B' | 'o' | 'O' | 'd' | 'D' | 'h' | 'H' ) ( '0' .. '9' )* '_' ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' ) ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' | '_' )* )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1883:23: '0' ( 'b' | 'B' | 'o' | 'O' | 'd' | 'D' | 'h' | 'H' ) ( '0' .. '9' )* '_' ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' ) ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' | '_' )*
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1979:21: ( '0' ( 'b' | 'B' | 'o' | 'O' | 'd' | 'D' | 'h' | 'H' ) ( '0' .. '9' )* '_' ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' ) ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' | '_' )* )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1979:23: '0' ( 'b' | 'B' | 'o' | 'O' | 'd' | 'D' | 'h' | 'H' ) ( '0' .. '9' )* '_' ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' ) ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' | '_' )*
             {
             match('0'); 
             if ( input.LA(1)=='B'||input.LA(1)=='D'||input.LA(1)=='H'||input.LA(1)=='O'||input.LA(1)=='b'||input.LA(1)=='d'||input.LA(1)=='h'||input.LA(1)=='o' ) {
@@ -2367,7 +2407,7 @@ public class SPCLexer extends Lexer {
                 recover(mse);    throw mse;
             }
 
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1883:75: ( '0' .. '9' )*
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1979:75: ( '0' .. '9' )*
             loop18:
             do {
                 int alt18=2;
@@ -2380,7 +2420,7 @@ public class SPCLexer extends Lexer {
 
                 switch (alt18) {
             	case 1 :
-            	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1883:76: '0' .. '9'
+            	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1979:76: '0' .. '9'
             	    {
             	    matchRange('0','9'); 
 
@@ -2403,7 +2443,7 @@ public class SPCLexer extends Lexer {
                 recover(mse);    throw mse;
             }
 
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1883:124: ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' | '_' )*
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1979:124: ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' | '_' )*
             loop19:
             do {
                 int alt19=2;
@@ -2451,8 +2491,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_NUMBER_FRAC() throws RecognitionException {
         try {
             int _type = TOK_NUMBER_FRAC;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1886:21: ( ( 'f' | 'F' ) '\\'' ( '0' .. '9' )+ '/' ( '0' .. '9' )+ )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1886:23: ( 'f' | 'F' ) '\\'' ( '0' .. '9' )+ '/' ( '0' .. '9' )+
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1982:21: ( ( 'f' | 'F' ) '\\'' ( '0' .. '9' )+ '/' ( '0' .. '9' )+ )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1982:23: ( 'f' | 'F' ) '\\'' ( '0' .. '9' )+ '/' ( '0' .. '9' )+
             {
             if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
                 input.consume();
@@ -2465,7 +2505,7 @@ public class SPCLexer extends Lexer {
             }
 
             match('\''); 
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1886:40: ( '0' .. '9' )+
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1982:40: ( '0' .. '9' )+
             int cnt20=0;
             loop20:
             do {
@@ -2479,7 +2519,7 @@ public class SPCLexer extends Lexer {
 
                 switch (alt20) {
             	case 1 :
-            	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1886:41: '0' .. '9'
+            	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1982:41: '0' .. '9'
             	    {
             	    matchRange('0','9'); 
 
@@ -2496,7 +2536,7 @@ public class SPCLexer extends Lexer {
             } while (true);
 
             match('/'); 
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1886:56: ( '0' .. '9' )+
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1982:56: ( '0' .. '9' )+
             int cnt21=0;
             loop21:
             do {
@@ -2510,7 +2550,7 @@ public class SPCLexer extends Lexer {
 
                 switch (alt21) {
             	case 1 :
-            	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1886:57: '0' .. '9'
+            	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1982:57: '0' .. '9'
             	    {
             	    matchRange('0','9'); 
 
@@ -2540,10 +2580,10 @@ public class SPCLexer extends Lexer {
     public final void mTOK_NUMBER() throws RecognitionException {
         try {
             int _type = TOK_NUMBER;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1889:17: ( ( '0' .. '9' )+ )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1889:19: ( '0' .. '9' )+
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1985:17: ( ( '0' .. '9' )+ )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1985:19: ( '0' .. '9' )+
             {
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1889:19: ( '0' .. '9' )+
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1985:19: ( '0' .. '9' )+
             int cnt22=0;
             loop22:
             do {
@@ -2557,7 +2597,7 @@ public class SPCLexer extends Lexer {
 
                 switch (alt22) {
             	case 1 :
-            	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1889:20: '0' .. '9'
+            	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1985:20: '0' .. '9'
             	    {
             	    matchRange('0','9'); 
 
@@ -2587,8 +2627,8 @@ public class SPCLexer extends Lexer {
     public final void mTOK_ATOM() throws RecognitionException {
         try {
             int _type = TOK_ATOM;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1892:15: ( ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '\\\\' | '$' | '#' | '-' )* )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1892:17: ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '\\\\' | '$' | '#' | '-' )*
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1988:15: ( ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '\\\\' | '$' | '#' | '-' )* )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1988:17: ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '\\\\' | '$' | '#' | '-' )*
             {
             if ( (input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                 input.consume();
@@ -2600,7 +2640,7 @@ public class SPCLexer extends Lexer {
                 recover(mse);    throw mse;
             }
 
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1892:45: ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '\\\\' | '$' | '#' | '-' )*
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1988:45: ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '\\\\' | '$' | '#' | '-' )*
             loop23:
             do {
                 int alt23=2;
@@ -2648,10 +2688,10 @@ public class SPCLexer extends Lexer {
     public final void mJTOK_WS() throws RecognitionException {
         try {
             int _type = JTOK_WS;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1895:15: ( ( ' ' | '\\t' | '\\r' | '\\n' )+ )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1895:19: ( ' ' | '\\t' | '\\r' | '\\n' )+
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1991:15: ( ( ' ' | '\\t' | '\\r' | '\\n' )+ )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1991:19: ( ' ' | '\\t' | '\\r' | '\\n' )+
             {
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1895:19: ( ' ' | '\\t' | '\\r' | '\\n' )+
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1991:19: ( ' ' | '\\t' | '\\r' | '\\n' )+
             int cnt24=0;
             loop24:
             do {
@@ -2705,15 +2745,15 @@ public class SPCLexer extends Lexer {
     public final void mJTOK_MULTI_COMMENT() throws RecognitionException {
         try {
             int _type = JTOK_MULTI_COMMENT;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1901:23: ( ( '/*' ( options {greedy=false; } : '\\r' | '\\n' | ~ ( '\\n' | '\\r' ) )* '*/' ) )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1901:25: ( '/*' ( options {greedy=false; } : '\\r' | '\\n' | ~ ( '\\n' | '\\r' ) )* '*/' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1997:23: ( ( '/*' ( options {greedy=false; } : '\\r' | '\\n' | ~ ( '\\n' | '\\r' ) )* '*/' ) )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1997:25: ( '/*' ( options {greedy=false; } : '\\r' | '\\n' | ~ ( '\\n' | '\\r' ) )* '*/' )
             {
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1901:25: ( '/*' ( options {greedy=false; } : '\\r' | '\\n' | ~ ( '\\n' | '\\r' ) )* '*/' )
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1901:26: '/*' ( options {greedy=false; } : '\\r' | '\\n' | ~ ( '\\n' | '\\r' ) )* '*/'
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1997:25: ( '/*' ( options {greedy=false; } : '\\r' | '\\n' | ~ ( '\\n' | '\\r' ) )* '*/' )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1997:26: '/*' ( options {greedy=false; } : '\\r' | '\\n' | ~ ( '\\n' | '\\r' ) )* '*/'
             {
             match("/*"); 
 
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1901:31: ( options {greedy=false; } : '\\r' | '\\n' | ~ ( '\\n' | '\\r' ) )*
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1997:31: ( options {greedy=false; } : '\\r' | '\\n' | ~ ( '\\n' | '\\r' ) )*
             loop25:
             do {
                 int alt25=4;
@@ -2744,21 +2784,21 @@ public class SPCLexer extends Lexer {
 
                 switch (alt25) {
             	case 1 :
-            	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1904:9: '\\r'
+            	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2000:9: '\\r'
             	    {
             	    match('\r'); 
 
             	    }
             	    break;
             	case 2 :
-            	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1905:13: '\\n'
+            	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2001:13: '\\n'
             	    {
             	    match('\n'); 
 
             	    }
             	    break;
             	case 3 :
-            	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1906:13: ~ ( '\\n' | '\\r' )
+            	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2002:13: ~ ( '\\n' | '\\r' )
             	    {
             	    if ( (input.LA(1)>='\u0000' && input.LA(1)<='\t')||(input.LA(1)>='\u000B' && input.LA(1)<='\f')||(input.LA(1)>='\u000E' && input.LA(1)<='\uFFFE') ) {
             	        input.consume();
@@ -2799,7 +2839,7 @@ public class SPCLexer extends Lexer {
     public final void mJTOK_LINE_COMMENT() throws RecognitionException {
         try {
             int _type = JTOK_LINE_COMMENT;
-            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1910:22: ( ( '--' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )? ) | ( '//' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )? ) )
+            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2006:22: ( ( '--' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )? ) | ( '//' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )? ) )
             int alt34=2;
             int LA34_0 = input.LA(1);
 
@@ -2811,20 +2851,20 @@ public class SPCLexer extends Lexer {
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("1910:1: JTOK_LINE_COMMENT : ( ( '--' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )? ) | ( '//' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )? ) );", 34, 0, input);
+                    new NoViableAltException("2006:1: JTOK_LINE_COMMENT : ( ( '--' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )? ) | ( '//' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )? ) );", 34, 0, input);
 
                 throw nvae;
             }
             switch (alt34) {
                 case 1 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1910:24: ( '--' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )? )
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2006:24: ( '--' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )? )
                     {
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1910:24: ( '--' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )? )
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1910:25: '--' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )?
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2006:24: ( '--' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )? )
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2006:25: '--' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )?
                     {
                     match("--"); 
 
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1910:30: (~ ( '\\n' | '\\r' ) )*
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2006:30: (~ ( '\\n' | '\\r' ) )*
                     loop26:
                     do {
                         int alt26=2;
@@ -2837,7 +2877,7 @@ public class SPCLexer extends Lexer {
 
                         switch (alt26) {
                     	case 1 :
-                    	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1910:31: ~ ( '\\n' | '\\r' )
+                    	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2006:31: ~ ( '\\n' | '\\r' )
                     	    {
                     	    if ( (input.LA(1)>='\u0000' && input.LA(1)<='\t')||(input.LA(1)>='\u000B' && input.LA(1)<='\f')||(input.LA(1)>='\u000E' && input.LA(1)<='\uFFFE') ) {
                     	        input.consume();
@@ -2858,7 +2898,7 @@ public class SPCLexer extends Lexer {
                         }
                     } while (true);
 
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1910:46: ( ( '\\n' | '\\r' ( '\\n' )? ) )?
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2006:46: ( ( '\\n' | '\\r' ( '\\n' )? ) )?
                     int alt29=2;
                     int LA29_0 = input.LA(1);
 
@@ -2867,9 +2907,9 @@ public class SPCLexer extends Lexer {
                     }
                     switch (alt29) {
                         case 1 :
-                            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1910:47: ( '\\n' | '\\r' ( '\\n' )? )
+                            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2006:47: ( '\\n' | '\\r' ( '\\n' )? )
                             {
-                            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1910:47: ( '\\n' | '\\r' ( '\\n' )? )
+                            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2006:47: ( '\\n' | '\\r' ( '\\n' )? )
                             int alt28=2;
                             int LA28_0 = input.LA(1);
 
@@ -2881,23 +2921,23 @@ public class SPCLexer extends Lexer {
                             }
                             else {
                                 NoViableAltException nvae =
-                                    new NoViableAltException("1910:47: ( '\\n' | '\\r' ( '\\n' )? )", 28, 0, input);
+                                    new NoViableAltException("2006:47: ( '\\n' | '\\r' ( '\\n' )? )", 28, 0, input);
 
                                 throw nvae;
                             }
                             switch (alt28) {
                                 case 1 :
-                                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1910:48: '\\n'
+                                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2006:48: '\\n'
                                     {
                                     match('\n'); 
 
                                     }
                                     break;
                                 case 2 :
-                                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1910:53: '\\r' ( '\\n' )?
+                                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2006:53: '\\r' ( '\\n' )?
                                     {
                                     match('\r'); 
-                                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1910:57: ( '\\n' )?
+                                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2006:57: ( '\\n' )?
                                     int alt27=2;
                                     int LA27_0 = input.LA(1);
 
@@ -2906,7 +2946,7 @@ public class SPCLexer extends Lexer {
                                     }
                                     switch (alt27) {
                                         case 1 :
-                                            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1910:58: '\\n'
+                                            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2006:58: '\\n'
                                             {
                                             match('\n'); 
 
@@ -2935,14 +2975,14 @@ public class SPCLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1911:11: ( '//' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )? )
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2007:11: ( '//' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )? )
                     {
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1911:11: ( '//' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )? )
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1911:12: '//' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )?
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2007:11: ( '//' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )? )
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2007:12: '//' (~ ( '\\n' | '\\r' ) )* ( ( '\\n' | '\\r' ( '\\n' )? ) )?
                     {
                     match("//"); 
 
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1911:17: (~ ( '\\n' | '\\r' ) )*
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2007:17: (~ ( '\\n' | '\\r' ) )*
                     loop30:
                     do {
                         int alt30=2;
@@ -2955,7 +2995,7 @@ public class SPCLexer extends Lexer {
 
                         switch (alt30) {
                     	case 1 :
-                    	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1911:18: ~ ( '\\n' | '\\r' )
+                    	    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2007:18: ~ ( '\\n' | '\\r' )
                     	    {
                     	    if ( (input.LA(1)>='\u0000' && input.LA(1)<='\t')||(input.LA(1)>='\u000B' && input.LA(1)<='\f')||(input.LA(1)>='\u000E' && input.LA(1)<='\uFFFE') ) {
                     	        input.consume();
@@ -2976,7 +3016,7 @@ public class SPCLexer extends Lexer {
                         }
                     } while (true);
 
-                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1911:33: ( ( '\\n' | '\\r' ( '\\n' )? ) )?
+                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2007:33: ( ( '\\n' | '\\r' ( '\\n' )? ) )?
                     int alt33=2;
                     int LA33_0 = input.LA(1);
 
@@ -2985,9 +3025,9 @@ public class SPCLexer extends Lexer {
                     }
                     switch (alt33) {
                         case 1 :
-                            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1911:34: ( '\\n' | '\\r' ( '\\n' )? )
+                            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2007:34: ( '\\n' | '\\r' ( '\\n' )? )
                             {
-                            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1911:34: ( '\\n' | '\\r' ( '\\n' )? )
+                            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2007:34: ( '\\n' | '\\r' ( '\\n' )? )
                             int alt32=2;
                             int LA32_0 = input.LA(1);
 
@@ -2999,23 +3039,23 @@ public class SPCLexer extends Lexer {
                             }
                             else {
                                 NoViableAltException nvae =
-                                    new NoViableAltException("1911:34: ( '\\n' | '\\r' ( '\\n' )? )", 32, 0, input);
+                                    new NoViableAltException("2007:34: ( '\\n' | '\\r' ( '\\n' )? )", 32, 0, input);
 
                                 throw nvae;
                             }
                             switch (alt32) {
                                 case 1 :
-                                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1911:35: '\\n'
+                                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2007:35: '\\n'
                                     {
                                     match('\n'); 
 
                                     }
                                     break;
                                 case 2 :
-                                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1911:40: '\\r' ( '\\n' )?
+                                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2007:40: '\\r' ( '\\n' )?
                                     {
                                     match('\r'); 
-                                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1911:44: ( '\\n' )?
+                                    // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2007:44: ( '\\n' )?
                                     int alt31=2;
                                     int LA31_0 = input.LA(1);
 
@@ -3024,7 +3064,7 @@ public class SPCLexer extends Lexer {
                                     }
                                     switch (alt31) {
                                         case 1 :
-                                            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1911:45: '\\n'
+                                            // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:2007:45: '\\n'
                                             {
                                             match('\n'); 
 
@@ -3062,8 +3102,8 @@ public class SPCLexer extends Lexer {
     // $ANTLR end JTOK_LINE_COMMENT
 
     public void mTokens() throws RecognitionException {
-        // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:8: ( TOK_CTL_SPEC | TOK_CTL_STAR_SPEC | TOK_LTL_SPEC | TOK_INVAR_SPEC | TOK_RTCTL_STAR_SPEC | TOK_LDL_SPEC | TOK_EX | TOK_AX | TOK_EF | TOK_AF | TOK_EG | TOK_AG | TOK_EE | TOK_AA | TOK_BUNTIL | TOK_EBF | TOK_ABF | TOK_EBG | TOK_ABG | TOK_OP_FINALLY | TOK_OP_ONCE | TOK_OP_GLOBALLY | TOK_OP_HISTORICALLY | TOK_OP_NEXT | TOK_OP_PREV | TOK_UNTIL | TOK_SINCE | TOK_RELEASE | TOK_TRIGGERED | TOK_OP_NOTPREVNOT | TOK_OP_BFINALLY | TOK_OP_BGLOBALLY | TOK_BRELEASE | TOK_KNOW | TOK_SKNOW | TOK_LP | TOK_RP | TOK_LB | TOK_RB | TOK_LCB | TOK_RCB | TOK_FALSEEXP | TOK_TRUEEXP | TOK_WORD1 | TOK_WORD | TOK_BOOL | TOK_WAREAD | TOK_WAWRITE | TOK_CASE | TOK_ESAC | TOK_PLUS | TOK_MINUS | TOK_TIMES | TOK_DIVIDE | TOK_MOD | TOK_LSHIFT | TOK_RSHIFT | TOK_EQUAL | TOK_NOTEQUAL | TOK_LE | TOK_GE | TOK_LT | TOK_GT | TOK_NEXT | TOK_UNION | TOK_SETIN | TOK_TWODOTS | TOK_DOT | TOK_IMPLIES | TOK_IFF | TOK_OR | TOK_AND | TOK_XOR | TOK_XNOR | TOK_NOT | TOK_COMMA | TOK_COLON | TOK_SEMI | TOK_CONCATENATION | TOK_2OR | TOK_2AND | TOK_REPEAT_LB | TOK_TEST | TOK_NUMBER_WORD | TOK_NUMBER_FRAC | TOK_NUMBER | TOK_ATOM | JTOK_WS | JTOK_MULTI_COMMENT | JTOK_LINE_COMMENT )
-        int alt35=90;
+        // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:8: ( TOK_CTL_SPEC | TOK_CTL_STAR_SPEC | TOK_LTL_SPEC | TOK_INVAR_SPEC | TOK_RTCTL_STAR_SPEC | TOK_CDLs_SPEC | TOK_EX | TOK_AX | TOK_EF | TOK_AF | TOK_EG | TOK_AG | TOK_EE | TOK_AA | TOK_BUNTIL | TOK_EBF | TOK_ABF | TOK_EBG | TOK_ABG | TOK_OP_FINALLY | TOK_OP_ONCE | TOK_OP_GLOBALLY | TOK_OP_HISTORICALLY | TOK_OP_NEXT | TOK_OP_PREV | TOK_UNTIL | TOK_SINCE | TOK_RELEASE | TOK_TRIGGERED | TOK_OP_NOTPREVNOT | TOK_OP_BFINALLY | TOK_OP_BGLOBALLY | TOK_BRELEASE | TOK_KNOW | TOK_SKNOW | TOK_LP | TOK_RP | TOK_LB | TOK_RB | TOK_LCB | TOK_RCB | TOK_FALSEEXP | TOK_TRUEEXP | TOK_WORD1 | TOK_WORD | TOK_BOOL | TOK_WAREAD | TOK_WAWRITE | TOK_CASE | TOK_ESAC | TOK_PLUS | TOK_MINUS | TOK_TIMES | TOK_DIVIDE | TOK_MOD | TOK_LSHIFT | TOK_RSHIFT | TOK_EQUAL | TOK_NOTEQUAL | TOK_LE | TOK_GE | TOK_LT | TOK_GT | TOK_NEXT | TOK_UNION | TOK_SETIN | TOK_TWODOTS | TOK_DOT | TOK_IMPLIES | TOK_IFF | TOK_OR | TOK_AND | TOK_XOR | TOK_XNOR | TOK_NOT | TOK_COMMA | TOK_COLON | TOK_SEMI | TOK_CONCATENATION | TOK_LDL_OR | TOK_LDL_AND | TOK_LDL_REPEAT_LB | TOK_LDL_TEST | TOK_LDL_SERE_SAT | TOK_LDL_SERE_IMP | TOK_NUMBER_WORD | TOK_NUMBER_FRAC | TOK_NUMBER | TOK_ATOM | JTOK_WS | JTOK_MULTI_COMMENT | JTOK_LINE_COMMENT )
+        int alt35=92;
         switch ( input.LA(1) ) {
         case 'C':
             {
@@ -3074,16 +3114,11 @@ public class SPCLexer extends Lexer {
 
                 if ( (LA35_57=='L') ) {
                     switch ( input.LA(4) ) {
-                    case '*':
-                        {
-                        alt35=2;
-                        }
-                        break;
                     case 'S':
                         {
-                        int LA35_212 = input.LA(5);
+                        int LA35_211 = input.LA(5);
 
-                        if ( (LA35_212=='P') ) {
+                        if ( (LA35_211=='P') ) {
                             int LA35_261 = input.LA(6);
 
                             if ( (LA35_261=='E') ) {
@@ -3093,30 +3128,35 @@ public class SPCLexer extends Lexer {
                                     int LA35_322 = input.LA(8);
 
                                     if ( ((LA35_322>='#' && LA35_322<='$')||LA35_322=='-'||(LA35_322>='0' && LA35_322<='9')||(LA35_322>='A' && LA35_322<='Z')||LA35_322=='\\'||LA35_322=='_'||(LA35_322>='a' && LA35_322<='z')) ) {
-                                        alt35=87;
+                                        alt35=89;
                                     }
                                     else {
                                         alt35=1;}
                                 }
                                 else {
-                                    alt35=87;}
+                                    alt35=89;}
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
+                        }
+                        break;
+                    case '*':
+                        {
+                        alt35=2;
                         }
                         break;
                     default:
-                        alt35=87;}
+                        alt35=89;}
 
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
             }
             else {
-                alt35=87;}
+                alt35=89;}
             }
             break;
         case 'S':
@@ -3127,22 +3167,22 @@ public class SPCLexer extends Lexer {
                 int LA35_58 = input.LA(3);
 
                 if ( (LA35_58=='E') ) {
-                    int LA35_151 = input.LA(4);
+                    int LA35_152 = input.LA(4);
 
-                    if ( (LA35_151=='C') ) {
+                    if ( (LA35_152=='C') ) {
                         int LA35_213 = input.LA(5);
 
                         if ( ((LA35_213>='#' && LA35_213<='$')||LA35_213=='-'||(LA35_213>='0' && LA35_213<='9')||(LA35_213>='A' && LA35_213<='Z')||LA35_213=='\\'||LA35_213=='_'||(LA35_213>='a' && LA35_213<='z')) ) {
-                            alt35=87;
+                            alt35=89;
                         }
                         else {
                             alt35=1;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case 'i':
@@ -3150,28 +3190,28 @@ public class SPCLexer extends Lexer {
                 int LA35_59 = input.LA(3);
 
                 if ( (LA35_59=='n') ) {
-                    int LA35_152 = input.LA(4);
+                    int LA35_153 = input.LA(4);
 
-                    if ( (LA35_152=='c') ) {
+                    if ( (LA35_153=='c') ) {
                         int LA35_214 = input.LA(5);
 
                         if ( (LA35_214=='e') ) {
                             int LA35_263 = input.LA(6);
 
                             if ( ((LA35_263>='#' && LA35_263<='$')||LA35_263=='-'||(LA35_263>='0' && LA35_263<='9')||(LA35_263>='A' && LA35_263<='Z')||LA35_263=='\\'||LA35_263=='_'||(LA35_263>='a' && LA35_263<='z')) ) {
-                                alt35=87;
+                                alt35=89;
                             }
                             else {
                                 alt35=27;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case 'I':
@@ -3179,28 +3219,28 @@ public class SPCLexer extends Lexer {
                 int LA35_60 = input.LA(3);
 
                 if ( (LA35_60=='N') ) {
-                    int LA35_153 = input.LA(4);
+                    int LA35_154 = input.LA(4);
 
-                    if ( (LA35_153=='C') ) {
+                    if ( (LA35_154=='C') ) {
                         int LA35_215 = input.LA(5);
 
                         if ( (LA35_215=='E') ) {
                             int LA35_264 = input.LA(6);
 
                             if ( ((LA35_264>='#' && LA35_264<='$')||LA35_264=='-'||(LA35_264>='0' && LA35_264<='9')||(LA35_264>='A' && LA35_264<='Z')||LA35_264=='\\'||LA35_264=='_'||(LA35_264>='a' && LA35_264<='z')) ) {
-                                alt35=87;
+                                alt35=89;
                             }
                             else {
                                 alt35=27;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case 'K':
@@ -3208,25 +3248,25 @@ public class SPCLexer extends Lexer {
                 switch ( input.LA(3) ) {
                 case 'N':
                     {
-                    int LA35_154 = input.LA(4);
+                    int LA35_155 = input.LA(4);
 
-                    if ( (LA35_154=='O') ) {
+                    if ( (LA35_155=='O') ) {
                         int LA35_216 = input.LA(5);
 
                         if ( (LA35_216=='W') ) {
                             int LA35_265 = input.LA(6);
 
                             if ( ((LA35_265>='#' && LA35_265<='$')||LA35_265=='-'||(LA35_265>='0' && LA35_265<='9')||(LA35_265>='A' && LA35_265<='Z')||LA35_265=='\\'||LA35_265=='_'||(LA35_265>='a' && LA35_265<='z')) ) {
-                                alt35=87;
+                                alt35=89;
                             }
                             else {
                                 alt35=35;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                     }
                     break;
                 case '#':
@@ -3296,7 +3336,7 @@ public class SPCLexer extends Lexer {
                 case 'y':
                 case 'z':
                     {
-                    alt35=87;
+                    alt35=89;
                     }
                     break;
                 default:
@@ -3309,28 +3349,28 @@ public class SPCLexer extends Lexer {
                 int LA35_62 = input.LA(3);
 
                 if ( (LA35_62=='n') ) {
-                    int LA35_156 = input.LA(4);
+                    int LA35_157 = input.LA(4);
 
-                    if ( (LA35_156=='o') ) {
+                    if ( (LA35_157=='o') ) {
                         int LA35_217 = input.LA(5);
 
                         if ( (LA35_217=='w') ) {
                             int LA35_266 = input.LA(6);
 
                             if ( ((LA35_266>='#' && LA35_266<='$')||LA35_266=='-'||(LA35_266>='0' && LA35_266<='9')||(LA35_266>='A' && LA35_266<='Z')||LA35_266=='\\'||LA35_266=='_'||(LA35_266>='a' && LA35_266<='z')) ) {
-                                alt35=87;
+                                alt35=89;
                             }
                             else {
                                 alt35=35;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case '#':
@@ -3396,7 +3436,7 @@ public class SPCLexer extends Lexer {
             case 'y':
             case 'z':
                 {
-                alt35=87;
+                alt35=89;
                 }
                 break;
             default:
@@ -3406,15 +3446,15 @@ public class SPCLexer extends Lexer {
             break;
         case 'L':
             {
-            switch ( input.LA(2) ) {
-            case 'T':
-                {
+            int LA35_3 = input.LA(2);
+
+            if ( (LA35_3=='T') ) {
                 int LA35_64 = input.LA(3);
 
                 if ( (LA35_64=='L') ) {
-                    int LA35_157 = input.LA(4);
+                    int LA35_158 = input.LA(4);
 
-                    if ( (LA35_157=='S') ) {
+                    if ( (LA35_158=='S') ) {
                         int LA35_218 = input.LA(5);
 
                         if ( (LA35_218=='P') ) {
@@ -3427,71 +3467,28 @@ public class SPCLexer extends Lexer {
                                     int LA35_323 = input.LA(8);
 
                                     if ( ((LA35_323>='#' && LA35_323<='$')||LA35_323=='-'||(LA35_323>='0' && LA35_323<='9')||(LA35_323>='A' && LA35_323<='Z')||LA35_323=='\\'||LA35_323=='_'||(LA35_323>='a' && LA35_323<='z')) ) {
-                                        alt35=87;
+                                        alt35=89;
                                     }
                                     else {
                                         alt35=3;}
                                 }
                                 else {
-                                    alt35=87;}
+                                    alt35=89;}
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
-                }
-                break;
-            case 'D':
-                {
-                int LA35_65 = input.LA(3);
-
-                if ( (LA35_65=='L') ) {
-                    int LA35_158 = input.LA(4);
-
-                    if ( (LA35_158=='S') ) {
-                        int LA35_219 = input.LA(5);
-
-                        if ( (LA35_219=='P') ) {
-                            int LA35_268 = input.LA(6);
-
-                            if ( (LA35_268=='E') ) {
-                                int LA35_301 = input.LA(7);
-
-                                if ( (LA35_301=='C') ) {
-                                    int LA35_324 = input.LA(8);
-
-                                    if ( ((LA35_324>='#' && LA35_324<='$')||LA35_324=='-'||(LA35_324>='0' && LA35_324<='9')||(LA35_324>='A' && LA35_324<='Z')||LA35_324=='\\'||LA35_324=='_'||(LA35_324>='a' && LA35_324<='z')) ) {
-                                        alt35=87;
-                                    }
-                                    else {
-                                        alt35=6;}
-                                }
-                                else {
-                                    alt35=87;}
-                            }
-                            else {
-                                alt35=87;}
-                        }
-                        else {
-                            alt35=87;}
-                    }
-                    else {
-                        alt35=87;}
-                }
-                else {
-                    alt35=87;}
-                }
-                break;
-            default:
-                alt35=87;}
-
+                    alt35=89;}
+            }
+            else {
+                alt35=89;}
             }
             break;
         case 'I':
@@ -3499,58 +3496,58 @@ public class SPCLexer extends Lexer {
             int LA35_4 = input.LA(2);
 
             if ( (LA35_4=='N') ) {
-                int LA35_66 = input.LA(3);
+                int LA35_65 = input.LA(3);
 
-                if ( (LA35_66=='V') ) {
+                if ( (LA35_65=='V') ) {
                     int LA35_159 = input.LA(4);
 
                     if ( (LA35_159=='A') ) {
-                        int LA35_220 = input.LA(5);
+                        int LA35_219 = input.LA(5);
 
-                        if ( (LA35_220=='R') ) {
-                            int LA35_269 = input.LA(6);
+                        if ( (LA35_219=='R') ) {
+                            int LA35_268 = input.LA(6);
 
-                            if ( (LA35_269=='S') ) {
-                                int LA35_302 = input.LA(7);
+                            if ( (LA35_268=='S') ) {
+                                int LA35_301 = input.LA(7);
 
-                                if ( (LA35_302=='P') ) {
-                                    int LA35_325 = input.LA(8);
+                                if ( (LA35_301=='P') ) {
+                                    int LA35_324 = input.LA(8);
 
-                                    if ( (LA35_325=='E') ) {
-                                        int LA35_339 = input.LA(9);
+                                    if ( (LA35_324=='E') ) {
+                                        int LA35_337 = input.LA(9);
 
-                                        if ( (LA35_339=='C') ) {
-                                            int LA35_348 = input.LA(10);
+                                        if ( (LA35_337=='C') ) {
+                                            int LA35_346 = input.LA(10);
 
-                                            if ( ((LA35_348>='#' && LA35_348<='$')||LA35_348=='-'||(LA35_348>='0' && LA35_348<='9')||(LA35_348>='A' && LA35_348<='Z')||LA35_348=='\\'||LA35_348=='_'||(LA35_348>='a' && LA35_348<='z')) ) {
-                                                alt35=87;
+                                            if ( ((LA35_346>='#' && LA35_346<='$')||LA35_346=='-'||(LA35_346>='0' && LA35_346<='9')||(LA35_346>='A' && LA35_346<='Z')||LA35_346=='\\'||LA35_346=='_'||(LA35_346>='a' && LA35_346<='z')) ) {
+                                                alt35=89;
                                             }
                                             else {
                                                 alt35=4;}
                                         }
                                         else {
-                                            alt35=87;}
+                                            alt35=89;}
                                     }
                                     else {
-                                        alt35=87;}
+                                        alt35=89;}
                                 }
                                 else {
-                                    alt35=87;}
+                                    alt35=89;}
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
             }
             else {
-                alt35=87;}
+                alt35=89;}
             }
             break;
         case 'R':
@@ -3558,12 +3555,29 @@ public class SPCLexer extends Lexer {
             switch ( input.LA(2) ) {
             case 'T':
                 {
-                int LA35_67 = input.LA(3);
+                int LA35_66 = input.LA(3);
 
-                if ( (LA35_67=='C') ) {
-                    int LA35_160 = input.LA(4);
+                if ( (LA35_66=='C') ) {
+                    switch ( input.LA(4) ) {
+                    case 'D':
+                        {
+                        int LA35_220 = input.LA(5);
 
-                    if ( (LA35_160=='T') ) {
+                        if ( (LA35_220=='L') ) {
+                            int LA35_269 = input.LA(6);
+
+                            if ( (LA35_269=='*') ) {
+                                alt35=6;
+                            }
+                            else {
+                                alt35=89;}
+                        }
+                        else {
+                            alt35=89;}
+                        }
+                        break;
+                    case 'T':
+                        {
                         int LA35_221 = input.LA(5);
 
                         if ( (LA35_221=='L') ) {
@@ -3573,16 +3587,18 @@ public class SPCLexer extends Lexer {
                                 alt35=5;
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
-                    }
-                    else {
-                        alt35=87;}
+                            alt35=89;}
+                        }
+                        break;
+                    default:
+                        alt35=89;}
+
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case 'E':
@@ -3596,13 +3612,13 @@ public class SPCLexer extends Lexer {
                         int LA35_222 = input.LA(5);
 
                         if ( ((LA35_222>='#' && LA35_222<='$')||LA35_222=='-'||(LA35_222>='0' && LA35_222<='9')||(LA35_222>='A' && LA35_222<='Z')||LA35_222=='\\'||LA35_222=='_'||(LA35_222>='a' && LA35_222<='z')) ) {
-                            alt35=87;
+                            alt35=89;
                         }
                         else {
                             alt35=47;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                     }
                     break;
                 case 'L':
@@ -3619,29 +3635,29 @@ public class SPCLexer extends Lexer {
                                 int LA35_304 = input.LA(7);
 
                                 if ( (LA35_304=='E') ) {
-                                    int LA35_326 = input.LA(8);
+                                    int LA35_325 = input.LA(8);
 
-                                    if ( ((LA35_326>='#' && LA35_326<='$')||LA35_326=='-'||(LA35_326>='0' && LA35_326<='9')||(LA35_326>='A' && LA35_326<='Z')||LA35_326=='\\'||LA35_326=='_'||(LA35_326>='a' && LA35_326<='z')) ) {
-                                        alt35=87;
+                                    if ( ((LA35_325>='#' && LA35_325<='$')||LA35_325=='-'||(LA35_325>='0' && LA35_325<='9')||(LA35_325>='A' && LA35_325<='Z')||LA35_325=='\\'||LA35_325=='_'||(LA35_325>='a' && LA35_325<='z')) ) {
+                                        alt35=89;
                                     }
                                     else {
                                         alt35=28;}
                                 }
                                 else {
-                                    alt35=87;}
+                                    alt35=89;}
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                     }
                     break;
                 default:
-                    alt35=87;}
+                    alt35=89;}
 
                 }
                 break;
@@ -3711,7 +3727,7 @@ public class SPCLexer extends Lexer {
             case 'y':
             case 'z':
                 {
-                alt35=87;
+                alt35=89;
                 }
                 break;
             default:
@@ -3724,10 +3740,10 @@ public class SPCLexer extends Lexer {
             switch ( input.LA(2) ) {
             case 'X':
                 {
-                int LA35_70 = input.LA(3);
+                int LA35_69 = input.LA(3);
 
-                if ( ((LA35_70>='#' && LA35_70<='$')||LA35_70=='-'||(LA35_70>='0' && LA35_70<='9')||(LA35_70>='A' && LA35_70<='Z')||LA35_70=='\\'||LA35_70=='_'||(LA35_70>='a' && LA35_70<='z')) ) {
-                    alt35=87;
+                if ( ((LA35_69>='#' && LA35_69<='$')||LA35_69=='-'||(LA35_69>='0' && LA35_69<='9')||(LA35_69>='A' && LA35_69<='Z')||LA35_69=='\\'||LA35_69=='_'||(LA35_69>='a' && LA35_69<='z')) ) {
+                    alt35=89;
                 }
                 else {
                     alt35=7;}
@@ -3735,10 +3751,10 @@ public class SPCLexer extends Lexer {
                 break;
             case 'F':
                 {
-                int LA35_71 = input.LA(3);
+                int LA35_70 = input.LA(3);
 
-                if ( ((LA35_71>='#' && LA35_71<='$')||LA35_71=='-'||(LA35_71>='0' && LA35_71<='9')||(LA35_71>='A' && LA35_71<='Z')||LA35_71=='\\'||LA35_71=='_'||(LA35_71>='a' && LA35_71<='z')) ) {
-                    alt35=87;
+                if ( ((LA35_70>='#' && LA35_70<='$')||LA35_70=='-'||(LA35_70>='0' && LA35_70<='9')||(LA35_70>='A' && LA35_70<='Z')||LA35_70=='\\'||LA35_70=='_'||(LA35_70>='a' && LA35_70<='z')) ) {
+                    alt35=89;
                 }
                 else {
                     alt35=9;}
@@ -3746,10 +3762,10 @@ public class SPCLexer extends Lexer {
                 break;
             case 'G':
                 {
-                int LA35_72 = input.LA(3);
+                int LA35_71 = input.LA(3);
 
-                if ( ((LA35_72>='#' && LA35_72<='$')||LA35_72=='-'||(LA35_72>='0' && LA35_72<='9')||(LA35_72>='A' && LA35_72<='Z')||LA35_72=='\\'||LA35_72=='_'||(LA35_72>='a' && LA35_72<='z')) ) {
-                    alt35=87;
+                if ( ((LA35_71>='#' && LA35_71<='$')||LA35_71=='-'||(LA35_71>='0' && LA35_71<='9')||(LA35_71>='A' && LA35_71<='Z')||LA35_71=='\\'||LA35_71=='_'||(LA35_71>='a' && LA35_71<='z')) ) {
+                    alt35=89;
                 }
                 else {
                     alt35=11;}
@@ -3763,7 +3779,7 @@ public class SPCLexer extends Lexer {
                     int LA35_166 = input.LA(4);
 
                     if ( ((LA35_166>='#' && LA35_166<='$')||LA35_166=='-'||(LA35_166>='0' && LA35_166<='9')||(LA35_166>='A' && LA35_166<='Z')||LA35_166=='\\'||LA35_166=='_'||(LA35_166>='a' && LA35_166<='z')) ) {
-                        alt35=87;
+                        alt35=89;
                     }
                     else {
                         alt35=16;}
@@ -3774,22 +3790,22 @@ public class SPCLexer extends Lexer {
                     int LA35_167 = input.LA(4);
 
                     if ( ((LA35_167>='#' && LA35_167<='$')||LA35_167=='-'||(LA35_167>='0' && LA35_167<='9')||(LA35_167>='A' && LA35_167<='Z')||LA35_167=='\\'||LA35_167=='_'||(LA35_167>='a' && LA35_167<='z')) ) {
-                        alt35=87;
+                        alt35=89;
                     }
                     else {
                         alt35=18;}
                     }
                     break;
                 default:
-                    alt35=87;}
+                    alt35=89;}
 
                 }
                 break;
             case 'V':
                 {
-                int LA35_74 = input.LA(3);
+                int LA35_73 = input.LA(3);
 
-                if ( (LA35_74=='E') ) {
+                if ( (LA35_73=='E') ) {
                     int LA35_168 = input.LA(4);
 
                     if ( (LA35_168=='N') ) {
@@ -3802,46 +3818,46 @@ public class SPCLexer extends Lexer {
                                 int LA35_305 = input.LA(7);
 
                                 if ( (LA35_305=='A') ) {
-                                    int LA35_327 = input.LA(8);
+                                    int LA35_326 = input.LA(8);
 
-                                    if ( (LA35_327=='L') ) {
-                                        int LA35_340 = input.LA(9);
+                                    if ( (LA35_326=='L') ) {
+                                        int LA35_338 = input.LA(9);
 
-                                        if ( (LA35_340=='L') ) {
-                                            int LA35_349 = input.LA(10);
+                                        if ( (LA35_338=='L') ) {
+                                            int LA35_347 = input.LA(10);
 
-                                            if ( (LA35_349=='Y') ) {
-                                                int LA35_355 = input.LA(11);
+                                            if ( (LA35_347=='Y') ) {
+                                                int LA35_353 = input.LA(11);
 
-                                                if ( ((LA35_355>='#' && LA35_355<='$')||LA35_355=='-'||(LA35_355>='0' && LA35_355<='9')||(LA35_355>='A' && LA35_355<='Z')||LA35_355=='\\'||LA35_355=='_'||(LA35_355>='a' && LA35_355<='z')) ) {
-                                                    alt35=87;
+                                                if ( ((LA35_353>='#' && LA35_353<='$')||LA35_353=='-'||(LA35_353>='0' && LA35_353<='9')||(LA35_353>='A' && LA35_353<='Z')||LA35_353=='\\'||LA35_353=='_'||(LA35_353>='a' && LA35_353<='z')) ) {
+                                                    alt35=89;
                                                 }
                                                 else {
                                                     alt35=20;}
                                             }
                                             else {
-                                                alt35=87;}
+                                                alt35=89;}
                                         }
                                         else {
-                                            alt35=87;}
+                                            alt35=89;}
                                     }
                                     else {
-                                        alt35=87;}
+                                        alt35=89;}
                                 }
                                 else {
-                                    alt35=87;}
+                                    alt35=89;}
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case '#':
@@ -3907,7 +3923,7 @@ public class SPCLexer extends Lexer {
             case 'y':
             case 'z':
                 {
-                alt35=87;
+                alt35=89;
                 }
                 break;
             default:
@@ -3920,10 +3936,10 @@ public class SPCLexer extends Lexer {
             switch ( input.LA(2) ) {
             case 'X':
                 {
-                int LA35_76 = input.LA(3);
+                int LA35_75 = input.LA(3);
 
-                if ( ((LA35_76>='#' && LA35_76<='$')||LA35_76=='-'||(LA35_76>='0' && LA35_76<='9')||(LA35_76>='A' && LA35_76<='Z')||LA35_76=='\\'||LA35_76=='_'||(LA35_76>='a' && LA35_76<='z')) ) {
-                    alt35=87;
+                if ( ((LA35_75>='#' && LA35_75<='$')||LA35_75=='-'||(LA35_75>='0' && LA35_75<='9')||(LA35_75>='A' && LA35_75<='Z')||LA35_75=='\\'||LA35_75=='_'||(LA35_75>='a' && LA35_75<='z')) ) {
+                    alt35=89;
                 }
                 else {
                     alt35=8;}
@@ -3931,10 +3947,10 @@ public class SPCLexer extends Lexer {
                 break;
             case 'F':
                 {
-                int LA35_77 = input.LA(3);
+                int LA35_76 = input.LA(3);
 
-                if ( ((LA35_77>='#' && LA35_77<='$')||LA35_77=='-'||(LA35_77>='0' && LA35_77<='9')||(LA35_77>='A' && LA35_77<='Z')||LA35_77=='\\'||LA35_77=='_'||(LA35_77>='a' && LA35_77<='z')) ) {
-                    alt35=87;
+                if ( ((LA35_76>='#' && LA35_76<='$')||LA35_76=='-'||(LA35_76>='0' && LA35_76<='9')||(LA35_76>='A' && LA35_76<='Z')||LA35_76=='\\'||LA35_76=='_'||(LA35_76>='a' && LA35_76<='z')) ) {
+                    alt35=89;
                 }
                 else {
                     alt35=10;}
@@ -3942,10 +3958,10 @@ public class SPCLexer extends Lexer {
                 break;
             case 'G':
                 {
-                int LA35_78 = input.LA(3);
+                int LA35_77 = input.LA(3);
 
-                if ( ((LA35_78>='#' && LA35_78<='$')||LA35_78=='-'||(LA35_78>='0' && LA35_78<='9')||(LA35_78>='A' && LA35_78<='Z')||LA35_78=='\\'||LA35_78=='_'||(LA35_78>='a' && LA35_78<='z')) ) {
-                    alt35=87;
+                if ( ((LA35_77>='#' && LA35_77<='$')||LA35_77=='-'||(LA35_77>='0' && LA35_77<='9')||(LA35_77>='A' && LA35_77<='Z')||LA35_77=='\\'||LA35_77=='_'||(LA35_77>='a' && LA35_77<='z')) ) {
+                    alt35=89;
                 }
                 else {
                     alt35=12;}
@@ -3954,38 +3970,38 @@ public class SPCLexer extends Lexer {
             case 'B':
                 {
                 switch ( input.LA(3) ) {
-                case 'G':
+                case 'F':
                     {
                     int LA35_172 = input.LA(4);
 
                     if ( ((LA35_172>='#' && LA35_172<='$')||LA35_172=='-'||(LA35_172>='0' && LA35_172<='9')||(LA35_172>='A' && LA35_172<='Z')||LA35_172=='\\'||LA35_172=='_'||(LA35_172>='a' && LA35_172<='z')) ) {
-                        alt35=87;
-                    }
-                    else {
-                        alt35=19;}
-                    }
-                    break;
-                case 'F':
-                    {
-                    int LA35_173 = input.LA(4);
-
-                    if ( ((LA35_173>='#' && LA35_173<='$')||LA35_173=='-'||(LA35_173>='0' && LA35_173<='9')||(LA35_173>='A' && LA35_173<='Z')||LA35_173=='\\'||LA35_173=='_'||(LA35_173>='a' && LA35_173<='z')) ) {
-                        alt35=87;
+                        alt35=89;
                     }
                     else {
                         alt35=17;}
                     }
                     break;
+                case 'G':
+                    {
+                    int LA35_173 = input.LA(4);
+
+                    if ( ((LA35_173>='#' && LA35_173<='$')||LA35_173=='-'||(LA35_173>='0' && LA35_173<='9')||(LA35_173>='A' && LA35_173<='Z')||LA35_173=='\\'||LA35_173=='_'||(LA35_173>='a' && LA35_173<='z')) ) {
+                        alt35=89;
+                    }
+                    else {
+                        alt35=19;}
+                    }
+                    break;
                 default:
-                    alt35=87;}
+                    alt35=89;}
 
                 }
                 break;
             case 'L':
                 {
-                int LA35_80 = input.LA(3);
+                int LA35_79 = input.LA(3);
 
-                if ( (LA35_80=='W') ) {
+                if ( (LA35_79=='W') ) {
                     int LA35_174 = input.LA(4);
 
                     if ( (LA35_174=='A') ) {
@@ -3998,29 +4014,29 @@ public class SPCLexer extends Lexer {
                                 int LA35_306 = input.LA(7);
 
                                 if ( ((LA35_306>='#' && LA35_306<='$')||LA35_306=='-'||(LA35_306>='0' && LA35_306<='9')||(LA35_306>='A' && LA35_306<='Z')||LA35_306=='\\'||LA35_306=='_'||(LA35_306>='a' && LA35_306<='z')) ) {
-                                    alt35=87;
+                                    alt35=89;
                                 }
                                 else {
                                     alt35=22;}
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case 'w':
                 {
-                int LA35_81 = input.LA(3);
+                int LA35_80 = input.LA(3);
 
-                if ( (LA35_81=='a') ) {
+                if ( (LA35_80=='a') ) {
                     int LA35_175 = input.LA(4);
 
                     if ( (LA35_175=='i') ) {
@@ -4033,22 +4049,22 @@ public class SPCLexer extends Lexer {
                                 int LA35_307 = input.LA(7);
 
                                 if ( ((LA35_307>='#' && LA35_307<='$')||LA35_307=='-'||(LA35_307>='0' && LA35_307<='9')||(LA35_307>='A' && LA35_307<='Z')||LA35_307=='\\'||LA35_307=='_'||(LA35_307>='a' && LA35_307<='z')) ) {
-                                    alt35=87;
+                                    alt35=89;
                                 }
                                 else {
                                     alt35=28;}
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case '#':
@@ -4113,7 +4129,7 @@ public class SPCLexer extends Lexer {
             case 'y':
             case 'z':
                 {
-                alt35=87;
+                alt35=89;
                 }
                 break;
             default:
@@ -4126,10 +4142,10 @@ public class SPCLexer extends Lexer {
             switch ( input.LA(2) ) {
             case 'U':
                 {
-                int LA35_83 = input.LA(3);
+                int LA35_82 = input.LA(3);
 
-                if ( ((LA35_83>='#' && LA35_83<='$')||LA35_83=='-'||(LA35_83>='0' && LA35_83<='9')||(LA35_83>='A' && LA35_83<='Z')||LA35_83=='\\'||LA35_83=='_'||(LA35_83>='a' && LA35_83<='z')) ) {
-                    alt35=87;
+                if ( ((LA35_82>='#' && LA35_82<='$')||LA35_82=='-'||(LA35_82>='0' && LA35_82<='9')||(LA35_82>='A' && LA35_82<='Z')||LA35_82=='\\'||LA35_82=='_'||(LA35_82>='a' && LA35_82<='z')) ) {
+                    alt35=89;
                 }
                 else {
                     alt35=15;}
@@ -4137,9 +4153,9 @@ public class SPCLexer extends Lexer {
                 break;
             case 'a':
                 {
-                int LA35_84 = input.LA(3);
+                int LA35_83 = input.LA(3);
 
-                if ( (LA35_84=='c') ) {
+                if ( (LA35_83=='c') ) {
                     int LA35_177 = input.LA(4);
 
                     if ( (LA35_177=='k') ) {
@@ -4152,22 +4168,22 @@ public class SPCLexer extends Lexer {
                                 int LA35_308 = input.LA(7);
 
                                 if ( ((LA35_308>='#' && LA35_308<='$')||LA35_308=='-'||(LA35_308>='0' && LA35_308<='9')||(LA35_308>='A' && LA35_308<='Z')||LA35_308=='\\'||LA35_308=='_'||(LA35_308>='a' && LA35_308<='z')) ) {
-                                    alt35=87;
+                                    alt35=89;
                                 }
                                 else {
                                     alt35=29;}
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case 'F':
@@ -4187,31 +4203,31 @@ public class SPCLexer extends Lexer {
                                 int LA35_309 = input.LA(7);
 
                                 if ( (LA35_309=='L') ) {
-                                    int LA35_328 = input.LA(8);
+                                    int LA35_327 = input.LA(8);
 
-                                    if ( (LA35_328=='Y') ) {
-                                        int LA35_341 = input.LA(9);
+                                    if ( (LA35_327=='Y') ) {
+                                        int LA35_339 = input.LA(9);
 
-                                        if ( ((LA35_341>='#' && LA35_341<='$')||LA35_341=='-'||(LA35_341>='0' && LA35_341<='9')||(LA35_341>='A' && LA35_341<='Z')||LA35_341=='\\'||LA35_341=='_'||(LA35_341>='a' && LA35_341<='z')) ) {
-                                            alt35=87;
+                                        if ( ((LA35_339>='#' && LA35_339<='$')||LA35_339=='-'||(LA35_339>='0' && LA35_339<='9')||(LA35_339>='A' && LA35_339<='Z')||LA35_339=='\\'||LA35_339=='_'||(LA35_339>='a' && LA35_339<='z')) ) {
+                                            alt35=89;
                                         }
                                         else {
                                             alt35=31;}
                                     }
                                     else {
-                                        alt35=87;}
+                                        alt35=89;}
                                 }
                                 else {
-                                    alt35=87;}
+                                    alt35=89;}
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                     }
                     break;
                 case '#':
@@ -4281,7 +4297,7 @@ public class SPCLexer extends Lexer {
                 case 'y':
                 case 'z':
                     {
-                    alt35=87;
+                    alt35=89;
                     }
                     break;
                 default:
@@ -4291,9 +4307,9 @@ public class SPCLexer extends Lexer {
                 break;
             case 'E':
                 {
-                int LA35_86 = input.LA(3);
+                int LA35_85 = input.LA(3);
 
-                if ( (LA35_86=='V') ) {
+                if ( (LA35_85=='V') ) {
                     int LA35_180 = input.LA(4);
 
                     if ( (LA35_180=='E') ) {
@@ -4306,52 +4322,52 @@ public class SPCLexer extends Lexer {
                                 int LA35_310 = input.LA(7);
 
                                 if ( (LA35_310=='U') ) {
-                                    int LA35_329 = input.LA(8);
+                                    int LA35_328 = input.LA(8);
 
-                                    if ( (LA35_329=='A') ) {
-                                        int LA35_342 = input.LA(9);
+                                    if ( (LA35_328=='A') ) {
+                                        int LA35_340 = input.LA(9);
 
-                                        if ( (LA35_342=='L') ) {
-                                            int LA35_350 = input.LA(10);
+                                        if ( (LA35_340=='L') ) {
+                                            int LA35_348 = input.LA(10);
 
-                                            if ( (LA35_350=='L') ) {
-                                                int LA35_356 = input.LA(11);
+                                            if ( (LA35_348=='L') ) {
+                                                int LA35_354 = input.LA(11);
 
-                                                if ( (LA35_356=='Y') ) {
-                                                    int LA35_358 = input.LA(12);
+                                                if ( (LA35_354=='Y') ) {
+                                                    int LA35_356 = input.LA(12);
 
-                                                    if ( ((LA35_358>='#' && LA35_358<='$')||LA35_358=='-'||(LA35_358>='0' && LA35_358<='9')||(LA35_358>='A' && LA35_358<='Z')||LA35_358=='\\'||LA35_358=='_'||(LA35_358>='a' && LA35_358<='z')) ) {
-                                                        alt35=87;
+                                                    if ( ((LA35_356>='#' && LA35_356<='$')||LA35_356=='-'||(LA35_356>='0' && LA35_356<='9')||(LA35_356>='A' && LA35_356<='Z')||LA35_356=='\\'||LA35_356=='_'||(LA35_356>='a' && LA35_356<='z')) ) {
+                                                        alt35=89;
                                                     }
                                                     else {
                                                         alt35=31;}
                                                 }
                                                 else {
-                                                    alt35=87;}
+                                                    alt35=89;}
                                             }
                                             else {
-                                                alt35=87;}
+                                                alt35=89;}
                                         }
                                         else {
-                                            alt35=87;}
+                                            alt35=89;}
                                     }
                                     else {
-                                        alt35=87;}
+                                        alt35=89;}
                                 }
                                 else {
-                                    alt35=87;}
+                                    alt35=89;}
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case 'G':
@@ -4371,37 +4387,37 @@ public class SPCLexer extends Lexer {
                                 int LA35_311 = input.LA(7);
 
                                 if ( (LA35_311=='L') ) {
-                                    int LA35_330 = input.LA(8);
+                                    int LA35_329 = input.LA(8);
 
-                                    if ( (LA35_330=='L') ) {
-                                        int LA35_343 = input.LA(9);
+                                    if ( (LA35_329=='L') ) {
+                                        int LA35_341 = input.LA(9);
 
-                                        if ( (LA35_343=='Y') ) {
-                                            int LA35_351 = input.LA(10);
+                                        if ( (LA35_341=='Y') ) {
+                                            int LA35_349 = input.LA(10);
 
-                                            if ( ((LA35_351>='#' && LA35_351<='$')||LA35_351=='-'||(LA35_351>='0' && LA35_351<='9')||(LA35_351>='A' && LA35_351<='Z')||LA35_351=='\\'||LA35_351=='_'||(LA35_351>='a' && LA35_351<='z')) ) {
-                                                alt35=87;
+                                            if ( ((LA35_349>='#' && LA35_349<='$')||LA35_349=='-'||(LA35_349>='0' && LA35_349<='9')||(LA35_349>='A' && LA35_349<='Z')||LA35_349=='\\'||LA35_349=='_'||(LA35_349>='a' && LA35_349<='z')) ) {
+                                                alt35=89;
                                             }
                                             else {
                                                 alt35=32;}
                                         }
                                         else {
-                                            alt35=87;}
+                                            alt35=89;}
                                     }
                                     else {
-                                        alt35=87;}
+                                        alt35=89;}
                                 }
                                 else {
-                                    alt35=87;}
+                                    alt35=89;}
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                     }
                     break;
                 case '#':
@@ -4471,7 +4487,7 @@ public class SPCLexer extends Lexer {
                 case 'y':
                 case 'z':
                     {
-                    alt35=87;
+                    alt35=89;
                     }
                     break;
                 default:
@@ -4481,9 +4497,9 @@ public class SPCLexer extends Lexer {
                 break;
             case 'A':
                 {
-                int LA35_88 = input.LA(3);
+                int LA35_87 = input.LA(3);
 
-                if ( (LA35_88=='L') ) {
+                if ( (LA35_87=='L') ) {
                     int LA35_183 = input.LA(4);
 
                     if ( (LA35_183=='W') ) {
@@ -4496,28 +4512,28 @@ public class SPCLexer extends Lexer {
                                 int LA35_312 = input.LA(7);
 
                                 if ( (LA35_312=='S') ) {
-                                    int LA35_331 = input.LA(8);
+                                    int LA35_330 = input.LA(8);
 
-                                    if ( ((LA35_331>='#' && LA35_331<='$')||LA35_331=='-'||(LA35_331>='0' && LA35_331<='9')||(LA35_331>='A' && LA35_331<='Z')||LA35_331=='\\'||LA35_331=='_'||(LA35_331>='a' && LA35_331<='z')) ) {
-                                        alt35=87;
+                                    if ( ((LA35_330>='#' && LA35_330<='$')||LA35_330=='-'||(LA35_330>='0' && LA35_330<='9')||(LA35_330>='A' && LA35_330<='Z')||LA35_330=='\\'||LA35_330=='_'||(LA35_330>='a' && LA35_330<='z')) ) {
+                                        alt35=89;
                                     }
                                     else {
                                         alt35=32;}
                                 }
                                 else {
-                                    alt35=87;}
+                                    alt35=89;}
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case 'R':
@@ -4537,31 +4553,31 @@ public class SPCLexer extends Lexer {
                                 int LA35_313 = input.LA(7);
 
                                 if ( (LA35_313=='S') ) {
-                                    int LA35_332 = input.LA(8);
+                                    int LA35_331 = input.LA(8);
 
-                                    if ( (LA35_332=='E') ) {
-                                        int LA35_344 = input.LA(9);
+                                    if ( (LA35_331=='E') ) {
+                                        int LA35_342 = input.LA(9);
 
-                                        if ( ((LA35_344>='#' && LA35_344<='$')||LA35_344=='-'||(LA35_344>='0' && LA35_344<='9')||(LA35_344>='A' && LA35_344<='Z')||LA35_344=='\\'||LA35_344=='_'||(LA35_344>='a' && LA35_344<='z')) ) {
-                                            alt35=87;
+                                        if ( ((LA35_342>='#' && LA35_342<='$')||LA35_342=='-'||(LA35_342>='0' && LA35_342<='9')||(LA35_342>='A' && LA35_342<='Z')||LA35_342=='\\'||LA35_342=='_'||(LA35_342>='a' && LA35_342<='z')) ) {
+                                            alt35=89;
                                         }
                                         else {
                                             alt35=33;}
                                     }
                                     else {
-                                        alt35=87;}
+                                        alt35=89;}
                                 }
                                 else {
-                                    alt35=87;}
+                                    alt35=89;}
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                     }
                     break;
                 case '#':
@@ -4631,7 +4647,7 @@ public class SPCLexer extends Lexer {
                 case 'y':
                 case 'z':
                     {
-                    alt35=87;
+                    alt35=89;
                     }
                     break;
                 default:
@@ -4640,7 +4656,7 @@ public class SPCLexer extends Lexer {
                 }
                 break;
             default:
-                alt35=87;}
+                alt35=89;}
 
             }
             break;
@@ -4649,9 +4665,9 @@ public class SPCLexer extends Lexer {
             switch ( input.LA(2) ) {
             case 'I':
                 {
-                int LA35_90 = input.LA(3);
+                int LA35_89 = input.LA(3);
 
-                if ( (LA35_90=='N') ) {
+                if ( (LA35_89=='N') ) {
                     int LA35_186 = input.LA(4);
 
                     if ( (LA35_186=='A') ) {
@@ -4664,35 +4680,35 @@ public class SPCLexer extends Lexer {
                                 int LA35_314 = input.LA(7);
 
                                 if ( (LA35_314=='Y') ) {
-                                    int LA35_333 = input.LA(8);
+                                    int LA35_332 = input.LA(8);
 
-                                    if ( ((LA35_333>='#' && LA35_333<='$')||LA35_333=='-'||(LA35_333>='0' && LA35_333<='9')||(LA35_333>='A' && LA35_333<='Z')||LA35_333=='\\'||LA35_333=='_'||(LA35_333>='a' && LA35_333<='z')) ) {
-                                        alt35=87;
+                                    if ( ((LA35_332>='#' && LA35_332<='$')||LA35_332=='-'||(LA35_332>='0' && LA35_332<='9')||(LA35_332>='A' && LA35_332<='Z')||LA35_332=='\\'||LA35_332=='_'||(LA35_332>='a' && LA35_332<='z')) ) {
+                                        alt35=89;
                                     }
                                     else {
                                         alt35=20;}
                                 }
                                 else {
-                                    alt35=87;}
+                                    alt35=89;}
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case 'A':
                 {
-                int LA35_91 = input.LA(3);
+                int LA35_90 = input.LA(3);
 
-                if ( (LA35_91=='L') ) {
+                if ( (LA35_90=='L') ) {
                     int LA35_187 = input.LA(4);
 
                     if ( (LA35_187=='S') ) {
@@ -4702,24 +4718,24 @@ public class SPCLexer extends Lexer {
                             int LA35_283 = input.LA(6);
 
                             if ( ((LA35_283>='#' && LA35_283<='$')||LA35_283=='-'||(LA35_283>='0' && LA35_283<='9')||(LA35_283>='A' && LA35_283<='Z')||LA35_283=='\\'||LA35_283=='_'||(LA35_283>='a' && LA35_283<='z')) ) {
-                                alt35=87;
+                                alt35=89;
                             }
                             else {
                                 alt35=42;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case '\'':
                 {
-                alt35=85;
+                alt35=87;
                 }
                 break;
             case '#':
@@ -4788,7 +4804,7 @@ public class SPCLexer extends Lexer {
             case 'y':
             case 'z':
                 {
-                alt35=87;
+                alt35=89;
                 }
                 break;
             default:
@@ -4801,25 +4817,25 @@ public class SPCLexer extends Lexer {
             switch ( input.LA(2) ) {
             case 'N':
                 {
-                int LA35_94 = input.LA(3);
+                int LA35_93 = input.LA(3);
 
-                if ( (LA35_94=='C') ) {
+                if ( (LA35_93=='C') ) {
                     int LA35_188 = input.LA(4);
 
                     if ( (LA35_188=='E') ) {
                         int LA35_239 = input.LA(5);
 
                         if ( ((LA35_239>='#' && LA35_239<='$')||LA35_239=='-'||(LA35_239>='0' && LA35_239<='9')||(LA35_239>='A' && LA35_239<='Z')||LA35_239=='\\'||LA35_239=='_'||(LA35_239>='a' && LA35_239<='z')) ) {
-                            alt35=87;
+                            alt35=89;
                         }
                         else {
                             alt35=21;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case '#':
@@ -4889,7 +4905,7 @@ public class SPCLexer extends Lexer {
             case 'y':
             case 'z':
                 {
-                alt35=87;
+                alt35=89;
                 }
                 break;
             default:
@@ -4902,9 +4918,9 @@ public class SPCLexer extends Lexer {
             switch ( input.LA(2) ) {
             case 'L':
                 {
-                int LA35_96 = input.LA(3);
+                int LA35_95 = input.LA(3);
 
-                if ( (LA35_96=='O') ) {
+                if ( (LA35_95=='O') ) {
                     int LA35_189 = input.LA(4);
 
                     if ( (LA35_189=='B') ) {
@@ -4917,34 +4933,34 @@ public class SPCLexer extends Lexer {
                                 int LA35_316 = input.LA(7);
 
                                 if ( (LA35_316=='L') ) {
-                                    int LA35_334 = input.LA(8);
+                                    int LA35_333 = input.LA(8);
 
-                                    if ( (LA35_334=='Y') ) {
-                                        int LA35_345 = input.LA(9);
+                                    if ( (LA35_333=='Y') ) {
+                                        int LA35_343 = input.LA(9);
 
-                                        if ( ((LA35_345>='#' && LA35_345<='$')||LA35_345=='-'||(LA35_345>='0' && LA35_345<='9')||(LA35_345>='A' && LA35_345<='Z')||LA35_345=='\\'||LA35_345=='_'||(LA35_345>='a' && LA35_345<='z')) ) {
-                                            alt35=87;
+                                        if ( ((LA35_343>='#' && LA35_343<='$')||LA35_343=='-'||(LA35_343>='0' && LA35_343<='9')||(LA35_343>='A' && LA35_343<='Z')||LA35_343=='\\'||LA35_343=='_'||(LA35_343>='a' && LA35_343<='z')) ) {
+                                            alt35=89;
                                         }
                                         else {
                                             alt35=22;}
                                     }
                                     else {
-                                        alt35=87;}
+                                        alt35=89;}
                                 }
                                 else {
-                                    alt35=87;}
+                                    alt35=89;}
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case '#':
@@ -5014,7 +5030,7 @@ public class SPCLexer extends Lexer {
             case 'y':
             case 'z':
                 {
-                alt35=87;
+                alt35=89;
                 }
                 break;
             default:
@@ -5027,9 +5043,9 @@ public class SPCLexer extends Lexer {
             switch ( input.LA(2) ) {
             case 'I':
                 {
-                int LA35_98 = input.LA(3);
+                int LA35_97 = input.LA(3);
 
-                if ( (LA35_98=='S') ) {
+                if ( (LA35_97=='S') ) {
                     int LA35_190 = input.LA(4);
 
                     if ( (LA35_190=='T') ) {
@@ -5042,58 +5058,58 @@ public class SPCLexer extends Lexer {
                                 int LA35_317 = input.LA(7);
 
                                 if ( (LA35_317=='I') ) {
-                                    int LA35_335 = input.LA(8);
+                                    int LA35_334 = input.LA(8);
 
-                                    if ( (LA35_335=='C') ) {
-                                        int LA35_346 = input.LA(9);
+                                    if ( (LA35_334=='C') ) {
+                                        int LA35_344 = input.LA(9);
 
-                                        if ( (LA35_346=='A') ) {
-                                            int LA35_352 = input.LA(10);
+                                        if ( (LA35_344=='A') ) {
+                                            int LA35_350 = input.LA(10);
 
-                                            if ( (LA35_352=='L') ) {
-                                                int LA35_357 = input.LA(11);
+                                            if ( (LA35_350=='L') ) {
+                                                int LA35_355 = input.LA(11);
 
-                                                if ( (LA35_357=='L') ) {
-                                                    int LA35_359 = input.LA(12);
+                                                if ( (LA35_355=='L') ) {
+                                                    int LA35_357 = input.LA(12);
 
-                                                    if ( (LA35_359=='Y') ) {
-                                                        int LA35_360 = input.LA(13);
+                                                    if ( (LA35_357=='Y') ) {
+                                                        int LA35_358 = input.LA(13);
 
-                                                        if ( ((LA35_360>='#' && LA35_360<='$')||LA35_360=='-'||(LA35_360>='0' && LA35_360<='9')||(LA35_360>='A' && LA35_360<='Z')||LA35_360=='\\'||LA35_360=='_'||(LA35_360>='a' && LA35_360<='z')) ) {
-                                                            alt35=87;
+                                                        if ( ((LA35_358>='#' && LA35_358<='$')||LA35_358=='-'||(LA35_358>='0' && LA35_358<='9')||(LA35_358>='A' && LA35_358<='Z')||LA35_358=='\\'||LA35_358=='_'||(LA35_358>='a' && LA35_358<='z')) ) {
+                                                            alt35=89;
                                                         }
                                                         else {
                                                             alt35=23;}
                                                     }
                                                     else {
-                                                        alt35=87;}
+                                                        alt35=89;}
                                                 }
                                                 else {
-                                                    alt35=87;}
+                                                    alt35=89;}
                                             }
                                             else {
-                                                alt35=87;}
+                                                alt35=89;}
                                         }
                                         else {
-                                            alt35=87;}
+                                            alt35=89;}
                                     }
                                     else {
-                                        alt35=87;}
+                                        alt35=89;}
                                 }
                                 else {
-                                    alt35=87;}
+                                    alt35=89;}
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case '#':
@@ -5163,7 +5179,7 @@ public class SPCLexer extends Lexer {
             case 'y':
             case 'z':
                 {
-                alt35=87;
+                alt35=89;
                 }
                 break;
             default:
@@ -5176,7 +5192,7 @@ public class SPCLexer extends Lexer {
             int LA35_13 = input.LA(2);
 
             if ( ((LA35_13>='#' && LA35_13<='$')||LA35_13=='-'||(LA35_13>='0' && LA35_13<='9')||(LA35_13>='A' && LA35_13<='Z')||LA35_13=='\\'||LA35_13=='_'||(LA35_13>='a' && LA35_13<='z')) ) {
-                alt35=87;
+                alt35=89;
             }
             else {
                 alt35=24;}
@@ -5187,28 +5203,28 @@ public class SPCLexer extends Lexer {
             int LA35_14 = input.LA(2);
 
             if ( (LA35_14=='E') ) {
-                int LA35_101 = input.LA(3);
+                int LA35_100 = input.LA(3);
 
-                if ( (LA35_101=='X') ) {
+                if ( (LA35_100=='X') ) {
                     int LA35_191 = input.LA(4);
 
                     if ( (LA35_191=='T') ) {
                         int LA35_242 = input.LA(5);
 
                         if ( ((LA35_242>='#' && LA35_242<='$')||LA35_242=='-'||(LA35_242>='0' && LA35_242<='9')||(LA35_242>='A' && LA35_242<='Z')||LA35_242=='\\'||LA35_242=='_'||(LA35_242>='a' && LA35_242<='z')) ) {
-                            alt35=87;
+                            alt35=89;
                         }
                         else {
                             alt35=24;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
             }
             else {
-                alt35=87;}
+                alt35=89;}
             }
             break;
         case 'Y':
@@ -5216,7 +5232,7 @@ public class SPCLexer extends Lexer {
             int LA35_15 = input.LA(2);
 
             if ( ((LA35_15>='#' && LA35_15<='$')||LA35_15=='-'||(LA35_15>='0' && LA35_15<='9')||(LA35_15>='A' && LA35_15<='Z')||LA35_15=='\\'||LA35_15=='_'||(LA35_15>='a' && LA35_15<='z')) ) {
-                alt35=87;
+                alt35=89;
             }
             else {
                 alt35=25;}
@@ -5227,28 +5243,28 @@ public class SPCLexer extends Lexer {
             int LA35_16 = input.LA(2);
 
             if ( (LA35_16=='R') ) {
-                int LA35_103 = input.LA(3);
+                int LA35_102 = input.LA(3);
 
-                if ( (LA35_103=='E') ) {
+                if ( (LA35_102=='E') ) {
                     int LA35_192 = input.LA(4);
 
                     if ( (LA35_192=='V') ) {
                         int LA35_243 = input.LA(5);
 
                         if ( ((LA35_243>='#' && LA35_243<='$')||LA35_243=='-'||(LA35_243>='0' && LA35_243<='9')||(LA35_243>='A' && LA35_243<='Z')||LA35_243=='\\'||LA35_243=='_'||(LA35_243>='a' && LA35_243<='z')) ) {
-                            alt35=87;
+                            alt35=89;
                         }
                         else {
                             alt35=25;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
             }
             else {
-                alt35=87;}
+                alt35=89;}
             }
             break;
         case 'U':
@@ -5256,9 +5272,9 @@ public class SPCLexer extends Lexer {
             switch ( input.LA(2) ) {
             case 'n':
                 {
-                int LA35_104 = input.LA(3);
+                int LA35_103 = input.LA(3);
 
-                if ( (LA35_104=='t') ) {
+                if ( (LA35_103=='t') ) {
                     int LA35_193 = input.LA(4);
 
                     if ( (LA35_193=='i') ) {
@@ -5268,26 +5284,26 @@ public class SPCLexer extends Lexer {
                             int LA35_286 = input.LA(6);
 
                             if ( ((LA35_286>='#' && LA35_286<='$')||LA35_286=='-'||(LA35_286>='0' && LA35_286<='9')||(LA35_286>='A' && LA35_286<='Z')||LA35_286=='\\'||LA35_286=='_'||(LA35_286>='a' && LA35_286<='z')) ) {
-                                alt35=87;
+                                alt35=89;
                             }
                             else {
                                 alt35=26;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case 'N':
                 {
-                int LA35_105 = input.LA(3);
+                int LA35_104 = input.LA(3);
 
-                if ( (LA35_105=='T') ) {
+                if ( (LA35_104=='T') ) {
                     int LA35_194 = input.LA(4);
 
                     if ( (LA35_194=='I') ) {
@@ -5297,19 +5313,19 @@ public class SPCLexer extends Lexer {
                             int LA35_287 = input.LA(6);
 
                             if ( ((LA35_287>='#' && LA35_287<='$')||LA35_287=='-'||(LA35_287>='0' && LA35_287<='9')||(LA35_287>='A' && LA35_287<='Z')||LA35_287=='\\'||LA35_287=='_'||(LA35_287>='a' && LA35_287<='z')) ) {
-                                alt35=87;
+                                alt35=89;
                             }
                             else {
                                 alt35=26;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case '#':
@@ -5378,7 +5394,7 @@ public class SPCLexer extends Lexer {
             case 'y':
             case 'z':
                 {
-                alt35=87;
+                alt35=89;
                 }
                 break;
             default:
@@ -5392,72 +5408,72 @@ public class SPCLexer extends Lexer {
             case 'R':
                 {
                 switch ( input.LA(3) ) {
-                case 'U':
+                case 'I':
                     {
                     int LA35_195 = input.LA(4);
 
-                    if ( (LA35_195=='E') ) {
+                    if ( (LA35_195=='G') ) {
                         int LA35_246 = input.LA(5);
 
-                        if ( ((LA35_246>='#' && LA35_246<='$')||LA35_246=='-'||(LA35_246>='0' && LA35_246<='9')||(LA35_246>='A' && LA35_246<='Z')||LA35_246=='\\'||LA35_246=='_'||(LA35_246>='a' && LA35_246<='z')) ) {
-                            alt35=87;
-                        }
-                        else {
-                            alt35=43;}
-                    }
-                    else {
-                        alt35=87;}
-                    }
-                    break;
-                case 'I':
-                    {
-                    int LA35_196 = input.LA(4);
+                        if ( (LA35_246=='G') ) {
+                            int LA35_288 = input.LA(6);
 
-                    if ( (LA35_196=='G') ) {
-                        int LA35_247 = input.LA(5);
-
-                        if ( (LA35_247=='G') ) {
-                            int LA35_289 = input.LA(6);
-
-                            if ( (LA35_289=='E') ) {
+                            if ( (LA35_288=='E') ) {
                                 int LA35_318 = input.LA(7);
 
                                 if ( (LA35_318=='R') ) {
-                                    int LA35_336 = input.LA(8);
+                                    int LA35_335 = input.LA(8);
 
-                                    if ( (LA35_336=='E') ) {
-                                        int LA35_347 = input.LA(9);
+                                    if ( (LA35_335=='E') ) {
+                                        int LA35_345 = input.LA(9);
 
-                                        if ( (LA35_347=='D') ) {
-                                            int LA35_353 = input.LA(10);
+                                        if ( (LA35_345=='D') ) {
+                                            int LA35_351 = input.LA(10);
 
-                                            if ( ((LA35_353>='#' && LA35_353<='$')||LA35_353=='-'||(LA35_353>='0' && LA35_353<='9')||(LA35_353>='A' && LA35_353<='Z')||LA35_353=='\\'||LA35_353=='_'||(LA35_353>='a' && LA35_353<='z')) ) {
-                                                alt35=87;
+                                            if ( ((LA35_351>='#' && LA35_351<='$')||LA35_351=='-'||(LA35_351>='0' && LA35_351<='9')||(LA35_351>='A' && LA35_351<='Z')||LA35_351=='\\'||LA35_351=='_'||(LA35_351>='a' && LA35_351<='z')) ) {
+                                                alt35=89;
                                             }
                                             else {
                                                 alt35=29;}
                                         }
                                         else {
-                                            alt35=87;}
+                                            alt35=89;}
                                     }
                                     else {
-                                        alt35=87;}
+                                        alt35=89;}
                                 }
                                 else {
-                                    alt35=87;}
+                                    alt35=89;}
                             }
                             else {
-                                alt35=87;}
+                                alt35=89;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
+                    }
+                    break;
+                case 'U':
+                    {
+                    int LA35_196 = input.LA(4);
+
+                    if ( (LA35_196=='E') ) {
+                        int LA35_247 = input.LA(5);
+
+                        if ( ((LA35_247>='#' && LA35_247<='$')||LA35_247=='-'||(LA35_247>='0' && LA35_247<='9')||(LA35_247>='A' && LA35_247<='Z')||LA35_247=='\\'||LA35_247=='_'||(LA35_247>='a' && LA35_247<='z')) ) {
+                            alt35=89;
+                        }
+                        else {
+                            alt35=43;}
+                    }
+                    else {
+                        alt35=89;}
                     }
                     break;
                 default:
-                    alt35=87;}
+                    alt35=89;}
 
                 }
                 break;
@@ -5528,7 +5544,7 @@ public class SPCLexer extends Lexer {
             case 'y':
             case 'z':
                 {
-                alt35=87;
+                alt35=89;
                 }
                 break;
             default:
@@ -5541,7 +5557,7 @@ public class SPCLexer extends Lexer {
             int LA35_19 = input.LA(2);
 
             if ( ((LA35_19>='#' && LA35_19<='$')||LA35_19=='-'||(LA35_19>='0' && LA35_19<='9')||(LA35_19>='A' && LA35_19<='Z')||LA35_19=='\\'||LA35_19=='_'||(LA35_19>='a' && LA35_19<='z')) ) {
-                alt35=87;
+                alt35=89;
             }
             else {
                 alt35=30;}
@@ -5552,48 +5568,48 @@ public class SPCLexer extends Lexer {
             switch ( input.LA(2) ) {
             case 'N':
                 {
-                int LA35_110 = input.LA(3);
+                int LA35_109 = input.LA(3);
 
-                if ( (LA35_110=='O') ) {
+                if ( (LA35_109=='O') ) {
                     int LA35_197 = input.LA(4);
 
                     if ( (LA35_197=='W') ) {
                         int LA35_248 = input.LA(5);
 
                         if ( ((LA35_248>='#' && LA35_248<='$')||LA35_248=='-'||(LA35_248>='0' && LA35_248<='9')||(LA35_248>='A' && LA35_248<='Z')||LA35_248=='\\'||LA35_248=='_'||(LA35_248>='a' && LA35_248<='z')) ) {
-                            alt35=87;
+                            alt35=89;
                         }
                         else {
                             alt35=34;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case 'n':
                 {
-                int LA35_111 = input.LA(3);
+                int LA35_110 = input.LA(3);
 
-                if ( (LA35_111=='o') ) {
+                if ( (LA35_110=='o') ) {
                     int LA35_198 = input.LA(4);
 
                     if ( (LA35_198=='w') ) {
                         int LA35_249 = input.LA(5);
 
                         if ( ((LA35_249>='#' && LA35_249<='$')||LA35_249=='-'||(LA35_249>='0' && LA35_249<='9')||(LA35_249>='A' && LA35_249<='Z')||LA35_249=='\\'||LA35_249=='_'||(LA35_249>='a' && LA35_249<='z')) ) {
-                            alt35=87;
+                            alt35=89;
                         }
                         else {
                             alt35=34;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case '#':
@@ -5662,7 +5678,7 @@ public class SPCLexer extends Lexer {
             case 'y':
             case 'z':
                 {
-                alt35=87;
+                alt35=89;
                 }
                 break;
             default:
@@ -5711,9 +5727,9 @@ public class SPCLexer extends Lexer {
             int LA35_27 = input.LA(2);
 
             if ( (LA35_27=='o') ) {
-                int LA35_115 = input.LA(3);
+                int LA35_114 = input.LA(3);
 
-                if ( (LA35_115=='r') ) {
+                if ( (LA35_114=='r') ) {
                     int LA35_199 = input.LA(4);
 
                     if ( (LA35_199=='d') ) {
@@ -5723,7 +5739,7 @@ public class SPCLexer extends Lexer {
                             int LA35_290 = input.LA(6);
 
                             if ( ((LA35_290>='#' && LA35_290<='$')||LA35_290=='-'||(LA35_290>='0' && LA35_290<='9')||(LA35_290>='A' && LA35_290<='Z')||LA35_290=='\\'||LA35_290=='_'||(LA35_290>='a' && LA35_290<='z')) ) {
-                                alt35=87;
+                                alt35=89;
                             }
                             else {
                                 alt35=44;}
@@ -5796,7 +5812,7 @@ public class SPCLexer extends Lexer {
                         case 'y':
                         case 'z':
                             {
-                            alt35=87;
+                            alt35=89;
                             }
                             break;
                         default:
@@ -5804,13 +5820,13 @@ public class SPCLexer extends Lexer {
 
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
             }
             else {
-                alt35=87;}
+                alt35=89;}
             }
             break;
         case 'W':
@@ -5818,32 +5834,32 @@ public class SPCLexer extends Lexer {
             switch ( input.LA(2) ) {
             case 'o':
                 {
-                int LA35_116 = input.LA(3);
+                int LA35_115 = input.LA(3);
 
-                if ( (LA35_116=='r') ) {
+                if ( (LA35_115=='r') ) {
                     int LA35_200 = input.LA(4);
 
                     if ( (LA35_200=='d') ) {
                         int LA35_251 = input.LA(5);
 
                         if ( ((LA35_251>='#' && LA35_251<='$')||LA35_251=='-'||(LA35_251>='0' && LA35_251<='9')||(LA35_251>='A' && LA35_251<='Z')||LA35_251=='\\'||LA35_251=='_'||(LA35_251>='a' && LA35_251<='z')) ) {
-                            alt35=87;
+                            alt35=89;
                         }
                         else {
                             alt35=45;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case 'R':
                 {
-                int LA35_117 = input.LA(3);
+                int LA35_116 = input.LA(3);
 
-                if ( (LA35_117=='I') ) {
+                if ( (LA35_116=='I') ) {
                     int LA35_201 = input.LA(4);
 
                     if ( (LA35_201=='T') ) {
@@ -5853,23 +5869,23 @@ public class SPCLexer extends Lexer {
                             int LA35_292 = input.LA(6);
 
                             if ( ((LA35_292>='#' && LA35_292<='$')||LA35_292=='-'||(LA35_292>='0' && LA35_292<='9')||(LA35_292>='A' && LA35_292<='Z')||LA35_292=='\\'||LA35_292=='_'||(LA35_292>='a' && LA35_292<='z')) ) {
-                                alt35=87;
+                                alt35=89;
                             }
                             else {
                                 alt35=48;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             default:
-                alt35=87;}
+                alt35=89;}
 
             }
             break;
@@ -5878,28 +5894,28 @@ public class SPCLexer extends Lexer {
             int LA35_29 = input.LA(2);
 
             if ( (LA35_29=='o') ) {
-                int LA35_118 = input.LA(3);
+                int LA35_117 = input.LA(3);
 
-                if ( (LA35_118=='o') ) {
+                if ( (LA35_117=='o') ) {
                     int LA35_202 = input.LA(4);
 
                     if ( (LA35_202=='l') ) {
                         int LA35_253 = input.LA(5);
 
                         if ( ((LA35_253>='#' && LA35_253<='$')||LA35_253=='-'||(LA35_253>='0' && LA35_253<='9')||(LA35_253>='A' && LA35_253<='Z')||LA35_253=='\\'||LA35_253=='_'||(LA35_253>='a' && LA35_253<='z')) ) {
-                            alt35=87;
+                            alt35=89;
                         }
                         else {
                             alt35=46;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
             }
             else {
-                alt35=87;}
+                alt35=89;}
             }
             break;
         case 'c':
@@ -5907,28 +5923,28 @@ public class SPCLexer extends Lexer {
             int LA35_30 = input.LA(2);
 
             if ( (LA35_30=='a') ) {
-                int LA35_119 = input.LA(3);
+                int LA35_118 = input.LA(3);
 
-                if ( (LA35_119=='s') ) {
+                if ( (LA35_118=='s') ) {
                     int LA35_203 = input.LA(4);
 
                     if ( (LA35_203=='e') ) {
                         int LA35_254 = input.LA(5);
 
                         if ( ((LA35_254>='#' && LA35_254<='$')||LA35_254=='-'||(LA35_254>='0' && LA35_254<='9')||(LA35_254>='A' && LA35_254<='Z')||LA35_254=='\\'||LA35_254=='_'||(LA35_254>='a' && LA35_254<='z')) ) {
-                            alt35=87;
+                            alt35=89;
                         }
                         else {
                             alt35=49;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
             }
             else {
-                alt35=87;}
+                alt35=89;}
             }
             break;
         case 'e':
@@ -5936,28 +5952,28 @@ public class SPCLexer extends Lexer {
             int LA35_31 = input.LA(2);
 
             if ( (LA35_31=='s') ) {
-                int LA35_120 = input.LA(3);
+                int LA35_119 = input.LA(3);
 
-                if ( (LA35_120=='a') ) {
+                if ( (LA35_119=='a') ) {
                     int LA35_204 = input.LA(4);
 
                     if ( (LA35_204=='c') ) {
                         int LA35_255 = input.LA(5);
 
                         if ( ((LA35_255>='#' && LA35_255<='$')||LA35_255=='-'||(LA35_255>='0' && LA35_255<='9')||(LA35_255>='A' && LA35_255<='Z')||LA35_255=='\\'||LA35_255=='_'||(LA35_255>='a' && LA35_255<='z')) ) {
-                            alt35=87;
+                            alt35=89;
                         }
                         else {
                             alt35=50;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
             }
             else {
-                alt35=87;}
+                alt35=89;}
             }
             break;
         case '+':
@@ -5970,7 +5986,7 @@ public class SPCLexer extends Lexer {
             switch ( input.LA(2) ) {
             case '-':
                 {
-                alt35=90;
+                alt35=92;
                 }
                 break;
             case '>':
@@ -5993,12 +6009,12 @@ public class SPCLexer extends Lexer {
             switch ( input.LA(2) ) {
             case '*':
                 {
-                alt35=89;
+                alt35=91;
                 }
                 break;
             case '/':
                 {
-                alt35=90;
+                alt35=92;
                 }
                 break;
             default:
@@ -6011,22 +6027,22 @@ public class SPCLexer extends Lexer {
             int LA35_36 = input.LA(2);
 
             if ( (LA35_36=='o') ) {
-                int LA35_126 = input.LA(3);
+                int LA35_125 = input.LA(3);
 
-                if ( (LA35_126=='d') ) {
+                if ( (LA35_125=='d') ) {
                     int LA35_205 = input.LA(4);
 
                     if ( ((LA35_205>='#' && LA35_205<='$')||LA35_205=='-'||(LA35_205>='0' && LA35_205<='9')||(LA35_205>='A' && LA35_205<='Z')||LA35_205=='\\'||LA35_205=='_'||(LA35_205>='a' && LA35_205<='z')) ) {
-                        alt35=87;
+                        alt35=89;
                     }
                     else {
                         alt35=55;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
             }
             else {
-                alt35=87;}
+                alt35=89;}
             }
             break;
         case '<':
@@ -6091,28 +6107,28 @@ public class SPCLexer extends Lexer {
             int LA35_41 = input.LA(2);
 
             if ( (LA35_41=='e') ) {
-                int LA35_136 = input.LA(3);
+                int LA35_135 = input.LA(3);
 
-                if ( (LA35_136=='x') ) {
+                if ( (LA35_135=='x') ) {
                     int LA35_206 = input.LA(4);
 
                     if ( (LA35_206=='t') ) {
                         int LA35_257 = input.LA(5);
 
                         if ( ((LA35_257>='#' && LA35_257<='$')||LA35_257=='-'||(LA35_257>='0' && LA35_257<='9')||(LA35_257>='A' && LA35_257<='Z')||LA35_257=='\\'||LA35_257=='_'||(LA35_257>='a' && LA35_257<='z')) ) {
-                            alt35=87;
+                            alt35=89;
                         }
                         else {
                             alt35=64;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
             }
             else {
-                alt35=87;}
+                alt35=89;}
             }
             break;
         case 'u':
@@ -6120,9 +6136,9 @@ public class SPCLexer extends Lexer {
             int LA35_42 = input.LA(2);
 
             if ( (LA35_42=='n') ) {
-                int LA35_137 = input.LA(3);
+                int LA35_136 = input.LA(3);
 
-                if ( (LA35_137=='i') ) {
+                if ( (LA35_136=='i') ) {
                     int LA35_207 = input.LA(4);
 
                     if ( (LA35_207=='o') ) {
@@ -6132,22 +6148,22 @@ public class SPCLexer extends Lexer {
                             int LA35_297 = input.LA(6);
 
                             if ( ((LA35_297>='#' && LA35_297<='$')||LA35_297=='-'||(LA35_297>='0' && LA35_297<='9')||(LA35_297>='A' && LA35_297<='Z')||LA35_297=='\\'||LA35_297=='_'||(LA35_297>='a' && LA35_297<='z')) ) {
-                                alt35=87;
+                                alt35=89;
                             }
                             else {
                                 alt35=65;}
                         }
                         else {
-                            alt35=87;}
+                            alt35=89;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
             }
             else {
-                alt35=87;}
+                alt35=89;}
             }
             break;
         case 'i':
@@ -6155,16 +6171,16 @@ public class SPCLexer extends Lexer {
             int LA35_43 = input.LA(2);
 
             if ( (LA35_43=='n') ) {
-                int LA35_138 = input.LA(3);
+                int LA35_137 = input.LA(3);
 
-                if ( ((LA35_138>='#' && LA35_138<='$')||LA35_138=='-'||(LA35_138>='0' && LA35_138<='9')||(LA35_138>='A' && LA35_138<='Z')||LA35_138=='\\'||LA35_138=='_'||(LA35_138>='a' && LA35_138<='z')) ) {
-                    alt35=87;
+                if ( ((LA35_137>='#' && LA35_137<='$')||LA35_137=='-'||(LA35_137>='0' && LA35_137<='9')||(LA35_137>='A' && LA35_137<='Z')||LA35_137=='\\'||LA35_137=='_'||(LA35_137>='a' && LA35_137<='z')) ) {
+                    alt35=89;
                 }
                 else {
                     alt35=66;}
             }
             else {
-                alt35=87;}
+                alt35=89;}
             }
             break;
         case '.':
@@ -6205,46 +6221,46 @@ public class SPCLexer extends Lexer {
             switch ( input.LA(2) ) {
             case 'o':
                 {
-                int LA35_145 = input.LA(3);
+                int LA35_144 = input.LA(3);
 
-                if ( (LA35_145=='r') ) {
+                if ( (LA35_144=='r') ) {
                     int LA35_209 = input.LA(4);
 
                     if ( ((LA35_209>='#' && LA35_209<='$')||LA35_209=='-'||(LA35_209>='0' && LA35_209<='9')||(LA35_209>='A' && LA35_209<='Z')||LA35_209=='\\'||LA35_209=='_'||(LA35_209>='a' && LA35_209<='z')) ) {
-                        alt35=87;
+                        alt35=89;
                     }
                     else {
                         alt35=73;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             case 'n':
                 {
-                int LA35_146 = input.LA(3);
+                int LA35_145 = input.LA(3);
 
-                if ( (LA35_146=='o') ) {
+                if ( (LA35_145=='o') ) {
                     int LA35_210 = input.LA(4);
 
                     if ( (LA35_210=='r') ) {
                         int LA35_260 = input.LA(5);
 
                         if ( ((LA35_260>='#' && LA35_260<='$')||LA35_260=='-'||(LA35_260>='0' && LA35_260<='9')||(LA35_260>='A' && LA35_260<='Z')||LA35_260=='\\'||LA35_260=='_'||(LA35_260>='a' && LA35_260<='z')) ) {
-                            alt35=87;
+                            alt35=89;
                         }
                         else {
                             alt35=74;}
                     }
                     else {
-                        alt35=87;}
+                        alt35=89;}
                 }
                 else {
-                    alt35=87;}
+                    alt35=89;}
                 }
                 break;
             default:
-                alt35=87;}
+                alt35=89;}
 
             }
             break;
@@ -6255,13 +6271,25 @@ public class SPCLexer extends Lexer {
             break;
         case ':':
             {
-            int LA35_49 = input.LA(2);
-
-            if ( (LA35_49==':') ) {
+            switch ( input.LA(2) ) {
+            case ':':
+                {
                 alt35=79;
-            }
-            else {
+                }
+                break;
+            case '-':
+                {
+                alt35=84;
+                }
+                break;
+            case '=':
+                {
+                alt35=85;
+                }
+                break;
+            default:
                 alt35=77;}
+
             }
             break;
         case ';':
@@ -6279,10 +6307,10 @@ public class SPCLexer extends Lexer {
             int LA35_52 = input.LA(2);
 
             if ( (LA35_52=='B'||LA35_52=='D'||LA35_52=='H'||LA35_52=='O'||LA35_52=='b'||LA35_52=='d'||LA35_52=='h'||LA35_52=='o') ) {
-                alt35=84;
+                alt35=86;
             }
             else {
-                alt35=86;}
+                alt35=88;}
             }
             break;
         case 'f':
@@ -6290,10 +6318,10 @@ public class SPCLexer extends Lexer {
             int LA35_53 = input.LA(2);
 
             if ( (LA35_53=='\'') ) {
-                alt35=85;
+                alt35=87;
             }
             else {
-                alt35=87;}
+                alt35=89;}
             }
             break;
         case '1':
@@ -6306,7 +6334,7 @@ public class SPCLexer extends Lexer {
         case '8':
         case '9':
             {
-            alt35=86;
+            alt35=88;
             }
             break;
         case 'D':
@@ -6332,7 +6360,7 @@ public class SPCLexer extends Lexer {
         case 'y':
         case 'z':
             {
-            alt35=87;
+            alt35=89;
             }
             break;
         case '\t':
@@ -6340,12 +6368,12 @@ public class SPCLexer extends Lexer {
         case '\r':
         case ' ':
             {
-            alt35=88;
+            alt35=90;
             }
             break;
         default:
             NoViableAltException nvae =
-                new NoViableAltException("1:1: Tokens : ( TOK_CTL_SPEC | TOK_CTL_STAR_SPEC | TOK_LTL_SPEC | TOK_INVAR_SPEC | TOK_RTCTL_STAR_SPEC | TOK_LDL_SPEC | TOK_EX | TOK_AX | TOK_EF | TOK_AF | TOK_EG | TOK_AG | TOK_EE | TOK_AA | TOK_BUNTIL | TOK_EBF | TOK_ABF | TOK_EBG | TOK_ABG | TOK_OP_FINALLY | TOK_OP_ONCE | TOK_OP_GLOBALLY | TOK_OP_HISTORICALLY | TOK_OP_NEXT | TOK_OP_PREV | TOK_UNTIL | TOK_SINCE | TOK_RELEASE | TOK_TRIGGERED | TOK_OP_NOTPREVNOT | TOK_OP_BFINALLY | TOK_OP_BGLOBALLY | TOK_BRELEASE | TOK_KNOW | TOK_SKNOW | TOK_LP | TOK_RP | TOK_LB | TOK_RB | TOK_LCB | TOK_RCB | TOK_FALSEEXP | TOK_TRUEEXP | TOK_WORD1 | TOK_WORD | TOK_BOOL | TOK_WAREAD | TOK_WAWRITE | TOK_CASE | TOK_ESAC | TOK_PLUS | TOK_MINUS | TOK_TIMES | TOK_DIVIDE | TOK_MOD | TOK_LSHIFT | TOK_RSHIFT | TOK_EQUAL | TOK_NOTEQUAL | TOK_LE | TOK_GE | TOK_LT | TOK_GT | TOK_NEXT | TOK_UNION | TOK_SETIN | TOK_TWODOTS | TOK_DOT | TOK_IMPLIES | TOK_IFF | TOK_OR | TOK_AND | TOK_XOR | TOK_XNOR | TOK_NOT | TOK_COMMA | TOK_COLON | TOK_SEMI | TOK_CONCATENATION | TOK_2OR | TOK_2AND | TOK_REPEAT_LB | TOK_TEST | TOK_NUMBER_WORD | TOK_NUMBER_FRAC | TOK_NUMBER | TOK_ATOM | JTOK_WS | JTOK_MULTI_COMMENT | JTOK_LINE_COMMENT );", 35, 0, input);
+                new NoViableAltException("1:1: Tokens : ( TOK_CTL_SPEC | TOK_CTL_STAR_SPEC | TOK_LTL_SPEC | TOK_INVAR_SPEC | TOK_RTCTL_STAR_SPEC | TOK_CDLs_SPEC | TOK_EX | TOK_AX | TOK_EF | TOK_AF | TOK_EG | TOK_AG | TOK_EE | TOK_AA | TOK_BUNTIL | TOK_EBF | TOK_ABF | TOK_EBG | TOK_ABG | TOK_OP_FINALLY | TOK_OP_ONCE | TOK_OP_GLOBALLY | TOK_OP_HISTORICALLY | TOK_OP_NEXT | TOK_OP_PREV | TOK_UNTIL | TOK_SINCE | TOK_RELEASE | TOK_TRIGGERED | TOK_OP_NOTPREVNOT | TOK_OP_BFINALLY | TOK_OP_BGLOBALLY | TOK_BRELEASE | TOK_KNOW | TOK_SKNOW | TOK_LP | TOK_RP | TOK_LB | TOK_RB | TOK_LCB | TOK_RCB | TOK_FALSEEXP | TOK_TRUEEXP | TOK_WORD1 | TOK_WORD | TOK_BOOL | TOK_WAREAD | TOK_WAWRITE | TOK_CASE | TOK_ESAC | TOK_PLUS | TOK_MINUS | TOK_TIMES | TOK_DIVIDE | TOK_MOD | TOK_LSHIFT | TOK_RSHIFT | TOK_EQUAL | TOK_NOTEQUAL | TOK_LE | TOK_GE | TOK_LT | TOK_GT | TOK_NEXT | TOK_UNION | TOK_SETIN | TOK_TWODOTS | TOK_DOT | TOK_IMPLIES | TOK_IFF | TOK_OR | TOK_AND | TOK_XOR | TOK_XNOR | TOK_NOT | TOK_COMMA | TOK_COLON | TOK_SEMI | TOK_CONCATENATION | TOK_LDL_OR | TOK_LDL_AND | TOK_LDL_REPEAT_LB | TOK_LDL_TEST | TOK_LDL_SERE_SAT | TOK_LDL_SERE_IMP | TOK_NUMBER_WORD | TOK_NUMBER_FRAC | TOK_NUMBER | TOK_ATOM | JTOK_WS | JTOK_MULTI_COMMENT | JTOK_LINE_COMMENT );", 35, 0, input);
 
             throw nvae;
         }
@@ -6387,595 +6415,609 @@ public class SPCLexer extends Lexer {
                 }
                 break;
             case 6 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:89: TOK_LDL_SPEC
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:89: TOK_CDLs_SPEC
                 {
-                mTOK_LDL_SPEC(); 
+                mTOK_CDLs_SPEC(); 
 
                 }
                 break;
             case 7 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:102: TOK_EX
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:103: TOK_EX
                 {
                 mTOK_EX(); 
 
                 }
                 break;
             case 8 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:109: TOK_AX
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:110: TOK_AX
                 {
                 mTOK_AX(); 
 
                 }
                 break;
             case 9 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:116: TOK_EF
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:117: TOK_EF
                 {
                 mTOK_EF(); 
 
                 }
                 break;
             case 10 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:123: TOK_AF
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:124: TOK_AF
                 {
                 mTOK_AF(); 
 
                 }
                 break;
             case 11 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:130: TOK_EG
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:131: TOK_EG
                 {
                 mTOK_EG(); 
 
                 }
                 break;
             case 12 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:137: TOK_AG
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:138: TOK_AG
                 {
                 mTOK_AG(); 
 
                 }
                 break;
             case 13 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:144: TOK_EE
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:145: TOK_EE
                 {
                 mTOK_EE(); 
 
                 }
                 break;
             case 14 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:151: TOK_AA
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:152: TOK_AA
                 {
                 mTOK_AA(); 
 
                 }
                 break;
             case 15 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:158: TOK_BUNTIL
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:159: TOK_BUNTIL
                 {
                 mTOK_BUNTIL(); 
 
                 }
                 break;
             case 16 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:169: TOK_EBF
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:170: TOK_EBF
                 {
                 mTOK_EBF(); 
 
                 }
                 break;
             case 17 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:177: TOK_ABF
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:178: TOK_ABF
                 {
                 mTOK_ABF(); 
 
                 }
                 break;
             case 18 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:185: TOK_EBG
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:186: TOK_EBG
                 {
                 mTOK_EBG(); 
 
                 }
                 break;
             case 19 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:193: TOK_ABG
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:194: TOK_ABG
                 {
                 mTOK_ABG(); 
 
                 }
                 break;
             case 20 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:201: TOK_OP_FINALLY
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:202: TOK_OP_FINALLY
                 {
                 mTOK_OP_FINALLY(); 
 
                 }
                 break;
             case 21 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:216: TOK_OP_ONCE
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:217: TOK_OP_ONCE
                 {
                 mTOK_OP_ONCE(); 
 
                 }
                 break;
             case 22 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:228: TOK_OP_GLOBALLY
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:229: TOK_OP_GLOBALLY
                 {
                 mTOK_OP_GLOBALLY(); 
 
                 }
                 break;
             case 23 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:244: TOK_OP_HISTORICALLY
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:245: TOK_OP_HISTORICALLY
                 {
                 mTOK_OP_HISTORICALLY(); 
 
                 }
                 break;
             case 24 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:264: TOK_OP_NEXT
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:265: TOK_OP_NEXT
                 {
                 mTOK_OP_NEXT(); 
 
                 }
                 break;
             case 25 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:276: TOK_OP_PREV
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:277: TOK_OP_PREV
                 {
                 mTOK_OP_PREV(); 
 
                 }
                 break;
             case 26 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:288: TOK_UNTIL
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:289: TOK_UNTIL
                 {
                 mTOK_UNTIL(); 
 
                 }
                 break;
             case 27 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:298: TOK_SINCE
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:299: TOK_SINCE
                 {
                 mTOK_SINCE(); 
 
                 }
                 break;
             case 28 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:308: TOK_RELEASE
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:309: TOK_RELEASE
                 {
                 mTOK_RELEASE(); 
 
                 }
                 break;
             case 29 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:320: TOK_TRIGGERED
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:321: TOK_TRIGGERED
                 {
                 mTOK_TRIGGERED(); 
 
                 }
                 break;
             case 30 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:334: TOK_OP_NOTPREVNOT
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:335: TOK_OP_NOTPREVNOT
                 {
                 mTOK_OP_NOTPREVNOT(); 
 
                 }
                 break;
             case 31 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:352: TOK_OP_BFINALLY
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:353: TOK_OP_BFINALLY
                 {
                 mTOK_OP_BFINALLY(); 
 
                 }
                 break;
             case 32 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:368: TOK_OP_BGLOBALLY
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:369: TOK_OP_BGLOBALLY
                 {
                 mTOK_OP_BGLOBALLY(); 
 
                 }
                 break;
             case 33 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:385: TOK_BRELEASE
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:386: TOK_BRELEASE
                 {
                 mTOK_BRELEASE(); 
 
                 }
                 break;
             case 34 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:398: TOK_KNOW
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:399: TOK_KNOW
                 {
                 mTOK_KNOW(); 
 
                 }
                 break;
             case 35 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:407: TOK_SKNOW
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:408: TOK_SKNOW
                 {
                 mTOK_SKNOW(); 
 
                 }
                 break;
             case 36 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:417: TOK_LP
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:418: TOK_LP
                 {
                 mTOK_LP(); 
 
                 }
                 break;
             case 37 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:424: TOK_RP
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:425: TOK_RP
                 {
                 mTOK_RP(); 
 
                 }
                 break;
             case 38 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:431: TOK_LB
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:432: TOK_LB
                 {
                 mTOK_LB(); 
 
                 }
                 break;
             case 39 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:438: TOK_RB
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:439: TOK_RB
                 {
                 mTOK_RB(); 
 
                 }
                 break;
             case 40 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:445: TOK_LCB
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:446: TOK_LCB
                 {
                 mTOK_LCB(); 
 
                 }
                 break;
             case 41 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:453: TOK_RCB
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:454: TOK_RCB
                 {
                 mTOK_RCB(); 
 
                 }
                 break;
             case 42 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:461: TOK_FALSEEXP
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:462: TOK_FALSEEXP
                 {
                 mTOK_FALSEEXP(); 
 
                 }
                 break;
             case 43 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:474: TOK_TRUEEXP
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:475: TOK_TRUEEXP
                 {
                 mTOK_TRUEEXP(); 
 
                 }
                 break;
             case 44 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:486: TOK_WORD1
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:487: TOK_WORD1
                 {
                 mTOK_WORD1(); 
 
                 }
                 break;
             case 45 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:496: TOK_WORD
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:497: TOK_WORD
                 {
                 mTOK_WORD(); 
 
                 }
                 break;
             case 46 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:505: TOK_BOOL
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:506: TOK_BOOL
                 {
                 mTOK_BOOL(); 
 
                 }
                 break;
             case 47 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:514: TOK_WAREAD
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:515: TOK_WAREAD
                 {
                 mTOK_WAREAD(); 
 
                 }
                 break;
             case 48 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:525: TOK_WAWRITE
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:526: TOK_WAWRITE
                 {
                 mTOK_WAWRITE(); 
 
                 }
                 break;
             case 49 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:537: TOK_CASE
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:538: TOK_CASE
                 {
                 mTOK_CASE(); 
 
                 }
                 break;
             case 50 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:546: TOK_ESAC
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:547: TOK_ESAC
                 {
                 mTOK_ESAC(); 
 
                 }
                 break;
             case 51 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:555: TOK_PLUS
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:556: TOK_PLUS
                 {
                 mTOK_PLUS(); 
 
                 }
                 break;
             case 52 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:564: TOK_MINUS
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:565: TOK_MINUS
                 {
                 mTOK_MINUS(); 
 
                 }
                 break;
             case 53 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:574: TOK_TIMES
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:575: TOK_TIMES
                 {
                 mTOK_TIMES(); 
 
                 }
                 break;
             case 54 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:584: TOK_DIVIDE
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:585: TOK_DIVIDE
                 {
                 mTOK_DIVIDE(); 
 
                 }
                 break;
             case 55 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:595: TOK_MOD
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:596: TOK_MOD
                 {
                 mTOK_MOD(); 
 
                 }
                 break;
             case 56 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:603: TOK_LSHIFT
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:604: TOK_LSHIFT
                 {
                 mTOK_LSHIFT(); 
 
                 }
                 break;
             case 57 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:614: TOK_RSHIFT
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:615: TOK_RSHIFT
                 {
                 mTOK_RSHIFT(); 
 
                 }
                 break;
             case 58 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:625: TOK_EQUAL
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:626: TOK_EQUAL
                 {
                 mTOK_EQUAL(); 
 
                 }
                 break;
             case 59 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:635: TOK_NOTEQUAL
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:636: TOK_NOTEQUAL
                 {
                 mTOK_NOTEQUAL(); 
 
                 }
                 break;
             case 60 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:648: TOK_LE
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:649: TOK_LE
                 {
                 mTOK_LE(); 
 
                 }
                 break;
             case 61 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:655: TOK_GE
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:656: TOK_GE
                 {
                 mTOK_GE(); 
 
                 }
                 break;
             case 62 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:662: TOK_LT
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:663: TOK_LT
                 {
                 mTOK_LT(); 
 
                 }
                 break;
             case 63 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:669: TOK_GT
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:670: TOK_GT
                 {
                 mTOK_GT(); 
 
                 }
                 break;
             case 64 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:676: TOK_NEXT
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:677: TOK_NEXT
                 {
                 mTOK_NEXT(); 
 
                 }
                 break;
             case 65 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:685: TOK_UNION
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:686: TOK_UNION
                 {
                 mTOK_UNION(); 
 
                 }
                 break;
             case 66 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:695: TOK_SETIN
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:696: TOK_SETIN
                 {
                 mTOK_SETIN(); 
 
                 }
                 break;
             case 67 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:705: TOK_TWODOTS
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:706: TOK_TWODOTS
                 {
                 mTOK_TWODOTS(); 
 
                 }
                 break;
             case 68 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:717: TOK_DOT
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:718: TOK_DOT
                 {
                 mTOK_DOT(); 
 
                 }
                 break;
             case 69 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:725: TOK_IMPLIES
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:726: TOK_IMPLIES
                 {
                 mTOK_IMPLIES(); 
 
                 }
                 break;
             case 70 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:737: TOK_IFF
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:738: TOK_IFF
                 {
                 mTOK_IFF(); 
 
                 }
                 break;
             case 71 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:745: TOK_OR
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:746: TOK_OR
                 {
                 mTOK_OR(); 
 
                 }
                 break;
             case 72 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:752: TOK_AND
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:753: TOK_AND
                 {
                 mTOK_AND(); 
 
                 }
                 break;
             case 73 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:760: TOK_XOR
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:761: TOK_XOR
                 {
                 mTOK_XOR(); 
 
                 }
                 break;
             case 74 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:768: TOK_XNOR
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:769: TOK_XNOR
                 {
                 mTOK_XNOR(); 
 
                 }
                 break;
             case 75 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:777: TOK_NOT
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:778: TOK_NOT
                 {
                 mTOK_NOT(); 
 
                 }
                 break;
             case 76 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:785: TOK_COMMA
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:786: TOK_COMMA
                 {
                 mTOK_COMMA(); 
 
                 }
                 break;
             case 77 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:795: TOK_COLON
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:796: TOK_COLON
                 {
                 mTOK_COLON(); 
 
                 }
                 break;
             case 78 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:805: TOK_SEMI
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:806: TOK_SEMI
                 {
                 mTOK_SEMI(); 
 
                 }
                 break;
             case 79 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:814: TOK_CONCATENATION
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:815: TOK_CONCATENATION
                 {
                 mTOK_CONCATENATION(); 
 
                 }
                 break;
             case 80 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:832: TOK_2OR
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:833: TOK_LDL_OR
                 {
-                mTOK_2OR(); 
+                mTOK_LDL_OR(); 
 
                 }
                 break;
             case 81 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:840: TOK_2AND
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:844: TOK_LDL_AND
                 {
-                mTOK_2AND(); 
+                mTOK_LDL_AND(); 
 
                 }
                 break;
             case 82 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:849: TOK_REPEAT_LB
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:856: TOK_LDL_REPEAT_LB
                 {
-                mTOK_REPEAT_LB(); 
+                mTOK_LDL_REPEAT_LB(); 
 
                 }
                 break;
             case 83 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:863: TOK_TEST
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:874: TOK_LDL_TEST
                 {
-                mTOK_TEST(); 
+                mTOK_LDL_TEST(); 
 
                 }
                 break;
             case 84 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:872: TOK_NUMBER_WORD
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:887: TOK_LDL_SERE_SAT
+                {
+                mTOK_LDL_SERE_SAT(); 
+
+                }
+                break;
+            case 85 :
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:904: TOK_LDL_SERE_IMP
+                {
+                mTOK_LDL_SERE_IMP(); 
+
+                }
+                break;
+            case 86 :
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:921: TOK_NUMBER_WORD
                 {
                 mTOK_NUMBER_WORD(); 
 
                 }
                 break;
-            case 85 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:888: TOK_NUMBER_FRAC
+            case 87 :
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:937: TOK_NUMBER_FRAC
                 {
                 mTOK_NUMBER_FRAC(); 
 
                 }
                 break;
-            case 86 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:904: TOK_NUMBER
+            case 88 :
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:953: TOK_NUMBER
                 {
                 mTOK_NUMBER(); 
 
                 }
                 break;
-            case 87 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:915: TOK_ATOM
+            case 89 :
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:964: TOK_ATOM
                 {
                 mTOK_ATOM(); 
 
                 }
                 break;
-            case 88 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:924: JTOK_WS
+            case 90 :
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:973: JTOK_WS
                 {
                 mJTOK_WS(); 
 
                 }
                 break;
-            case 89 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:932: JTOK_MULTI_COMMENT
+            case 91 :
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:981: JTOK_MULTI_COMMENT
                 {
                 mJTOK_MULTI_COMMENT(); 
 
                 }
                 break;
-            case 90 :
-                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:951: JTOK_LINE_COMMENT
+            case 92 :
+                // /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g:1:1000: JTOK_LINE_COMMENT
                 {
                 mJTOK_LINE_COMMENT(); 
 

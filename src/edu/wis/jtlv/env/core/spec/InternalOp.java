@@ -41,7 +41,9 @@ public enum InternalOp {
 	LDL_CONC,
 	LDL_TEST,
 	LDL_REPEAT,
-	LDL_BOUNDED_REPEAT;
+	LDL_BOUNDED_REPEAT,
+	LDL_SERE_SAT,
+	LDL_SERE_IMP;
 
 	// Extra Prop - Binary
 	// EQ, NEQ, LT, GT, LE, GE, SETIN, UNION, LSHIFT, RSHIFT, MOD, PLUS, MINUS,
@@ -51,9 +53,17 @@ public enum InternalOp {
 	// Groupings //////////////////////////////////////////////////////////////
 	// number of operands...
 	public static final InternalOp[] unaryOp = { NOT, FINALLY, GLOBALLY, HISTORICALLY,
-			NEXT, NOT_PREV_NOT, ONCE, PREV, EX, EF, EG, AX, AF, AG };
+			NEXT, NOT_PREV_NOT, ONCE, PREV, EX, EF, EG, AX, AF, AG,
+			LDL_TEST,
+			LDL_REPEAT};
 	public static final InternalOp[] binaryOp = { AND, OR, XOR, XNOR, IFF, IMPLIES,
-			RELEASES, SINCE, TRIGGERED, UNTIL, ABF, ABG, EBF, EBG, AU, EU, B_FINALLY, B_GLOBALLY, KNOW, SKNOW, NKNOW, NSKNOW, CAN_ENFORCE, CANNOT_AVOID};
+			RELEASES, SINCE, TRIGGERED, UNTIL, ABF, ABG, EBF, EBG, AU, EU, B_FINALLY, B_GLOBALLY, KNOW, SKNOW, NKNOW, NSKNOW, CAN_ENFORCE, CANNOT_AVOID,
+			LDL_OR,
+			LDL_AND,
+			LDL_CONC,
+			LDL_BOUNDED_REPEAT,
+			LDL_SERE_SAT,
+			LDL_SERE_IMP};
 	public static final InternalOp[] tripletOp = { ABU, EBU, B_UNTIL, B_RELEASES};
 
 	// is it propositional, or TL operator.
@@ -68,6 +78,8 @@ public enum InternalOp {
 	public static final InternalOp[] RealTimeLTLOp = { B_FINALLY, B_GLOBALLY, B_UNTIL, B_RELEASES};
 	public static final InternalOp[] EpistemicOp = { KNOW, SKNOW, NKNOW, NSKNOW };
 	public static final InternalOp[] SynEpistemicOp = { SKNOW, NSKNOW };
+	public static final InternalOp[] LDLPathOp = { LDL_SERE_SAT, LDL_SERE_IMP};
+	public static final InternalOp[] LDLSereOp = { LDL_OR,LDL_AND,LDL_CONC,LDL_TEST,LDL_REPEAT,LDL_BOUNDED_REPEAT };
 
 	private boolean in(InternalOp[] set) {
 		for (InternalOp op : set)
@@ -114,9 +126,16 @@ public enum InternalOp {
 		return this.in(SynEpistemicOp);
 	}
 
+	public boolean isLDLPathOp() {
+		return this.in(LDLPathOp);
+	}
+	public boolean isLDLSereOp() {
+		return this.in(LDLSereOp);
+	}
+
 	public boolean isTemporalOp() {
 		return this.in(FutureLTLOp) | this.in(PastLTLOp) | this.in(CTLOp)
-				| this.in(RealTimeCTLOp) | this.in(RealTimeLTLOp);
+				| this.in(RealTimeCTLOp) | this.in(RealTimeLTLOp) | this.in(LDLPathOp);
 	}
 
 	public boolean isUnary() {

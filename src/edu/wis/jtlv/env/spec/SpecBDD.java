@@ -162,6 +162,23 @@ public class SpecBDD implements Spec {
 
 	public boolean isStateSpec() { return true; }
 
+	@Override
+	public boolean isLDLSpec(StringBuilder syntaxMsg) {
+		syntaxMsg.delete(0,syntaxMsg.length());
+		return true;
+	}
+
+	@Override
+	public boolean isSereSpec(StringBuilder syntaxMsg) {
+		syntaxMsg.delete(0,syntaxMsg.length());
+		return true;
+	}
+
+	@Override
+	public boolean isCDLstarSpec(StringBuilder syntaxMsg) throws SpecException {
+		return true;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -214,6 +231,21 @@ public class SpecBDD implements Spec {
 				return "[!$#! Cannot Identify BDD Expression]";
 //		return "#[" + Env.toNiceSignleLineString(null, this.getVal()) + "]";    // original code
 		return Env.toNiceSignleLineString(null, this.getVal());  // added by LXY
+	}
+
+	@Override
+	public String toStringBracketed(String lBracket, String rBracket) {
+		String s = this.toString();
+		if( (	s.equals("TRUE") ||
+				s.equals("FALSE") ||
+				s.startsWith("(") && s.endsWith(")")) ||
+				(s.startsWith("[") && s.endsWith("]")) ||
+				(s.startsWith("{") && s.endsWith("}")) ||
+				(s.startsWith("<") && s.endsWith(">"))
+		) // spec has outermost bracket
+			return s;
+		else // spec has NOT outermost bracket
+			return lBracket+s+rBracket;
 	}
 
 	/*

@@ -1,4 +1,4 @@
-package edu.wis.jtlv.lib.mc.LDL;
+package edu.wis.jtlv.lib.mc.RTCDLs;
 
 import edu.wis.jtlv.env.core.smv.SMVParseException;
 import edu.wis.jtlv.env.module.ModuleException;
@@ -26,7 +26,7 @@ import static edu.wis.jtlv.lib.mc.RTCTL_STAR.RTCTL_STAR_ModelCheckAlg.simplifySp
 import static java.lang.Double.parseDouble;
 import static swing.MCTKFrame.consoleOutput;
 
-public class ViewerExplainLDL implements ViewerListener, ActionListener, MouseMotionListener {
+public class ViewerExplainRTCDLs implements ViewerListener, ActionListener, MouseMotionListener {
     protected boolean loop = true;
     JFrame ceFrame;
     Viewer viewer;
@@ -40,17 +40,17 @@ public class ViewerExplainLDL implements ViewerListener, ActionListener, MouseMo
     JSplitPane splitPane;
     public static JTextPane outputTextPane;
 
-    public GraphExplainLDL getGraph() {
+    public GraphExplainRTCDLs getGraph() {
         return graph;
     }
 
-    public void setGraph(GraphExplainLDL graph) {
+    public void setGraph(GraphExplainRTCDLs graph) {
         this.graph = graph;
     }
 
-    private GraphExplainLDL graph;
+    private GraphExplainRTCDLs graph;
 
-    public ViewerExplainLDL(GraphExplainLDL G) {
+    public ViewerExplainRTCDLs(GraphExplainRTCDLs G) {
         System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
         graph = G;
         graph.addAttribute("ui.label", graph.getId());

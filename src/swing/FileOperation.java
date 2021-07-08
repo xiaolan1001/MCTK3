@@ -58,14 +58,16 @@ public class FileOperation {
                 if (initSpecAnns!=null) initSpecAnns.clear(); else initSpecAnns=new Vector<String[]>();
                 for(int i=1; i<moduleSpecAnns.size(); i++) {
                     String[] specAnn=moduleSpecAnns.get(i);
-                    specAnn[0]=specAnn[0].replaceAll("RTCTL\\*SPEC","").trim();
-                    specAnn[1]=specAnn[1].trim();
+//                    specAnn[0]=specAnn[0].replaceAll("RTCTL\\*SPEC","").trim();
+//                    specAnn[0]=specAnn[0].replaceAll("RTCDL\\*SPEC","").trim();
+                    //if(specAnn[0]=="") specAnn[0]="CTL";
                     initSpecAnns.add(specAnn);
                 }
 
                 specsTableModel.getDataVector().clear();
                 for(int i=0; i<initSpecAnns.size(); i++) {
-                    mainFrame.insertSpec(i,"RTCTL*",initSpecAnns.get(i)[0],initSpecAnns.get(i)[1]);
+                    //mainFrame.insertSpec(i,"RTCDL*",initSpecAnns.get(i)[0],initSpecAnns.get(i)[1]);
+                    mainFrame.insertSpec(i,initSpecAnns.get(i)[0],initSpecAnns.get(i)[1],initSpecAnns.get(i)[2]);
                 }
                 if(specsTable.getRowCount()>0) specsTable.setRowSelectionInterval(0,0);
 
@@ -98,10 +100,11 @@ public class FileOperation {
 
                 if(specsTableChanged()) {
                     initSpecAnns.clear();
-                    for (int row = 0; row < specsTableModel.getRowCount(); row++) {
-                        String[] specAnn=new String[2];
-                        specAnn[0]="RTCTL*SPEC "+((String) specsTableModel.getValueAt(row,colSpec)).trim();
-                        specAnn[1]=((String) specsTableModel.getValueAt(row,colAnnotation)).trim();
+                    for (int row=0; row<specsTableModel.getRowCount(); row++) {
+                        String[] specAnn=new String[3];
+                        specAnn[0]=((String) specsTableModel.getValueAt(row,colLogic)).trim();
+                        specAnn[1]=((String) specsTableModel.getValueAt(row,colSpec)).trim();
+                        specAnn[2]=((String) specsTableModel.getValueAt(row,colAnnotation)).trim();
                         initSpecAnns.add(specAnn);
                     }
                 }
@@ -147,9 +150,10 @@ public class FileOperation {
                 if(specsTableChanged()) {
                     initSpecAnns.clear();
                     for (int row = 0; row < specsTableModel.getRowCount(); row++) {
-                        String[] specAnn=new String[2];
-                        specAnn[0]="RTCTL*SPEC "+((String) specsTableModel.getValueAt(row,colSpec)).trim();
-                        specAnn[1]=((String) specsTableModel.getValueAt(row,colAnnotation)).trim();
+                        String[] specAnn=new String[3];
+                        specAnn[0]=((String) specsTableModel.getValueAt(row,colLogic)).trim();
+                        specAnn[1]=((String) specsTableModel.getValueAt(row,colSpec)).trim();
+                        specAnn[2]=((String) specsTableModel.getValueAt(row,colAnnotation)).trim();
                         initSpecAnns.add(specAnn);
                     }
                 }
@@ -204,9 +208,10 @@ public class FileOperation {
                 if(specsTableChanged()) {
                     initSpecAnns.clear();
                     for (int row = 0; row < specsTableModel.getRowCount(); row++) {
-                        String[] specAnn=new String[2];
-                        specAnn[0]="RTCTL*SPEC "+((String) specsTableModel.getValueAt(row,colSpec)).trim();
-                        specAnn[1]=((String) specsTableModel.getValueAt(row,colAnnotation)).trim();
+                        String[] specAnn=new String[3];
+                        specAnn[0]=((String) specsTableModel.getValueAt(row,colLogic)).trim();
+                        specAnn[1]=((String) specsTableModel.getValueAt(row,colSpec)).trim();
+                        specAnn[2]=((String) specsTableModel.getValueAt(row,colAnnotation)).trim();
                         initSpecAnns.add(specAnn);
                     }
                 }
@@ -266,7 +271,7 @@ public class FileOperation {
 
     public void setFrameTitle(File file) {
         String name = file.getName();
-        mainFrame.setTitle("MCTK 2.0 - " + file.getAbsolutePath());
+        mainFrame.setTitle("MCTK 3.0 - " + file.getAbsolutePath());
     }
 
     public String getPath() {

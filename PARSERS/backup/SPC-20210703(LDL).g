@@ -21,7 +21,7 @@ tokens {
 	PURE_CTL_T;
 	PURE_LTL_T;
 
-	PURE_CDLs_T;
+	PURE_LDL_T;
 	PURE_RE_T;
 
 	RTCTLS_PURE_CTL_T;
@@ -110,7 +110,7 @@ public void consumeUntilSpecStart(TokenStream input) throws SpecParseException {
 		ttype != SPCLexer.TOK_CTL_SPEC && 
 		ttype != SPCLexer.TOK_LTL_SPEC && 
 		ttype != SPCLexer.TOK_RTCTL_STAR_SPEC && 
-		ttype != SPCLexer.TOK_CDLs_SPEC) {
+		ttype != SPCLexer.TOK_LDL_SPEC) {
 		tstop = input.LT(1);
 		input.consume();
 		ttype = input.LA(1);
@@ -166,7 +166,7 @@ spec_element				returns[InternalSpec ret]
 								| ctl_spec {if(!er()) $ret = $ctl_spec.ret; consumeUntilSpecStart(input); }
 								| ltl_spec {if(!er()) $ret = $ltl_spec.ret; consumeUntilSpecStart(input); }
 								| rtctls_spec {if(!er()) $ret = $rtctls_spec.ret; consumeUntilSpecStart(input); }
-								| cdls_spec {if(!er()) $ret = $cdls_spec.ret; consumeUntilSpecStart(input); }
+								| ldl_spec {if(!er()) $ret = $ldl_spec.ret; consumeUntilSpecStart(input); }
 								;
 
 invar_spec					returns[InternalSpec ret]
@@ -188,9 +188,9 @@ rtctls_spec					returns[InternalSpec ret]
 								;
 
 
-cdls_spec					returns[InternalSpec ret] // cdls_spec expresses RTCDL*, which is the combination of RTCTL* and LDL
+ldl_spec					returns[InternalSpec ret] // ldl_spec expresses RTCDL*, which is the combination of RTCTL* and LDL
 @after { $ret.setLanguage(LDL); if (!er() && ($ret instanceof InternalSpecBDD)) ((InternalSpecBDD) $ret).evalBDDExp(input); }
-								: TOK_CDLs_SPEC^ cdls_root_expr optsemi! {if(!er()) $ret = $cdls_root_expr.ret; }
+								: TOK_LDL_SPEC^ ldl_root_expr optsemi! {if(!er()) $ret = $ldl_root_expr.ret; }
 								;
 
 /* --------------------------------------------------------------------- */
@@ -1376,110 +1376,135 @@ rtctls_primary_expr_helper1	returns[InternalSpec ret]
 								;
 
 
-
 ///////////////////////////////////////////////////////////////////////////////
-// ROOT EXPRESSIONS OF RTCDL* operators + epistemic modalities /////////
+// ROOT EXPRESSIONS OF LDL operators + epistemic modalities /////////
 ///////////////////////////////////////////////////////////////////////////////
-cdls_root_expr				returns[InternalSpec ret]
-								: cdls_implies_expr {if(!er()) $ret = $cdls_implies_expr.ret; }
+ldl_root_expr				returns[InternalSpec ret]
+								: ldl_implies_expr {if(!er()) $ret = $ldl_implies_expr.ret; }
 								;
-cdls_implies_expr			returns[InternalSpec ret]
+ldl_implies_expr			returns[InternalSpec ret]
 @init {boolean append_end = false; String exp_str = ""; }
 @after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
-								: f=cdls_iff_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
-								( op=TOK_IMPLIES^ s=cdls_implies_expr
+								: f=ldl_iff_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
+								( op=TOK_IMPLIES^ s=ldl_implies_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_imply(input, $start, exp_str, $ret, $s.ret); }
 								)?
 								; /* right association */
-cdls_iff_expr				returns[InternalSpec ret]
+ldl_iff_expr				returns[InternalSpec ret]
 @init {boolean append_end = false; String exp_str = ""; }
 @after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
-								: f=cdls_or_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
-								( op=TOK_IFF^ s=cdls_or_expr
+								: f=ldl_or_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
+								( op=TOK_IFF^ s=ldl_or_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_iff(input, $start, exp_str, $ret, $s.ret); }
 								)*
 								;
-cdls_or_expr				returns[InternalSpec ret]
+ldl_or_expr				returns[InternalSpec ret]
 @init {boolean append_end = false; String exp_str = ""; }
 @after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
-								: f=cdls_and_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
-								( op=TOK_OR^ s=cdls_and_expr
+								: f=ldl_and_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
+								( 
+								op=TOK_LDL_OR^ s=ldl_and_expr
+								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_or(input, $start, exp_str, $ret, $s.ret); }
+								| op=TOK_OR^ s=ldl_and_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_or(input, $start, exp_str, $ret, $s.ret); }
-								| op=TOK_XOR^ s=cdls_and_expr
+								| op=TOK_XOR^ s=ldl_and_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_xor(input, $start, exp_str, $ret, $s.ret); }
-								| op=TOK_XNOR^ s=cdls_and_expr
+								| op=TOK_XNOR^ s=ldl_and_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_xnor(input, $start, exp_str, $ret, $s.ret); }
 								)*
 								;
-cdls_and_expr				returns[InternalSpec ret]
+ldl_and_expr				returns[InternalSpec ret]
 @init {boolean append_end = false; String exp_str = ""; }
 @after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
-								: f=cdls_ltl_binary_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
-								( op=TOK_AND^ s=cdls_ltl_binary_expr
+								: f=ldl_sat_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
+								( 
+								op=TOK_LDL_AND^ s=ldl_sat_expr
+								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_and(input, $start, exp_str, $ret, $s.ret); }
+								| op=TOK_AND^ s=ldl_sat_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_and(input, $start, exp_str, $ret, $s.ret); }
 								)*
 								;
-
-/* all LTL binary operators */
-cdls_ltl_binary_expr		returns[InternalSpec ret] // has two subformulas, excluding subrange and agent_name
+ldl_sat_expr				returns[InternalSpec ret]
 @init {boolean append_end = false; String exp_str = ""; }
 @after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
-								: f=cdls_ltl_unary_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
-								(
-								// LDL unary operators
-								op=TOK_LDL_TEST^
-								{ if (!er()) exp_str += $op.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_test(input, $start, exp_str, $ret); }								
-								| op=TOK_LDL_REPEAT_LB^ r=subrange op2=TOK_RB 
-								{ if (!er()) exp_str += " " + $op.text + $r.text + $op2.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_bounded_repeat(input, $start, exp_str, $ret, $r.ret); }
-								| op=TOK_LDL_REPEAT_LB^ op2=TOK_RB 
-								{ if (!er()) exp_str += " " + $op.text + $op2.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_repeat(input, $start, exp_str, $ret); }
-								
-								
-								// unbounded temporal
-								| op=TOK_UNTIL^ s=cdls_ltl_unary_expr
-								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_until(input, $start, exp_str, $ret, $s.ret); }
-								| op=TOK_SINCE^ s=cdls_ltl_unary_expr
-								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_since(input, $start, exp_str, $ret, $s.ret); }
-								| op=TOK_RELEASE^ s=cdls_ltl_unary_expr
-								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_releases(input, $start, exp_str, $ret, $s.ret); }
-								| op=TOK_TRIGGERED^ s=cdls_ltl_unary_expr
-								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_triggered(input, $start, exp_str, $ret, $s.ret); }
-								// bounded temporal
-								|op=TOK_BUNTIL^ r=subrange s=cdls_ltl_unary_expr
-								{ if (!er()) exp_str += " " + $op.text + " " + $r.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_buntil(input, $start, exp_str, $ret, $r.ret, $s.ret); }
-								| op=TOK_BRELEASE^ r=subrange s=cdls_ltl_unary_expr
-								{ if (!er()) exp_str += " " + $op.text + " " + $r.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_brelease(input, $start, exp_str, $ret, $r.ret, $s.ret); }
-								
-								// LDL binary operators
-								| op=TOK_LDL_OR^ s=cdls_ltl_unary_expr
-								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_or(input, $start, exp_str, $ret, $s.ret); }
-								| op=TOK_LDL_AND^ s=cdls_ltl_unary_expr
-								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_and(input, $start, exp_str, $ret, $s.ret); }
-								| op=TOK_COMMA^ s=cdls_ltl_unary_expr
+								: f=ldl_imp_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
+								( op=TOK_LDL_SAT^ s=ldl_imp_expr
+								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_somepath(input, $start, exp_str, $ret, $s.ret); }
+								)*
+								;
+ldl_imp_expr				returns[InternalSpec ret]
+@init {boolean append_end = false; String exp_str = ""; }
+@after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
+								: f=ldl_conc_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
+								( op=TOK_LDL_IMP^ s=ldl_conc_expr
+								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_allpath(input, $start, exp_str, $ret, $s.ret); }
+								)*
+								;
+ldl_conc_expr				returns[InternalSpec ret]
+@init {boolean append_end = false; String exp_str = ""; }
+@after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
+								: f=ldl_ltl_binary_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
+								( op=TOK_COMMA^ s=ldl_ltl_binary_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_conc(input, $start, exp_str, $ret, $s.ret); }
-								| op=TOK_LDL_SERE_SAT^ s=cdls_ltl_unary_expr
-								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_sere_sat(input, $start, exp_str, $ret, $s.ret); }
-								| op=TOK_LDL_SERE_IMP^ s=cdls_ltl_unary_expr
-								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_sere_imp(input, $start, exp_str, $ret, $s.ret); }
-
-			
-								// epistemic
-								| op=TOK_KNOW^ s=cdls_ltl_unary_expr
-								{ if (!er()) exp_str += " " + $op.text + " " + $s.text;
-								  if(!er()) append_end = true;
-								  InternalSpecAgentIdentifier agentId=null;
-								  if(!er()) agentId = new InternalSpecAgentIdentifier($f.text, $start);
-								  if(!er()) $ret = InitSpec.mk_cdls_know(input, $start, exp_str, agentId, $s.ret); }
-								| op=TOK_SKNOW^ s=cdls_ltl_unary_expr
-								{ if (!er()) exp_str += " " + $op.text + " " + $s.text;
-								  if(!er()) append_end = true;
-								  InternalSpecAgentIdentifier agentId=null;
-								  if(!er()) agentId = new InternalSpecAgentIdentifier($f.text, $start);
-								  if(!er()) $ret = InitSpec.mk_cdls_sknow(input, $start, exp_str, agentId, $s.ret); }
 								)*
 								;
 
-cdls_ltl_unary_expr			returns[InternalSpec ret] // has one subformulas, excluding subrange and agent_name
+/* all LDL binary operators */
+ldl_ltl_binary_expr		returns[InternalSpec ret] // has two subformulas, excluding subrange and agent_name
+@init {boolean append_end = false; String exp_str = ""; }
+@after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
+								: f=ldl_ltl_unary_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
+								(
+								// unbounded
+								op=TOK_UNTIL^ s=ldl_ltl_unary_expr
+								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_until(input, $start, exp_str, $ret, $s.ret); }
+								| op=TOK_SINCE^ s=ldl_ltl_unary_expr
+								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_since(input, $start, exp_str, $ret, $s.ret); }
+								| op=TOK_RELEASE^ s=ldl_ltl_unary_expr
+								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_releases(input, $start, exp_str, $ret, $s.ret); }
+								| op=TOK_TRIGGERED^ s=ldl_ltl_unary_expr
+								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_triggered(input, $start, exp_str, $ret, $s.ret); }
+								// bounded
+								|op=TOK_BUNTIL^ r=subrange s=ldl_ltl_unary_expr
+								{ if (!er()) exp_str += " " + $op.text + " " + $r.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_buntil(input, $start, exp_str, $ret, $r.ret, $s.ret); }
+								| op=TOK_BRELEASE^ r=subrange s=ldl_ltl_unary_expr
+								{ if (!er()) exp_str += " " + $op.text + " " + $r.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_brelease(input, $start, exp_str, $ret, $r.ret, $s.ret); }
+								// epistemic
+								| op=TOK_KNOW^ s=ldl_ltl_unary_expr
+								{ if (!er()) exp_str += " " + $op.text + " " + $s.text;
+								  if(!er()) append_end = true;
+								  InternalSpecAgentIdentifier agentId=null;
+								  if(!er()) agentId = new InternalSpecAgentIdentifier($f.text, $start);
+								  if(!er()) $ret = InitSpec.mk_ldl_know(input, $start, exp_str, agentId, $s.ret); }
+								| op=TOK_SKNOW^ s=ldl_ltl_unary_expr
+								{ if (!er()) exp_str += " " + $op.text + " " + $s.text;
+								  if(!er()) append_end = true;
+								  InternalSpecAgentIdentifier agentId=null;
+								  if(!er()) agentId = new InternalSpecAgentIdentifier($f.text, $start);
+								  if(!er()) $ret = InitSpec.mk_ldl_sknow(input, $start, exp_str, agentId, $s.ret); }
+
+								// LDL
+/*								| op=TOK_LDL_SAT^ s=ldl_ltl_unary_expr
+								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_somepath(input, $start, exp_str, $ret, $s.ret); }
+								| op=TOK_LDL_IMP^ s=ldl_ltl_unary_expr
+								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_allpath(input, $start, exp_str, $ret, $s.ret); }
+								| op=TOK_2OR^ s=ldl_ltl_unary_expr
+								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_or(input, $start, exp_str, $ret, $s.ret); }
+								| op=TOK_2AND^ s=ldl_ltl_unary_expr
+								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_and(input, $start, exp_str, $ret, $s.ret); }
+								| op=TOK_COMMA^ s=ldl_ltl_unary_expr
+								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_conc(input, $start, exp_str, $ret, $s.ret); }
+*/								| op=TOK_LDL_REPEAT_LB^ r=subrange TOK_RB
+								{ if (!er()) exp_str += " " + $op.text + $r.text + "]"; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_bounded_repeat(input, $start, exp_str, $ret, $r.ret); }
+								| op=TOK_LDL_REPEAT_LB^ TOK_RB
+								{ if (!er()) exp_str += " " + $op.text + "]"; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_repeat(input, $start, exp_str, $ret); }
+								| op=TOK_LDL_TEST^
+								{ if (!er()) exp_str += " " + $op.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_test(input, $start, exp_str, $ret); }
+								
+								)*
+								;
+
+ldl_ltl_unary_expr			returns[InternalSpec ret] // has one subformulas, excluding subrange and agent_name
 								: (TOK_NOT* // resolving conflict with the TOK_NOT
 									( TOK_OP_NEXT
 									| TOK_OP_PREV
@@ -1494,302 +1519,226 @@ cdls_ltl_unary_expr			returns[InternalSpec ret] // has one subformulas, excludin
 									// path quantifiers
 									| TOK_AA
 									| TOK_EE
-									// RTCDL*
-/*									| TOK_LT agent_list TOK_GT
-									| TOK_LB agent_list TOK_RB
-*/									)) => cdls_ltl_pure_unary_expr /* all unary LTL operators */
-								{ if(!er()) $ret = $cdls_ltl_pure_unary_expr.ret; }
-								-> ^(PURE_LTL_T cdls_ltl_pure_unary_expr)
-//								| cdls_ctl_expr
-//								{ if(!er()) $ret = $cdls_ctl_expr.ret; }
-								| cdls_relational_expr
-								{ if(!er()) $ret = $cdls_relational_expr.ret; }
-								;
 
-cdls_ltl_pure_unary_expr	returns[InternalSpec ret]
-@init {boolean append_end = false; String exp_str = ""; }
-@after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
-								: op=TOK_OP_NEXT^ f=cdls_ltl_unary_expr
-								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_next(input, $start, exp_str, $f.ret); }
-								| op=TOK_OP_PREV^ f=cdls_ltl_unary_expr
-								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_prev(input, $start, exp_str, $f.ret); }
-								| op=TOK_OP_NOTPREVNOT^ f=cdls_ltl_unary_expr
-								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_notprevnot(input, $start, exp_str, $f.ret); }
-								| op=TOK_OP_GLOBALLY^ f=cdls_ltl_unary_expr
-								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_globally(input, $start, exp_str, $f.ret); }
-								| op=TOK_OP_HISTORICALLY^ f=cdls_ltl_unary_expr
-								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_historically(input, $start, exp_str, $f.ret); }
-								| op=TOK_OP_FINALLY^ f=cdls_ltl_unary_expr
-								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_finally(input, $start, exp_str, $f.ret); }
-								| op=TOK_OP_ONCE^ f=cdls_ltl_unary_expr
-								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_once(input, $start, exp_str, $f.ret); }
-
-								// bounded
-								| op=TOK_OP_BFINALLY^ r=subrange f=cdls_ltl_unary_expr
-								{ if (!er()) exp_str = $op.text + " " + $r.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_bfinally(input, $start, exp_str, $r.ret, $f.ret); }
-								| op=TOK_OP_BGLOBALLY^ r=subrange f=cdls_ltl_unary_expr
-								{ if (!er()) exp_str = $op.text + " " + $r.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_bglobally(input, $start, exp_str, $r.ret, $f.ret); }
-
-								// path quantifiers
-								| op=TOK_AA^ f=cdls_ltl_unary_expr
-								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_allpath(input, $start, exp_str, $f.ret); }
-								| op=TOK_EE^ f=cdls_ltl_unary_expr
-								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_somepath(input, $start, exp_str, $f.ret); }
-
-								// RTCDL* operators
-/*								// < agent_list > f
-								| lt=TOK_LT al=agent_list gt=TOK_GT f=cdls_ltl_unary_expr
-								{ if (!er()) exp_str = $lt.text + $al.text + $gt.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_cdls_canEnforce(input, $start, exp_str, $al.ret, $f.ret); }
-
-								// [ agent_list ] f
-								| lb=TOK_LB al=agent_list rb=TOK_RB f=cdls_ltl_unary_expr
-								{ if (!er()) exp_str = $lb.text + $al.text + $rb.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_cdls_cannotAvoid(input, $start, exp_str, $al.ret, $f.ret); }
-*/
-								/* NOT is required here to allow such expr as "! X a" */
-								| op=TOK_NOT^ fp=cdls_ltl_pure_unary_expr
-								{ if (!er()) exp_str = $op.text + " " + $fp.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_not(input, $start, exp_str, $fp.ret); }
-								;
-
-/*
-// all CTL binary operators
-cdls_ctl_expr				returns[InternalSpec ret] // state formulas
-								: (TOK_NOT* // resolving conflict with the TOK_NOT
-									(
-									// temporal
-									TOK_EX
-									| TOK_AX
-									| TOK_EF
-									| TOK_AF
-									| TOK_EG
-									| TOK_AG
-									| TOK_EBF
-									| TOK_ABF
-									| TOK_EBG
-									| TOK_ABG
-
-									// CTL*
-									| TOK_AA
-									| TOK_EE
-
-									// epistemic
-									| TOK_LP agent_name TOK_KNOW
-									| TOK_LP agent_name TOK_SKNOW
-
-									// RTCDL*
 									| TOK_LT agent_list TOK_GT
 									| TOK_LB agent_list TOK_RB
 
-									)) => cdls_pure_ctl_expr
-								{ if(!er()) $ret = $cdls_pure_ctl_expr.ret; }
-								-> ^(RTCTLS_PURE_CTL_T cdls_pure_ctl_expr)
-								| cdls_relational_expr
-								{ if(!er()) $ret = $cdls_relational_expr.ret; }
+									)) => ldl_ltl_pure_unary_expr /* all unary LTL operators */
+								{ if(!er()) $ret = $ldl_ltl_pure_unary_expr.ret; }
+								-> ^(PURE_LTL_T ldl_ltl_pure_unary_expr)
+//								| ldl_ctl_expr
+//								{ if(!er()) $ret = $ldl_ctl_expr.ret; }
+								| ldl_relational_expr
+								{ if(!er()) $ret = $ldl_relational_expr.ret; }
 								;
-cdls_pure_ctl_expr			returns[InternalSpec ret]
+
+ldl_ltl_pure_unary_expr	returns[InternalSpec ret]
 @init {boolean append_end = false; String exp_str = ""; }
 @after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
-								:
-								op=TOK_EX^ f=cdls_ctl_expr
-								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_EX(input, $start, exp_str, $f.ret); }
-								| op=TOK_AX^ f=cdls_ctl_expr
-								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_AX(input, $start, exp_str, $f.ret); }
-								| op=TOK_EF^ f=cdls_ctl_expr
-								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_EF(input, $start, exp_str, $f.ret); }
-								| op=TOK_AF^ f=cdls_ctl_expr
-								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_AF(input, $start, exp_str, $f.ret); }
-								| op=TOK_EG^ f=cdls_ctl_expr
-								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_EG(input, $start, exp_str, $f.ret); }
-								| op=TOK_AG^ f=cdls_ctl_expr
-								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_AG(input, $start, exp_str, $f.ret); }
-								| op=TOK_EBF^ fsr=subrange s=cdls_ctl_expr
-								{ if (!er()) exp_str = $op.text + " " + $fsr.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_EBF(input, $start, exp_str, $fsr.ret, $s.ret); }
-								| op=TOK_ABF^ fsr=subrange s=cdls_ctl_expr
-								{ if (!er()) exp_str = $op.text + " " + $fsr.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ABF(input, $start, exp_str, $fsr.ret, $s.ret); }
-								| op=TOK_EBG^ fsr=subrange s=cdls_ctl_expr
-								{ if (!er()) exp_str = $op.text + " " + $fsr.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_EBG(input, $start, exp_str, $fsr.ret, $s.ret); }
-								| op=TOK_ABG^ fsr=subrange s=cdls_ctl_expr
-								{ if (!er()) exp_str = $op.text + " " + $fsr.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ABG(input, $start, exp_str, $fsr.ret, $s.ret); }
+								: op=TOK_OP_NEXT^ f=ldl_ltl_unary_expr
+								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_next(input, $start, exp_str, $f.ret); }
+								| op=TOK_OP_PREV^ f=ldl_ltl_unary_expr
+								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_prev(input, $start, exp_str, $f.ret); }
+								| op=TOK_OP_NOTPREVNOT^ f=ldl_ltl_unary_expr
+								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_notprevnot(input, $start, exp_str, $f.ret); }
+								| op=TOK_OP_GLOBALLY^ f=ldl_ltl_unary_expr
+								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_globally(input, $start, exp_str, $f.ret); }
+								| op=TOK_OP_HISTORICALLY^ f=ldl_ltl_unary_expr
+								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_historically(input, $start, exp_str, $f.ret); }
+								| op=TOK_OP_FINALLY^ f=ldl_ltl_unary_expr
+								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_finally(input, $start, exp_str, $f.ret); }
+								| op=TOK_OP_ONCE^ f=ldl_ltl_unary_expr
+								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_once(input, $start, exp_str, $f.ret); }
 
-								// RTCDL* operators
+								// bounded
+								| op=TOK_OP_BFINALLY^ r=subrange f=ldl_ltl_unary_expr
+								{ if (!er()) exp_str = $op.text + " " + $r.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_bfinally(input, $start, exp_str, $r.ret, $f.ret); }
+								| op=TOK_OP_BGLOBALLY^ r=subrange f=ldl_ltl_unary_expr
+								{ if (!er()) exp_str = $op.text + " " + $r.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_bglobally(input, $start, exp_str, $r.ret, $f.ret); }
+
+								// path quantifiers
+								| op=TOK_AA^ f=ldl_ltl_unary_expr
+								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_allpath(input, $start, exp_str, $f.ret); }
+								| op=TOK_EE^ f=ldl_ltl_unary_expr
+								{ if (!er()) exp_str = $op.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_somepath(input, $start, exp_str, $f.ret); }
+
+								
 								// < agent_list > f
-								| lt=TOK_LT al=agent_list gt=TOK_GT f=cdls_ctl_expr
-								{ if (!er()) exp_str = $lt.text + $al.text + $gt.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_cdls_canEnforce(input, $start, exp_str, $al.ret, $f.ret); }
+								| lt=TOK_LT al=agent_list gt=TOK_GT f=ldl_ltl_unary_expr
+								{ if (!er()) exp_str = $lt.text + $al.text + $gt.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_canEnforce(input, $start, exp_str, $al.ret, $f.ret); }
 
 								// [ agent_list ] f
-								| lb=TOK_LB al=agent_list rb=TOK_RB f=cdls_ctl_expr
-								{ if (!er()) exp_str = $lb.text + $al.text + $rb.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_cdls_cannotAvoid(input, $start, exp_str, $al.ret, $f.ret); }
+								| lb=TOK_LB al=agent_list rb=TOK_RB f=ldl_ltl_unary_expr
+								{ if (!er()) exp_str = $lb.text + $al.text + $rb.text + " " + $f.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ldl_cannotAvoid(input, $start, exp_str, $al.ret, $f.ret); }
 
-								// NOT is required here to allow such expr as "! EX a"
-								| op=TOK_NOT^ fp=cdls_pure_ctl_expr
+								/* NOT is required here to allow such expr as "! X a" */
+								| op=TOK_NOT^ fp=ldl_ltl_pure_unary_expr
 								{ if (!er()) exp_str = $op.text + " " + $fp.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_not(input, $start, exp_str, $fp.ret); }
 								;
-*/
 
-cdls_relational_expr		returns[InternalSpec ret]
+ldl_relational_expr		returns[InternalSpec ret]
 @init {boolean append_end = false; String exp_str = ""; }
 @after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
-								: f=cdls_in_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
-								( op=TOK_EQUAL^ s=cdls_in_expr
+								: f=ldl_in_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
+								( op=TOK_EQUAL^ s=ldl_in_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_eq(input, $start, exp_str, $ret, $s.ret); }
-								| op=TOK_NOTEQUAL^ s=cdls_in_expr
+								| op=TOK_NOTEQUAL^ s=ldl_in_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_neq(input, $start, exp_str, $ret, $s.ret); }
-								| op=TOK_LT^ s=cdls_in_expr
+								| op=TOK_LT^ s=ldl_in_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_lt(input, $start, exp_str, $ret, $s.ret); }
-								| op=TOK_GT^ s=cdls_in_expr
+								| op=TOK_GT^ s=ldl_in_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_gt(input, $start, exp_str, $ret, $s.ret); }
-								| op=TOK_LE^ s=cdls_in_expr
+								| op=TOK_LE^ s=ldl_in_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_le(input, $start, exp_str, $ret, $s.ret); }
-								| op=TOK_GE^ s=cdls_in_expr
+								| op=TOK_GE^ s=ldl_in_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ge(input, $start, exp_str, $ret, $s.ret); }
 								)*
 								;
-cdls_in_expr				returns[InternalSpec ret]
+ldl_in_expr				returns[InternalSpec ret]
 @init {boolean append_end = false; String exp_str = ""; }
 @after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
-								: f=cdls_union_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
-								( op=TOK_SETIN^ s=cdls_union_expr
+								: f=ldl_union_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
+								( op=TOK_SETIN^ s=ldl_union_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_setin(input, $start, exp_str, $ret, $s.ret); }
 								)*
 								;
-cdls_union_expr				returns[InternalSpec ret]
+ldl_union_expr				returns[InternalSpec ret]
 @init {boolean append_end = false; String exp_str = ""; }
 @after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
-								: f=cdls_set_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
-								( op=TOK_UNION^ s=cdls_set_expr
+								: f=ldl_set_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
+								( op=TOK_UNION^ s=ldl_set_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_union(input, $start, exp_str, $ret, $s.ret); }
 								)*
 								;
 
-cdls_set_expr				returns[InternalSpec ret]
+ldl_set_expr				returns[InternalSpec ret]
 @init {boolean append_end = false; }
 @after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
-								: cdls_shift_expr
-								{ if(!er()) $ret = $cdls_shift_expr.ret; }
+								: ldl_shift_expr
+								{ if(!er()) $ret = $ldl_shift_expr.ret; }
 								| subrange
 								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_range(input, $start, $subrange.text); }
-								| TOK_LCB cdls_set_list_expr TOK_RCB
-								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_set(input, $start, $TOK_LCB.text + " " + $cdls_set_list_expr.text + " " + $TOK_RCB.text); }
-								-> ^(SET_LIST_EXP_T cdls_set_list_expr)
+								| TOK_LCB ldl_set_list_expr TOK_RCB
+								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_set(input, $start, $TOK_LCB.text + " " + $ldl_set_list_expr.text + " " + $TOK_RCB.text); }
+								-> ^(SET_LIST_EXP_T ldl_set_list_expr)
 								;
-cdls_set_list_expr			// do nothing...
+ldl_set_list_expr			// do nothing...
 								: simple_root_expr (TOK_COMMA! simple_root_expr)*
 								; /* these are simple expression, not ctl expressions */
-cdls_shift_expr				returns[InternalSpec ret]
+ldl_shift_expr				returns[InternalSpec ret]
 @init {boolean append_end = false; String exp_str = ""; }
 @after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
-								: f=cdls_remainder_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
-								( op=TOK_LSHIFT^ s=cdls_remainder_expr
+								: f=ldl_remainder_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
+								( op=TOK_LSHIFT^ s=ldl_remainder_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_lshift(input, $start, exp_str, $ret, $s.ret); }
-								| op=TOK_RSHIFT^ s=cdls_remainder_expr
+								| op=TOK_RSHIFT^ s=ldl_remainder_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_rshift(input, $start, exp_str, $ret, $s.ret); }
 								)*
 								;
-cdls_remainder_expr			returns[InternalSpec ret]
+ldl_remainder_expr			returns[InternalSpec ret]
 @init {boolean append_end = false; String exp_str = ""; }
 @after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
-								: f=cdls_additive_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
-								( op=TOK_MOD^ s=cdls_additive_expr
+								: f=ldl_additive_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
+								( op=TOK_MOD^ s=ldl_additive_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_mod(input, $start, exp_str, $ret, $s.ret); }
 								)*
 								;
 
 
 
-cdls_additive_expr			returns[InternalSpec ret]
+ldl_additive_expr			returns[InternalSpec ret]
 @init {boolean append_end = false; String exp_str = ""; }
 @after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
-								: f=cdls_multiplicative_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
-								( op=TOK_PLUS^ s=cdls_multiplicative_expr
+								: f=ldl_multiplicative_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
+								( op=TOK_PLUS^ s=ldl_multiplicative_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_plus(input, $start, exp_str, $ret, $s.ret); }
-								| op=TOK_MINUS^ s=cdls_multiplicative_expr
+								| op=TOK_MINUS^ s=ldl_multiplicative_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_minus(input, $start, exp_str, $ret, $s.ret); }
 								)*
 								;
-cdls_multiplicative_expr	returns[InternalSpec ret]
+ldl_multiplicative_expr	returns[InternalSpec ret]
 @init {boolean append_end = false; String exp_str = ""; }
 @after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
-								: f=cdls_concatination_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
-								( op=TOK_TIMES^ s=cdls_concatination_expr
+								: f=ldl_concatination_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
+								( op=TOK_TIMES^ s=ldl_concatination_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_times(input, $start, exp_str, $ret, $s.ret); }
-								| op=TOK_DIVIDE^ s=cdls_concatination_expr
+								| op=TOK_DIVIDE^ s=ldl_concatination_expr
 								{ if (!er()) exp_str += " " + $op.text + " " + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_divide(input, $start, exp_str, $ret, $s.ret); }
 								)*
 								;
-cdls_concatination_expr		returns[InternalSpec ret]
+ldl_concatination_expr		returns[InternalSpec ret]
 @init {boolean append_end = false; String exp_str = ""; }
 @after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
-								: f=cdls_primary_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
-								( op=TOK_CONCATENATION^ s=cdls_primary_expr
+								: f=ldl_primary_expr { if (!er()) exp_str += $f.text; if(!er()) $ret = $f.ret; }
+								( op=TOK_CONCATENATION^ s=ldl_primary_expr
 								{ if (!er()) exp_str += $op.text + $s.text; if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_concatenation(input, $start, exp_str, $ret, $s.ret); }
 								)*
 								;
 
-cdls_primary_expr			returns[InternalSpec ret]
+ldl_primary_expr			returns[InternalSpec ret]
 @init {boolean append_end = false; }
 @after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
-								: cdls_primary_expr_helper1
-								{ if(!er()) $ret = $cdls_primary_expr_helper1.ret; }
-								| op=TOK_MINUS v=cdls_primary_expr
+								: ldl_primary_expr_helper1
+								{ if(!er()) $ret = $ldl_primary_expr_helper1.ret; }
+								| op=TOK_MINUS v=ldl_primary_expr
 								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_unary_minus(input, $start, $op.text + " " + $v.text, $v.ret); }
 								-> ^(TOK_UNARY_MINUS_T $v)
-								| op=TOK_NOT v=cdls_primary_expr
+								| op=TOK_NOT v=ldl_primary_expr
 								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_not(input, $start, $op.text + " " + $v.text, $v.ret); }
 								-> ^(TOK_NOT $v)
 								;
 
-cdls_primary_expr_helper1	returns[InternalSpec ret]
+ldl_primary_expr_helper1	returns[InternalSpec ret]
 @init {boolean append_end = false; String exp_str = ""; }
 @after { if(append_end) $ret.setEndToken($stop); if(!er()) $ret.evalBDDChildrenExp(input); }
 								: constant primary_expr_select
-								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $cdls_primary_expr_helper1.text); }
+								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $ldl_primary_expr_helper1.text); }
 								//{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $constant.text + " " + $primary_expr_select.text); }
 								-> ^(VALUE_T constant NOP primary_expr_select)
 								| primary_expr_helper1_pointer1
-								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $cdls_primary_expr_helper1.text); }
+								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $ldl_primary_expr_helper1.text); }
 								//{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $primary_expr_helper1_pointer1.text); }
 //								| primary_expr_helper1_pointer2
-//								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $cdls_primary_expr_helper1.text); }
+//								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $ldl_primary_expr_helper1.text); }
 //								//{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $primary_expr_helper1_pointer2.text); }
 
 								/* simple paren are the only case where we should start over
 								from the "real" begining of the parsed expression... */
-								| TOK_LP cdls_root_expr TOK_RP primary_expr_select
-								{ if(!er()) $ret = $cdls_root_expr.ret; } // primary_expr_select should be null...
-								-> ^(BLOCK_T cdls_root_expr NOP primary_expr_select)
+								| TOK_LP ldl_root_expr TOK_RP primary_expr_select
+								{ if(!er()) $ret = $ldl_root_expr.ret; } // primary_expr_select should be null...
+								-> ^(BLOCK_T ldl_root_expr NOP primary_expr_select)
 								/* ------------------------------------------------------- */
 
 								// cast has no meaning in a CTL exp. (using the common simple)
 								| TOK_BOOL TOK_LP simple_root_expr TOK_RP primary_expr_select
-								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $cdls_primary_expr_helper1.text); }
+								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $ldl_primary_expr_helper1.text); }
 								//{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $TOK_BOOL.text + $TOK_LP.text + $simple_root_expr.text + $TOK_RP.text + $primary_expr_select.text); }
 								-> ^(TOK_BOOL simple_root_expr NOP primary_expr_select)
 								| TOK_WORD1 TOK_LP simple_root_expr TOK_RP primary_expr_select
-								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $cdls_primary_expr_helper1.text); }
+								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $ldl_primary_expr_helper1.text); }
 								//{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $TOK_WORD1.text + $TOK_LP.text + $simple_root_expr.text + $TOK_RP.text + $primary_expr_select.text); }
 								-> ^(TOK_WORD1 simple_root_expr NOP primary_expr_select)
 								// next cannot enforced on a CTL formula. 'AX' should be used.
 								| TOK_NEXT TOK_LP simple_root_expr TOK_RP primary_expr_select
-								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $cdls_primary_expr_helper1.text); }
+								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $ldl_primary_expr_helper1.text); }
 								//{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $TOK_NEXT.text + $TOK_LP.text + $simple_root_expr.text + $TOK_RP.text + $primary_expr_select.text); }
 								-> ^(TOK_NEXT simple_root_expr NOP primary_expr_select)
 								// case has no meaning in a CTL exp. (using the common simple)
 								| TOK_CASE case_element_list_expr TOK_ESAC primary_expr_select
-								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $cdls_primary_expr_helper1.text); }
+								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $ldl_primary_expr_helper1.text); }
 								//{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $TOK_CASE.text + " " + $case_element_list_expr.text + " " + $TOK_ESAC.text + " " + $primary_expr_select.text); }
 								-> ^(CASE_LIST_EXPR_T case_element_list_expr NOP primary_expr_select)
 								// word op has no meaning in a CTL exp. (using the common simple)
 								| TOK_WAREAD TOK_LP f=simple_root_expr TOK_COMMA s=simple_root_expr TOK_RP primary_expr_select
-								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $cdls_primary_expr_helper1.text); }
+								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $ldl_primary_expr_helper1.text); }
 								//{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $TOK_WAREAD.text + $TOK_LP.text + $f.text + $TOK_COMMA.text + $s.text + $TOK_RP.text + $primary_expr_select.text); }
 								-> ^(TOK_WAREAD $f $s NOP primary_expr_select)
 								// word op has no meaning in a CTL exp. (using the common simple)
 								| TOK_WAWRITE TOK_LP f=simple_root_expr tc1=TOK_COMMA m=simple_root_expr tc2=TOK_COMMA s=simple_root_expr TOK_RP primary_expr_select
-								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $cdls_primary_expr_helper1.text); }
+								{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $ldl_primary_expr_helper1.text); }
 								//{ if(!er()) append_end = true; if(!er()) $ret = InitSpec.mk_ref(input, $start, $TOK_WAWRITE.text + $TOK_LP.text + $f.text + $tc1.text + $m.text + $tc2.text + $s.text + $TOK_RP.text + $primary_expr_select.text); }
 								-> ^(TOK_WAWRITE $f $m $s NOP primary_expr_select)
 								;
-
-
 
 
 
@@ -1865,7 +1814,7 @@ TOK_CTL_STAR_SPEC			: 'CTL*SPEC';
 TOK_LTL_SPEC				: 'LTLSPEC';
 TOK_INVAR_SPEC				: 'INVARSPEC';
 TOK_RTCTL_STAR_SPEC			: 'RTCTL*SPEC';
-TOK_CDLs_SPEC				: 'RTCDL*SPEC';
+TOK_LDL_SPEC				: 'RTCDL*SPEC';
 
 TOK_EX						: 'EX';
 TOK_AX						: 'AX';
@@ -1966,8 +1915,8 @@ TOK_LDL_AND					: '&&';
 // TOK_LDL_CONC					: '~';
 TOK_LDL_REPEAT_LB 				: '[*';
 TOK_LDL_TEST					: '?';
-TOK_LDL_SERE_SAT					: ':-';
-TOK_LDL_SERE_IMP					: ':=';
+TOK_LDL_SAT					: '#';
+TOK_LDL_IMP					: '@';
 
 
 

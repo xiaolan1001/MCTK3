@@ -113,6 +113,10 @@ public interface Spec {
 
 	public abstract boolean isStateSpec();
 
+	public abstract boolean isLDLSpec(StringBuilder syntaxMsg) throws SpecException;
+	public abstract boolean isSereSpec(StringBuilder syntaxMsg) throws SpecException;
+	public abstract boolean isCDLstarSpec(StringBuilder syntaxMsg) throws SpecException;
+
 	/**
 	 * <p>
 	 * Does this specification has a temporal operator.
@@ -154,6 +158,8 @@ public interface Spec {
 	 * @return A string representation of this object.
 	 */
 	public abstract String toString();
+
+	public abstract String toStringBracketed(String lBracket, String rBracket);
 
 	// ///////////////////////////////////////////////////////
 	// facilities for minimizing the types of operators.
