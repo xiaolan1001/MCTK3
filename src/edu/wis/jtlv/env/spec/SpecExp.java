@@ -285,9 +285,10 @@ public class SpecExp implements Spec {
 			for (Spec s : this.getChildren())
 				if(!s.isStateSpec()) return false;
 			return true;
-		}else if (op.isLTLOp() ||
-				op.isRTLTLOp() ||
-				op.isLDLSereOp()) // temporal operators
+		}else if (
+				op.isLTLOp() || op.isRTLTLOp() ||
+				op.isLDLSereOp() || op.isLDLPathOp()
+			) // temporal operators
 			return false;
 		else { // other operators, including path quantifiers and epistemic modalities
 			return true;
@@ -359,47 +360,60 @@ public class SpecExp implements Spec {
 		Operator op = this.getOperator();
 		Spec[] ch = this.getChildren();
 		boolean b=false;
+		syntaxMsg.delete(0,syntaxMsg.length());
 
 		if(this.isPropSpec()) {
-			syntaxMsg.delete(0,syntaxMsg.length());
 			return true;
 		}else if(op==Operator.LDL_TEST) {
-			return ch[0].isLDLSpec(syntaxMsg);
+			return ch[0].isCDLstarSpec(syntaxMsg);
 		}else if(op==Operator.LDL_OR || op==Operator.LDL_AND || op==Operator.LDL_CONC) {
 			StringBuilder s0=new StringBuilder(""),s1=new StringBuilder("");
 			b = ch[0].isSereSpec(s0) && ch[1].isSereSpec(s1);
 			if(!b){
 				if(!s0.equals(""))
-					syntaxMsg.replace(0,syntaxMsg.length(), s0.toString());
+					syntaxMsg.append(s0.toString());
 				else
-					syntaxMsg.replace(0,syntaxMsg.length(), s1.toString());
+					syntaxMsg.append(s1.toString());
 				return false;
-			}else {
-				syntaxMsg.delete(0,syntaxMsg.length());
+			}else
 				return true;
-			}
 		}else if(op==Operator.LDL_REPEAT)
 			return ch[0].isSereSpec(syntaxMsg);
 		else if(op==Operator.LDL_BOUNDED_REPEAT)
 			return ch[0].isSereSpec(syntaxMsg);
 		else {
-			syntaxMsg.replace(0,syntaxMsg.length(), RTCDLs_ModelCheckAlg.simplifySpecString(this,false) + " is not SERE sub-formula.");
+			syntaxMsg.append(RTCDLs_ModelCheckAlg.simplifySpecString(this,false) + " is not SERE sub-formula.");
 			return false;
 		}
 	}
 
 	@Override
-	public boolean isCDLstarSpec(StringBuilder syntaxMsg) throws SpecException {
-		for (Spec s : this.getChildren())
-			if (!s.isCDLstarSpec(syntaxMsg))
-				return false;
+	public boolean isCDLstarSpec(StringBuilder syntaxMsg) throws SpecException { // a CDL* formula is a STATE formula
 		Operator op = this.getOperator();
-		return op.isPropOp()
-				| op.isLTLOp()
-				| op.isRTLTLOp()
-				| op.isCTLsPathOp()
-				| op.isATLsPathOp()
-				| op.isEpistemicOp();
+		Spec[] ch = this.getChildren();
+		boolean b=false;
+		syntaxMsg.delete(0,syntaxMsg.length());
+
+		if(this.isStateSpec()){ // state formula
+			return true;
+		}else if(op.isPropOp()){
+			b=ch[0].isCDLstarSpec(syntaxMsg);
+			if(!b)
+				return false;
+			else if(op.numOfOperands()>1)
+				return ch[1].isCDLstarSpec(syntaxMsg);
+			else
+				return true;
+		}else if(op.isLTLOp() || op.isRTLTLOp()) { // LTL
+			return true;
+		}else if(op==Operator.LDL_SERE_IMP || op==Operator.LDL_SERE_SAT){ // <r>f or [r]f
+			b=ch[0].isSereSpec(syntaxMsg);
+			if(!b) return false;
+			else return ch[1].isCDLstarSpec(syntaxMsg);
+		}else{
+			syntaxMsg.append(RTCDLs_ModelCheckAlg.simplifySpecString(this,false) + " is not CDL* sub-formula.");
+			return false;
+		}
 	}
 
 	/*

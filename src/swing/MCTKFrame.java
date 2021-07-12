@@ -770,7 +770,7 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 		}else if(logicStr.equals("RTCTL*") && !spec.isCTLStarSpec()) {
 			consoleOutput(0,"error", "The inputted specification \""+specStr+"\" is not RTCTL*\n");
 			return;
-		}else if(logicStr.equals("RTCDL*") && !spec.isLDLSpec(syntaxMsg)) {
+		}else if(logicStr.equals("RTCDL*") && !spec.isCDLstarSpec(syntaxMsg)) {
 			consoleOutput(0,"error", "The specification \""+specStr+"\" is not RTCDL*. The reason is that \"" + syntaxMsg + "\"\n");
 			return;
 		}

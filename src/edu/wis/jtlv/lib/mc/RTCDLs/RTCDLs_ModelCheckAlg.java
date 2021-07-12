@@ -1450,37 +1450,20 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         // the initial_condition seems redundant
         design.removeIniRestriction(chkBdd_idx);
         design.setAllIniRestrictions(old_ini_restrictions);
+
+        String res="";
         if (Init_unSat.isZero()) {
+            res = "*** Property is TRUE ***\n";
             design.decompose(tester.module);
-            String res="*** Property is TRUE ***\n";
-            consoleOutput(0,"emph", res);
-            consoleOutput(0,"weak", statistic.getUsedInfo(true,true,true,true));
+            consoleOutput(0, "emph", res);
+            consoleOutput(0, "weak", statistic.getUsedInfo(true, true, true, true));
             return new AlgResultString(true, res);
-        } else {
-            graph = new GraphExplainRTCDLs(simplifySpecString(aSpec, false), simplifySpecString(chkProp,false),this);
-            graph.addAttribute("ui.title", graph.getId());
-            // design with the composed tester...
-            // create the initial node
-            BDD initState = Init_unSat.satOne(getDesign().moduleUnprimeVars(), false);
-            Node n = graph.addNode(1, 0, initState);
-            n.setAttribute("ui.class", "initialState");
-
-//            graph.nodeAddSpec(n.getId(), chkProp);
-            boolean ok = witness(chkProp, n);
-
-            String returned_msg = "";
-            returned_msg = "*** Property is FALSE ***\n";
-            consoleOutput(0,"error", returned_msg);
-            consoleOutput(0,"weak", statistic.getUsedInfo(true,true,true,true));
-
-            new Thread(){@Override
-                public void run() {
-                    isOpeningCounterexampleWindow=true;
-                    new ViewerExplainRTCDLs(graph);
-                }
-            }.start();
-            //design.decompose(tester.module); // delay the decomposition of tester to reserve the tester during showing the counterexample
-            return new AlgResultString(false, returned_msg);
+        }else{
+            res = "*** Property is FALSE ***\n";
+            design.decompose(tester.module);
+            consoleOutput(0, "error", res);
+            consoleOutput(0, "weak", statistic.getUsedInfo(true, true, true, true));
+            return new AlgResultString(false, res);
         }
     }
 
