@@ -1,4 +1,4 @@
-// $ANTLR 3.0.1 /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g 2021-07-08 23:31:48
+// $ANTLR 3.0.1 /Users/lxy/Documents/Doc-LXY-iMac/RecentDoc/Development/JTLV/MCTK3/PARSERS/SPC.g 2021-07-13 21:47:01
 
 package edu.wis.jtlv.env.core.spec;
 
@@ -2886,7 +2886,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: TOK_NOT, primary_expr
+                    // elements: primary_expr, TOK_NOT
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3262,7 +3262,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: TOK_BOOL, primary_expr_select, simple_root_expr
+                    // elements: TOK_BOOL, simple_root_expr, primary_expr_select
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3382,7 +3382,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: simple_root_expr, primary_expr_select, TOK_NEXT
+                    // elements: primary_expr_select, simple_root_expr, TOK_NEXT
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3507,7 +3507,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: simple_root_expr, simple_root_expr, primary_expr_select, TOK_WAREAD
+                    // elements: TOK_WAREAD, simple_root_expr, simple_root_expr, primary_expr_select
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3586,7 +3586,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: simple_root_expr, primary_expr_select, TOK_WAWRITE, simple_root_expr, simple_root_expr
+                    // elements: primary_expr_select, TOK_WAWRITE, simple_root_expr, simple_root_expr, simple_root_expr
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -6672,7 +6672,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: TOK_NOT, v
+                    // elements: v, TOK_NOT
                     // token labels: 
                     // rule labels: v, retval
                     // token list labels: 
@@ -6985,7 +6985,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: constant, primary_expr_select
+                    // elements: primary_expr_select, constant
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -7049,7 +7049,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: ctl_know, primary_expr_select
+                    // elements: primary_expr_select, ctl_know
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -7097,7 +7097,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: primary_expr_select, ctl_sknow
+                    // elements: ctl_sknow, primary_expr_select
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -7153,7 +7153,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: ctl_root_expr, primary_expr_select
+                    // elements: primary_expr_select, ctl_root_expr
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -7273,7 +7273,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: TOK_WORD1, simple_root_expr, primary_expr_select
+                    // elements: simple_root_expr, primary_expr_select, TOK_WORD1
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -7333,7 +7333,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: TOK_NEXT, simple_root_expr, primary_expr_select
+                    // elements: simple_root_expr, TOK_NEXT, primary_expr_select
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -7389,7 +7389,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: case_element_list_expr, primary_expr_select
+                    // elements: primary_expr_select, case_element_list_expr
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -7458,7 +7458,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: TOK_WAREAD, s, primary_expr_select, f
+                    // elements: f, primary_expr_select, s, TOK_WAREAD
                     // token labels: 
                     // rule labels: s, f, retval
                     // token list labels: 
@@ -7539,7 +7539,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: primary_expr_select, TOK_WAWRITE, s, m, f
+                    // elements: primary_expr_select, TOK_WAWRITE, f, s, m
                     // token labels: 
                     // rule labels: s, f, m, retval
                     // token list labels: 
@@ -10419,7 +10419,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: TOK_NOT, v
+                    // elements: v, TOK_NOT
                     // token labels: 
                     // rule labels: v, retval
                     // token list labels: 
@@ -10661,7 +10661,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: constant, primary_expr_select
+                    // elements: primary_expr_select, constant
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -10793,7 +10793,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: TOK_BOOL, simple_root_expr, primary_expr_select
+                    // elements: simple_root_expr, TOK_BOOL, primary_expr_select
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -10853,7 +10853,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: primary_expr_select, TOK_WORD1, simple_root_expr
+                    // elements: simple_root_expr, TOK_WORD1, primary_expr_select
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -10913,7 +10913,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: TOK_NEXT, simple_root_expr, primary_expr_select
+                    // elements: TOK_NEXT, primary_expr_select, simple_root_expr
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -11038,7 +11038,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: TOK_WAREAD, f, s, primary_expr_select
+                    // elements: f, s, TOK_WAREAD, primary_expr_select
                     // token labels: 
                     // rule labels: s, f, retval
                     // token list labels: 
@@ -11119,7 +11119,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: m, s, TOK_WAWRITE, primary_expr_select, f
+                    // elements: TOK_WAWRITE, primary_expr_select, s, f, m
                     // token labels: 
                     // rule labels: s, f, m, retval
                     // token list labels: 
@@ -14476,7 +14476,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: primary_expr_select, constant
+                    // elements: constant, primary_expr_select
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -14548,7 +14548,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: rtctls_root_expr, primary_expr_select
+                    // elements: primary_expr_select, rtctls_root_expr
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -14608,7 +14608,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: primary_expr_select, TOK_BOOL, simple_root_expr
+                    // elements: TOK_BOOL, primary_expr_select, simple_root_expr
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -14728,7 +14728,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: TOK_NEXT, primary_expr_select, simple_root_expr
+                    // elements: simple_root_expr, TOK_NEXT, primary_expr_select
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -14784,7 +14784,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: primary_expr_select, case_element_list_expr
+                    // elements: case_element_list_expr, primary_expr_select
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -14853,7 +14853,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: primary_expr_select, TOK_WAREAD, s, f
+                    // elements: TOK_WAREAD, primary_expr_select, s, f
                     // token labels: 
                     // rule labels: s, f, retval
                     // token list labels: 
@@ -14934,7 +14934,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: f, TOK_WAWRITE, m, primary_expr_select, s
+                    // elements: m, primary_expr_select, f, s, TOK_WAWRITE
                     // token labels: 
                     // rule labels: s, f, m, retval
                     // token list labels: 
@@ -18283,7 +18283,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: constant, primary_expr_select
+                    // elements: primary_expr_select, constant
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -18355,7 +18355,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: primary_expr_select, cdls_root_expr
+                    // elements: cdls_root_expr, primary_expr_select
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -18475,7 +18475,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: primary_expr_select, TOK_WORD1, simple_root_expr
+                    // elements: simple_root_expr, TOK_WORD1, primary_expr_select
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -18591,7 +18591,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: primary_expr_select, case_element_list_expr
+                    // elements: case_element_list_expr, primary_expr_select
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -18660,7 +18660,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: s, TOK_WAREAD, primary_expr_select, f
+                    // elements: f, primary_expr_select, TOK_WAREAD, s
                     // token labels: 
                     // rule labels: s, f, retval
                     // token list labels: 
@@ -18741,7 +18741,7 @@ public class SPCParser extends Parser {
                     }
 
                     // AST REWRITE
-                    // elements: m, f, primary_expr_select, TOK_WAWRITE, s
+                    // elements: f, m, s, primary_expr_select, TOK_WAWRITE
                     // token labels: 
                     // rule labels: s, f, m, retval
                     // token list labels: 
@@ -18833,7 +18833,7 @@ public class SPCParser extends Parser {
             if ( backtracking==0 ) stream_primary_expr_select.add(primary_expr_select278.getTree());
 
             // AST REWRITE
-            // elements: primary_expr_select, TOK_ATOM
+            // elements: TOK_ATOM, primary_expr_select
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -21432,7 +21432,7 @@ public class SPCParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: TOK_NUMBER, TOK_PLUS
+                    // elements: TOK_PLUS, TOK_NUMBER
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -21473,7 +21473,7 @@ public class SPCParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: TOK_MINUS, TOK_NUMBER
+                    // elements: TOK_NUMBER, TOK_MINUS
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 

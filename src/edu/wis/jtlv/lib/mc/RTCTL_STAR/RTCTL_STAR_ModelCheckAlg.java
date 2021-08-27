@@ -273,6 +273,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             xBdd = x.getDomain().ithVar(1);
             BDD p_lc = Env.prime(lc);
             tester.module.conjunctTrans(xBdd.imp(p_lc));
+            consoleOutput(0, "emph", "Variable " + xBdd.toString() + " is created for " + spec.toString() + "\n");
             tester.cachePutSpec(spec,xBdd); return xBdd;
         }
         if (op == Operator.UNTIL) {
@@ -284,6 +285,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             //tester.addInitial(xBdd.imp(c1.or(c2)));
             tester.module.conjunctTrans(xBdd.imp(rc.or(lc.and(p_x))));
             tester.module.addJustice(xBdd.imp(rc));
+            consoleOutput(0, "emph", "Variable " + xBdd.toString() + " is created for " + spec.toString() + "\n");
             tester.cachePutSpec(spec,xBdd); return xBdd;
         }
         if (op == Operator.RELEASES) {
@@ -293,6 +295,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             xBdd = x.getDomain().ithVar(1);
             BDD p_x = Env.prime(xBdd);
             tester.module.conjunctTrans(xBdd.imp(rc.and(lc.or(p_x))));
+            consoleOutput(0, "emph", "Variable " + xBdd.toString() + " is created for " + spec.toString() + "\n");
             tester.cachePutSpec(spec,xBdd); return xBdd;
         }
         if (op == Operator.B_UNTIL) {
@@ -631,7 +634,13 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         Spec negChild0 = NNF(new SpecExp(Operator.NOT, child[0]));
         negC1 = sat(negChild0);
         // specBdd = feas /\ !(feas /\ !child[0]) = feas /\ (!feas \/ !!child[0]) = feas /\ !!child[0] = feas /\ !negC1
-        specBdd = design.feasible().and(negC1.not());
+
+        BDD feas = design.feasible();
+//        BDD feas_negC1 = feas.and(negC1);
+//        specBdd = feas.and(feas_negC1.not());
+
+
+        specBdd = feas.and(negC1.not());
 /*
         int oldTesterVariablesNumber = tester.module.getAll_input_variables().size();
         negC1 = sat(negChild0);
@@ -1190,6 +1199,9 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
 
         SMVModule design = (SMVModule) getDesign(); // now design does not contain the tester
         restoreOriginalModuleData();
+
+        // testing
+//        BDD feas = design.feasible();// feas = the feasible states of D
 
         tester = new RTCTLsTester();
         design.syncComposition(tester.module); // the tester will be built in the following function sat()

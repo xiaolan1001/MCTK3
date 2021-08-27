@@ -698,13 +698,16 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
 
         if(ch[0].isPropSpec()){
             // if ch[0] is prop. sub-formula (including SpecBDD), then add transition x -> (ch[0) & ch[1]')
-            x = tester.module.addVar("X" + (++field_id)); // boolean variable
-            xBdd = x.getDomain().ithVar(1);
             lc = sat(ch[0]); tester.cachePutSpec(ch[0],lc);
             rc = sat(ch[1]); tester.cachePutSpec(ch[1],rc);
             BDD p_rc = Env.prime(rc);
+
+            x = tester.module.addVar("X" + (++field_id)); // boolean variable
+            xBdd = x.getDomain().ithVar(1);
+
             tester.module.conjunctTrans(xBdd.imp(lc.and(p_rc)));
             tester.cachePutSpec(spec,xBdd);
+            consoleOutput(0,"emph","Output variable "+xBdd+" is created for "+simplifySpecString(spec,false)+"\n");
             return xBdd;
         }else{// ch[0] must be SpecExp
             SpecExp ch0se = (SpecExp) ch[0];
@@ -745,9 +748,10 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                 return b0;
             }else if(ch0op == Operator.LDL_REPEAT){ // spec = <ch[0]>ch[1]
                 // ch[0] = ch0ch[0][*]
+                rc = sat(ch[1]);
+
                 if(RTCDLs_ModelCheckAlg.isTestOnly(ch0ch[0])){
                     // ch0ch[0] is test-only
-                    rc = sat(ch[1]);
                     tester.cachePutSpec(spec,rc);
                     return rc;
                 }
@@ -755,11 +759,12 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
 
                 x = tester.module.addVar("X" + (++field_id)); // boolean variable
                 xBdd = x.getDomain().ithVar(1);
+
                 BDD b0=sat(new SpecExp(Operator.LDL_SERE_SAT,ch0ch[0],new SpecBDD(xBdd))); // b0=sat(<ch0ch[0]>x)
-                rc = sat(ch[1]);
                 tester.module.conjunctTrans(xBdd.imp(rc.or(b0)));
                 tester.module.addJustice(xBdd.imp(rc));
                 tester.cachePutSpec(spec,xBdd);
+                consoleOutput(0,"emph","Output variable "+xBdd+" is created for "+simplifySpecString(spec,false)+"\n");
                 return xBdd;
             }else{ //ch0op is LDL_BOUNDED_REPEAT or other operators){
                 throw new SpecException("Current version does not support the operator "+ch0op);
@@ -785,11 +790,13 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
 
         if(ch[0].isPropSpec()){
             // if ch[0] is prop. sub-formula (including SpecBDD), then add transition x -> (ch[0) -> ch[1]')
-            x = tester.module.addVar("X" + (++field_id)); // boolean variable
-            xBdd = x.getDomain().ithVar(1);
             lc = sat(ch[0]); tester.cachePutSpec(ch[0],lc);
             rc = sat(ch[1]); tester.cachePutSpec(ch[1],rc);
             BDD p_rc = Env.prime(rc);
+
+            x = tester.module.addVar("X" + (++field_id)); // boolean variable
+            xBdd = x.getDomain().ithVar(1);
+
             tester.module.conjunctTrans(xBdd.imp(lc.imp(p_rc)));
             tester.cachePutSpec(spec,xBdd);
             return xBdd;
@@ -835,9 +842,10 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                 return b0;
             }else if(ch0op == Operator.LDL_REPEAT){ // spec = [ch[0]]ch[1]
                 // ch[0] = ch0ch[0][*]
+                rc = sat(ch[1]);
+
                 if(RTCDLs_ModelCheckAlg.isTestOnly(ch0ch[0])){
                     // ch0ch[0] is test-only
-                    rc = sat(ch[1]);
                     tester.cachePutSpec(spec,rc);
                     return rc;
                 }
@@ -845,8 +853,8 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
 
                 x = tester.module.addVar("X" + (++field_id)); // boolean variable
                 xBdd = x.getDomain().ithVar(1);
+
                 BDD b0=sat(new SpecExp(Operator.LDL_SERE_IMP,ch0ch[0],new SpecBDD(xBdd))); // b0=sat([ch0ch[0]]x)
-                rc = sat(ch[1]);
                 tester.module.conjunctTrans(xBdd.imp(rc.and(b0)));
                 tester.cachePutSpec(spec,xBdd);
                 return xBdd;
