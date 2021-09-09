@@ -176,7 +176,7 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 	public void initializeAfterModuleLoaded(){
 		original_AllIniRestrictions = smvModule.getAllIniRestrictions();
 		original_AllTransRestrictions = smvModule.getAllTransRestrictions();
-		original_AllInstancesCount = smvModule.getAllInstances().length;
+		//original_AllInstancesCount = smvModule.getAllInstances().length;
 		original_AllJusticesCount = smvModule.allJustice().length;
 		original_AllCompassionsCount = smvModule.allPCompassion().length;
 		original_AllInstancesCount = smvModule.getAllInstancesVector().size();
