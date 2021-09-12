@@ -627,10 +627,18 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 
 	// console=0: output to the console of main window
 	// console=1: output to the console of counterexample window
+	// console=2: output to the console of tester window
 	public static void consoleOutput(int console, String type, String str)
 	{
 		JTextPane textPane;
-		textPane=(console==0)? MCTKFrame.outputTextPane : ViewerExplainRTCTLs.outputTextPane;
+		if(console==1)
+			textPane=ViewerExplainRTCTLs.outputTextPane;
+		else if(console==2)
+			textPane=ViewerExplainRTCTLs.testerTextPane;
+		else // console==0 or other number
+			textPane=MCTKFrame.outputTextPane;
+
+		//textPane=(console==0)? MCTKFrame.outputTextPane : ViewerExplainRTCTLs.outputTextPane;
 
 		SimpleAttributeSet attribureSet = new SimpleAttributeSet();
 		Color textColor=Color.BLACK;

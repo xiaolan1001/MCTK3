@@ -2,6 +2,7 @@ package edu.wis.jtlv.lib.mc.RTCTL_STAR;
 
 import edu.wis.jtlv.env.core.smv.SMVParseException;
 import edu.wis.jtlv.env.module.ModuleException;
+import edu.wis.jtlv.env.module.SMVModule;
 import edu.wis.jtlv.env.spec.SpecException;
 import edu.wis.jtlv.lib.mc.ModelCheckAlgException;
 import edu.wis.jtlv.old_lib.mc.ModelCheckException;
@@ -21,6 +22,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Map;
 
 import static edu.wis.jtlv.lib.mc.RTCTL_STAR.RTCTL_STAR_ModelCheckAlg.simplifySpecString;
 import static java.lang.Double.parseDouble;
@@ -37,8 +39,8 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
     JTextField viewPercentTextField, mouseXTextField, mouseYTextField;
     JLabel negSpecLabel;
 
-    JSplitPane splitPane;
-    public static JTextPane outputTextPane;
+    JSplitPane splitPane_graph_rightPane, splitePane_testers_output;
+    public static JTextPane testerTextPane, outputTextPane;
 
     public GraphExplainRTCTLs getGraph() {
         return graph;
@@ -50,7 +52,7 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
 
     private GraphExplainRTCTLs graph;
 
-    public ViewerExplainRTCTLs(GraphExplainRTCTLs G) {
+    public ViewerExplainRTCTLs(GraphExplainRTCTLs G) throws SpecException {
         System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
         graph = G;
         graph.addAttribute("ui.label", graph.getId());
@@ -111,8 +113,8 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
         mouseYTextField = new JTextField("0",4);
 */
 
-        negSpecLabel = new JLabel("The following is a witness of "+graph.negSpecStr);
-        negSpecLabel.setToolTipText(graph.negSpecStr);
+        negSpecLabel = new JLabel("The following is a witness of " + RTCTL_STAR_ModelCheckAlg.simplifySpecString(graph.negSpec,false));
+        negSpecLabel.setToolTipText(RTCTL_STAR_ModelCheckAlg.simplifySpecString(graph.negSpec,false));
 
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -127,6 +129,22 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
 */
         graphPanel = (ViewPanel) viewer.addDefaultView(false);
 
+        testerTextPane = new JTextPane();
+        JScrollPane testerScrollPane = new JScrollPane(testerTextPane);
+        testerScrollPane.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createCompoundBorder(
+                                BorderFactory.createTitledBorder("Tester Information"),
+                                BorderFactory.createEmptyBorder(0,0,0,0)),
+                        BorderFactory.createEmptyBorder(0,0,0,0)));
+        int i=1;
+        for (Map.Entry<String, SMVModule> entry : G.negSpecTester.atomTesterSet.entrySet()) {
+            MCTKFrame.consoleOutput(2, "emph", entry.getValue().getName());
+            MCTKFrame.consoleOutput(2, "weak", " => ");
+            MCTKFrame.consoleOutput(2, "emph", RTCTL_STAR_ModelCheckAlg.simplifySpecString(entry.getKey(),false) + "\n");
+            i++;
+        }
+
         outputTextPane = new JTextPane();
         JScrollPane outputScrollPane = new JScrollPane(outputTextPane);
         outputScrollPane.setBorder(
@@ -136,13 +154,18 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
                                 BorderFactory.createEmptyBorder(0,0,0,0)),
                         BorderFactory.createEmptyBorder(0,0,0,0)));
 
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, graphPanel, outputScrollPane);
-        splitPane.setDividerLocation(ceFrame.getWidth()-350);
-        splitPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+
+        splitePane_testers_output = new JSplitPane(JSplitPane.VERTICAL_SPLIT,testerScrollPane,outputScrollPane);
+        splitePane_testers_output.setDividerLocation(150);
+        splitePane_testers_output.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+
+        splitPane_graph_rightPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, graphPanel, splitePane_testers_output);
+        splitPane_graph_rightPane.setDividerLocation(ceFrame.getWidth()-350);
+        splitPane_graph_rightPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
 
         ceFrame.setLayout(new BorderLayout());
         ceFrame.add("North", controlPanel);
-        ceFrame.add("Center",splitPane);
+        ceFrame.add("Center", splitPane_graph_rightPane);
 
         //ceFrame.setContentPane(viewPanel);
         ceFrame.setVisible(true);

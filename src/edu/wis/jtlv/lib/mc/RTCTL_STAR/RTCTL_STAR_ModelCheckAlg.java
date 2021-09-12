@@ -431,7 +431,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             xBdd = x.getDomain().ithVar(1);
             BDD p_lc = Env.prime(lc);
             T.conjunctTrans(xBdd.imp(p_lc));
-            consoleOutput(0, "emph", "Variable " + x.toFullString() + " is created for " + spec.toString() + "\n");
+            consoleOutput(0, "emph", "Variable " + x.toFullString() + " is created for " + simplifySpecString(spec.toString(),false) + "\n");
 
             //xBdd.andWith(design.feasible());
 
@@ -450,7 +450,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             //tester.addInitial(xBdd.imp(c1.or(c2)));
             T.conjunctTrans(xBdd.imp(rc.or(lc.and(p_x))));
             T.addJustice(xBdd.imp(rc));
-            consoleOutput(0, "emph", "Variable " + x.toFullString() + " is created for " + spec.toString() + "\n");
+            consoleOutput(0, "emph", "Variable " + x.toFullString() + " is created for " + simplifySpecString(spec.toString(),false) + "\n");
 
             //xBdd.andWith(design.feasible());
 
@@ -467,7 +467,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             xBdd = x.getDomain().ithVar(1);
             BDD p_x = Env.prime(xBdd);
             T.conjunctTrans(xBdd.imp(rc.and(lc.or(p_x))));
-            consoleOutput(0, "emph", "Variable " + x.toFullString() + " is created for " + spec.toString() + "\n");
+            consoleOutput(0, "emph", "Variable " + x.toFullString() + " is created for " + simplifySpecString(spec.toString(),false) + "\n");
 
             //BDD feas=design.feasible2(); //this.ce_fair_g(Env.TRUE());
             //xBdd.andWith(feas);
@@ -761,7 +761,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             // (3) decompose the sub-testers of child[0] from the current model, such that design=D, the original model
             for (SMVModule tester : c1Info.testerSet) design.decompose(tester); // design=D
 
-            testerInfo.putSpecInfo(spec, specBdd, null,DTc1_feas);
+            testerInfo.putSpecInfo(spec, specBdd, null, DTc1_feas);
         }
 
         return specBdd;
@@ -770,6 +770,22 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
     // return the set of states satisfying spec
     // spec = AA child[0]
     public BDD satAA(Spec spec) throws ModelCheckException, SMVParseException, ModuleException, ModelCheckAlgException, SpecException {
+        SMVModule design = (SMVModule) getDesign();
+        SpecExp se = (SpecExp) spec;
+        Operator op = se.getOperator();
+        Spec[] child = se.getChildren();
+        if (op != Operator.AA) return null;
+
+        Spec EnegC1 = NNF(new SpecExp( Operator.EE,
+                                    new SpecExp(Operator.NOT, child[0])));
+        BDD bddEnegC1 = sat(EnegC1);
+        BDD specBdd = D_feasibleStates.and(bddEnegC1.not());
+        testerInfo.putSpecInfo(spec, specBdd, null, D_feasibleStates);
+        return specBdd;
+    }
+        // return the set of states satisfying spec
+    // spec = AA child[0]
+    public BDD satAA_old(Spec spec) throws ModelCheckException, SMVParseException, ModuleException, ModelCheckAlgException, SpecException {
         SMVModule design = (SMVModule) getDesign();
         SpecExp se = (SpecExp) spec;
         Operator op = se.getOperator();
@@ -801,7 +817,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             BDDVarSet bddNC1AuxVarSet = getBDDVarSet(nc1AuxVars);
             BDD DTnc1_feas_negC1 = DTnc1_feas.and(bddNegC1);
             BDD D_feas_negC1 = DTnc1_feas_negC1.exist(bddNC1AuxVarSet);
-            specBdd = DTnc1_feas.and(D_feas_negC1).exist(bddNC1AuxVarSet);
+            specBdd = DTnc1_feas.and(D_feas_negC1.not()).exist(bddNC1AuxVarSet);
 
 //        BDDVarSet allAuxVars = tester_getAuxVars_BDDVarSet(tester.module);
 //        BDD D_feas_negC1 = DTnc1_feas_negC1.exist(allAuxVars); // the set of D-feasible states that does not satisfy c1
@@ -811,7 +827,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             // (3) decompose the sub-testers of child[0] from the current model, such that design=D, the original model
             for (SMVModule tester : nc1Info.testerSet) design.decompose(tester); // design=D
 
-            testerInfo.putSpecInfo(spec,specBdd,null,DTnc1_feas);
+            testerInfo.putSpecInfo(spec, specBdd, null, DTnc1_feas);
         }
 
         return specBdd;
@@ -1373,7 +1389,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             consoleOutput(0,"weak", statistic.getUsedInfo(true,true,true,true));
             return new AlgResultString(true, res);
         } else {
-            graph = new GraphExplainRTCTLs(simplifySpecString(aProperty, false), simplifySpecString(negProp,false),this);
+            graph = new GraphExplainRTCTLs(aProperty, negProp, testerInfo, this);
             graph.addAttribute("ui.title", graph.getId());
             // design with the composed tester...
             // create the initial node
@@ -1392,8 +1408,12 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
             new Thread(){@Override
                 public void run() {
                     isOpeningCounterexampleWindow=true;
+                try {
                     new ViewerExplainRTCTLs(graph);
+                } catch (SpecException e) {
+                    e.printStackTrace();
                 }
+            }
             }.start();
             //design.decompose(tester.module); // delay the decomposition of tester to reserve the tester during showing the counterexample
             return new AlgResultString(false, returned_msg);
