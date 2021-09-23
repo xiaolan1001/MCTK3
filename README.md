@@ -1,7 +1,7 @@
 # MCTK 3.0.0
-MCTK3 is a BDD-based symbolic model checker developed in Java and built upon JTLV. MCTK3 is fully compatiable with the SMV input language used by NuSMV and nuXmv. It currently supports the verification and graphical counterexample generation of CDL*, which is a branching-time extension of LDL. RTCTL* (bounded) temporal operators are also supported by CDL*.
+MCTK3 is a BDD-based symbolic model checker developed in Java and built upon JTLV. MCTK3 is fully compatible with the SMV input language used by NuSMV and nuXmv. It currently supports the verification and graphical counterexample generation of CDL*, which is a branching-time extension of LDL. RTCTL* (bounded) temporal operators are also supported by CDL*.
 
-MCTK3 is now in alpha version 3.0.0. You are welcome to test it and report any message to me by email.
+MCTK3 is now in alpha version 3.0.0, which contains all functions of MCTK2 for CTL* model checking and counterexample generation. You are welcome to test it and report any message to me by email.
 
 Cheers,
 

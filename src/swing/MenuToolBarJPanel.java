@@ -209,7 +209,7 @@ public class MenuToolBarJPanel implements ActionListener{
 		pasteButton.setToolTipText("Paste");
 		frontButton.setToolTipText("Front Style");
 //		compileButton.setToolTipText("Compile This Model");
-		helpButton.setToolTipText("About MCTK2.0");
+		helpButton.setToolTipText("About MCTK 3.0.0");
 
 		//向工具栏添加按钮
 		toolBar.setBorderPainted(false);
@@ -340,11 +340,11 @@ public class MenuToolBarJPanel implements ActionListener{
 			}.start();//start this thread
 		} else if(e.getActionCommand().equals("About")||e.getSource()==helpButton){
 			Object[] options = {"OK"};
-			JOptionPane.showOptionDialog(mainFrame, "MCTK 3.0.0 : A Symbolic Model Checker for Real-Time Branching Time Dynamic Logic RTCDL*\n" +
+			JOptionPane.showOptionDialog(mainFrame, "MCTK 3.0.0 : A Symbolic Model Checker for Real-Time Branching Time Dynamic Logic RTCDL* and Real-Time Branching Time Logic RTCTL*\n" +
 							"Developers:\n" +
 							"    Xiangyu Luo, Huaqiao University, luoxy@hqu.edu.cn\n" +
 							"    Sen Liang, Huaqiao University, liangsen@hqu.edu.cn\n" +
-					"MCTK2 Website: https://gitlab.com/hovertiger/mctk2-tr",
+					"MCTK3 Website: https://gitlab.com/hovertiger/mctk3",
 					"About",JOptionPane.YES_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
 		}
 	}
