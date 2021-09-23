@@ -22,7 +22,7 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 
-import static edu.wis.jtlv.lib.mc.RTCTL_STAR.RTCTL_STAR_ModelCheckAlg.simplifySpecString;
+import static edu.wis.jtlv.lib.mc.RTCTLs.RTCTLs_ModelCheckAlg.simplifySpecString;
 import static java.lang.Double.parseDouble;
 import static swing.MCTKFrame.consoleOutput;
 

@@ -7,7 +7,7 @@ import edu.wis.jtlv.env.spec.Spec;
 import edu.wis.jtlv.lib.AlgRunnerThread;
 import edu.wis.jtlv.lib.mc.LTL.LTLModelCheckAlg;
 import edu.wis.jtlv.lib.mc.RTCTLK.RTCTLKModelCheckAlg;
-import edu.wis.jtlv.lib.mc.RTCTL_STAR.RTCTL_STAR_ModelCheckAlg;
+import edu.wis.jtlv.lib.mc.RTCTLs.RTCTLs_ModelCheckAlg;
 import swing.Statistic;
 
 import java.io.IOException;
@@ -62,7 +62,7 @@ public class TR_Experiment {
         // model checking a module
         for (int i = 0; i < all_specs.length; i++) {
             System.out.println(all_specs[i].hasLTLOperators());
-            runner = new AlgRunnerThread(new RTCTL_STAR_ModelCheckAlg(main,
+            runner = new AlgRunnerThread(new RTCTLs_ModelCheckAlg(main,
                     all_specs[i]));
             runner.runSequential();
             if (runner.getDoResult() != null)
@@ -89,7 +89,7 @@ public class TR_Experiment {
 //			System.out.println("========= DONE Loading Specs ============");
             for (int i = 0; i < all_specs.length; i++) {
                 if (all_specs[i].getLanguage() == InternalSpecLanguage.RTCTLs)
-                    runner = new AlgRunnerThread(new RTCTL_STAR_ModelCheckAlg(main, all_specs[i]));
+                    runner = new AlgRunnerThread(new RTCTLs_ModelCheckAlg(main, all_specs[i]));
                 else if (all_specs[i].getLanguage() == InternalSpecLanguage.CTL)
                     runner = new AlgRunnerThread(new RTCTLKModelCheckAlg(main, all_specs[i]));
                 else if (all_specs[i].getLanguage() == InternalSpecLanguage.LTL)
@@ -121,7 +121,7 @@ public class TR_Experiment {
         if (all_specs != null) {
             for (int i = 0; i < all_specs.length; i++) {
                 if (all_specs[i].getLanguage() == InternalSpecLanguage.RTCTLs)
-                    runner = new AlgRunnerThread(new RTCTL_STAR_ModelCheckAlg(main, all_specs[i]));
+                    runner = new AlgRunnerThread(new RTCTLs_ModelCheckAlg(main, all_specs[i]));
                 else if (all_specs[i].getLanguage() == InternalSpecLanguage.CTL)
                     runner = new AlgRunnerThread(new RTCTLKModelCheckAlg(main, all_specs[i]));
                 else if (all_specs[i].getLanguage() == InternalSpecLanguage.LTL)
@@ -167,7 +167,7 @@ public class TR_Experiment {
                 getStat.beginBddInfo();
                 getStat.beginTimeMemory();
                 if (all_specs[i].getLanguage() == InternalSpecLanguage.RTCTLs)
-                    runner = new AlgRunnerThread(new RTCTL_STAR_ModelCheckAlg(main, all_specs[i]));
+                    runner = new AlgRunnerThread(new RTCTLs_ModelCheckAlg(main, all_specs[i]));
 //				else if (all_specs[i].getLanguage() == InternalSpecLanguage.CTL)
 //					runner = new AlgRunnerThread(new RTCTLKModelCheckAlg(main, all_specs[i]));
                 else

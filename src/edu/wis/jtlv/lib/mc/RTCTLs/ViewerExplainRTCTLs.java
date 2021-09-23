@@ -1,4 +1,4 @@
-package edu.wis.jtlv.lib.mc.RTCTL_STAR;
+package edu.wis.jtlv.lib.mc.RTCTLs;
 
 import edu.wis.jtlv.env.core.smv.SMVParseException;
 import edu.wis.jtlv.env.module.ModuleException;
@@ -24,7 +24,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.Map;
 
-import static edu.wis.jtlv.lib.mc.RTCTL_STAR.RTCTL_STAR_ModelCheckAlg.simplifySpecString;
+import static edu.wis.jtlv.lib.mc.RTCTLs.RTCTLs_ModelCheckAlg.simplifySpecString;
 import static java.lang.Double.parseDouble;
 import static swing.MCTKFrame.consoleOutput;
 
@@ -113,8 +113,8 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
         mouseYTextField = new JTextField("0",4);
 */
 
-        negSpecLabel = new JLabel("The following is a witness of " + RTCTL_STAR_ModelCheckAlg.simplifySpecString(graph.negSpec,false));
-        negSpecLabel.setToolTipText(RTCTL_STAR_ModelCheckAlg.simplifySpecString(graph.negSpec,false));
+        negSpecLabel = new JLabel("The following is a witness of " + RTCTLs_ModelCheckAlg.simplifySpecString(graph.negSpec,false));
+        negSpecLabel.setToolTipText(RTCTLs_ModelCheckAlg.simplifySpecString(graph.negSpec,false));
 
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -141,7 +141,7 @@ public class ViewerExplainRTCTLs implements ViewerListener, ActionListener, Mous
         for (Map.Entry<String, SMVModule> entry : G.negSpecTester.atomTesterSet.entrySet()) {
             MCTKFrame.consoleOutput(2, "emph", entry.getValue().getName());
             MCTKFrame.consoleOutput(2, "weak", " => ");
-            MCTKFrame.consoleOutput(2, "emph", RTCTL_STAR_ModelCheckAlg.simplifySpecString(entry.getKey(),false) + "\n");
+            MCTKFrame.consoleOutput(2, "emph", RTCTLs_ModelCheckAlg.simplifySpecString(entry.getKey(),false) + "\n");
             i++;
         }
 

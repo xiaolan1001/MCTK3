@@ -5,7 +5,7 @@ import edu.wis.jtlv.env.module.ModuleException;
 import edu.wis.jtlv.env.spec.SpecException;
 import edu.wis.jtlv.lib.mc.ModelCheckAlgException;
 import edu.wis.jtlv.lib.mc.RTCTLK.GraphExplainRTCTLK;
-import edu.wis.jtlv.lib.mc.RTCTL_STAR.GraphExplainRTCTLs;
+import edu.wis.jtlv.lib.mc.RTCTLs.GraphExplainRTCTLs;
 import edu.wis.jtlv.old_lib.mc.ModelCheckException;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;

@@ -8,8 +8,8 @@ import edu.wis.jtlv.env.spec.Spec;
 import edu.wis.jtlv.env.spec.SpecException;
 import edu.wis.jtlv.lib.mc.ModelCheckAlgException;
 import edu.wis.jtlv.lib.mc.RTCDLs.RTCDLs_ModelCheckAlg;
-import edu.wis.jtlv.lib.mc.RTCTL_STAR.RTCTL_STAR_ModelCheckAlg;
-import edu.wis.jtlv.lib.mc.RTCTL_STAR.ViewerExplainRTCTLs;
+import edu.wis.jtlv.lib.mc.RTCTLs.RTCTLs_ModelCheckAlg;
+import edu.wis.jtlv.lib.mc.RTCTLs.ViewerExplainRTCTLs;
 import edu.wis.jtlv.old_lib.mc.ModelCheckException;
 import net.sf.javabdd.BDD;
 import org.jb2011.lnf.beautyeye.BeautyEyeLNFHelper;
@@ -35,7 +35,7 @@ class SpecsTableModel extends AbstractTableModel {
 	private String[] columnNames = {
 			"No",
 			"Logic",
-			"RTCDL* Spec",
+			"Spec",
 			"Annotation"};
 	private Object[][] data = {
 	};
@@ -470,8 +470,8 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 		c.setCellRenderer(r);
 
 		JComboBox logicComboBox = new JComboBox();
-		logicComboBox.addItem("RTCDL*");
 		logicComboBox.addItem("RTCTL*");
+		logicComboBox.addItem("RTCDL*");
 		c.setCellEditor(new DefaultCellEditor(logicComboBox));
 
 		setColumnSize(specsTable,colSpec,1000,30,3000);
@@ -673,7 +673,7 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 			//System.out.println("add spec clicked");
 			int row=specsTable.getRowCount();
 
-			insertSpec(row, "RTCDL*","", "");
+			insertSpec(row, "RTCTL*","", "");
 
 			specsTable.setEditingRow(row);
 			specsTable.setEditingColumn(2); // spec column
@@ -685,7 +685,7 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 			if(specsTable.getRowCount()<=0 || specsTable.getSelectedRow()==-1) row=0;
 			else row=specsTable.getSelectedRow();
 
-			insertSpec(row, "RTCDL*","", "");
+			insertSpec(row, "RTCTL*","", "");
 
 			specsTable.setEditingRow(row);
 			specsTable.setEditingColumn(2); // spec column
@@ -784,7 +784,7 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 		}
 
 		if(logicStr.equals("RTCTL*")) {
-			RTCTL_STAR_ModelCheckAlg alg = new RTCTL_STAR_ModelCheckAlg(this, smvModule);
+			RTCTLs_ModelCheckAlg alg = new RTCTLs_ModelCheckAlg(this, smvModule);
 			alg.modelCheckingOneSpec(spec);
 		}else if(logicStr.equals("RTCDL*")) {
 			RTCDLs_ModelCheckAlg alg = new RTCDLs_ModelCheckAlg(this, smvModule);

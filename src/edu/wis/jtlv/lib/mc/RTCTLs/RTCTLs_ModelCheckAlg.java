@@ -1,4 +1,4 @@
-package edu.wis.jtlv.lib.mc.RTCTL_STAR;
+package edu.wis.jtlv.lib.mc.RTCTLs;
 
 import edu.wis.jtlv.env.Env;
 import edu.wis.jtlv.env.core.smv.SMVParseException;
@@ -245,7 +245,7 @@ class NodePath {
 }
 
 
-public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
+public class RTCTLs_ModelCheckAlg extends ModelCheckAlgI {
     MCTKFrame mainFrame;
     private Spec property;
 
@@ -297,7 +297,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
      * @param design   The design to check.
      * @param property The property to check.
      */
-    public RTCTL_STAR_ModelCheckAlg(Module design, Spec property) {
+    public RTCTLs_ModelCheckAlg(Module design, Spec property) {
         super(design);
         this.property = property;
         stateVarSet = design.moduleUnprimeVars();
@@ -312,7 +312,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
      *
      * @param design The design to check.
      */
-    public RTCTL_STAR_ModelCheckAlg(MCTKFrame mainFrame, Module design) {
+    public RTCTLs_ModelCheckAlg(MCTKFrame mainFrame, Module design) {
         super(design);
         this.mainFrame=mainFrame;
 //		this.tester = user_tester;
@@ -1369,7 +1369,7 @@ public class RTCTL_STAR_ModelCheckAlg extends ModelCheckAlgI {
         } else { // the property is a state formula
             negProp = NNF(new SpecExp(Operator.NOT, aProperty)); // newp = !property
         }
-        //consoleOutput(0,"normal","The negative propperty: " + simplifySpecString(chkProp,false)+"\n");
+        consoleOutput(0,"emph","The negative propperty: " + simplifySpecString(negProp,false)+"\n");
         //visibleVars = this.getRelevantVars(getDesign(), chkProp);
         // now chkProp is a state property
 

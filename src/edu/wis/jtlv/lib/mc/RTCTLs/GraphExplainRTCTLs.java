@@ -1,4 +1,4 @@
-package edu.wis.jtlv.lib.mc.RTCTL_STAR;
+package edu.wis.jtlv.lib.mc.RTCTLs;
 
 import edu.wis.jtlv.env.Env;
 import edu.wis.jtlv.env.spec.Spec;
@@ -77,18 +77,18 @@ public class GraphExplainRTCTLs extends MultiGraph {
     public Spec spec=null, negSpec=null;
     RTCTLsTester negSpecTester=null;
 
-    public RTCTL_STAR_ModelCheckAlg getChecker() {
+    public RTCTLs_ModelCheckAlg getChecker() {
         return checker;
     }
 
-    public void setChecker(RTCTL_STAR_ModelCheckAlg checker) {
+    public void setChecker(RTCTLs_ModelCheckAlg checker) {
         this.checker = checker;
     }
 
-    private RTCTL_STAR_ModelCheckAlg checker;
+    private RTCTLs_ModelCheckAlg checker;
 
-    public GraphExplainRTCTLs(Spec spec, Spec negSpec, RTCTLsTester negSpecTester, RTCTL_STAR_ModelCheckAlg checker) throws SpecException {
-        super("A counterexample of " + RTCTL_STAR_ModelCheckAlg.simplifySpecString(spec,false) );
+    public GraphExplainRTCTLs(Spec spec, Spec negSpec, RTCTLsTester negSpecTester, RTCTLs_ModelCheckAlg checker) throws SpecException {
+        super("A counterexample of " + RTCTLs_ModelCheckAlg.simplifySpecString(spec,false) );
         this.spec = spec;
         this.negSpec = negSpec;
         this.negSpecTester = negSpecTester;
@@ -193,11 +193,11 @@ public class GraphExplainRTCTLs extends MultiGraph {
         s.setAttribute("spec",spec);
 
         if(spec.isPropSpec() && spec.toBDD().isOne()) return true;  // do not explain TRUE
-        boolean needExplained = RTCTL_STAR_ModelCheckAlg.needExpE(spec) || RTCTL_STAR_ModelCheckAlg.needExpT(spec);
+        boolean needExplained = RTCTLs_ModelCheckAlg.needExpE(spec) || RTCTLs_ModelCheckAlg.needExpT(spec);
         s.setAttribute("needExplained", needExplained);
 
         s.setAttribute("explained", false);
-        s.setAttribute("ui.label","⊨"+RTCTL_STAR_ModelCheckAlg.simplifySpecString(spec,false));
+        s.setAttribute("ui.label","⊨"+ RTCTLs_ModelCheckAlg.simplifySpecString(spec,false));
         s.attachToNode(nodeId);
 
         n.setAttribute("spriteSpec"+specNum, s);
@@ -258,7 +258,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
             Sprite s=n.getAttribute("spriteSpec"+i);
             Spec spec=s.getAttribute("spec");
             String d=""; if(ret.equals("")) d=""; else d="\n";
-            ret+=d+RTCTL_STAR_ModelCheckAlg.simplifySpecString(spec,false);
+            ret+=d+ RTCTLs_ModelCheckAlg.simplifySpecString(spec,false);
         }
         return ret;
     }
@@ -342,7 +342,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
 
         if(spec.isPropSpec() && spec.toBDD().isOne()) return true;  // do not explain TRUE
         boolean needExplained = !onlyShow &&
-                (RTCTL_STAR_ModelCheckAlg.needExpE(spec) || RTCTL_STAR_ModelCheckAlg.needExpT(spec));
+                (RTCTLs_ModelCheckAlg.needExpE(spec) || RTCTLs_ModelCheckAlg.needExpT(spec));
         s.setAttribute("needExplained", needExplained);
 
         s.setAttribute("path",path);
@@ -351,7 +351,7 @@ public class GraphExplainRTCTLs extends MultiGraph {
         s.setAttribute("explained", false);
         s.setAttribute("ui.label",
                 "path"+(path.pathIndex+1)+((pos==0)?"":","+pos)
-                        +"⊨"+RTCTL_STAR_ModelCheckAlg.simplifySpecString(spec,false));
+                        +"⊨"+ RTCTLs_ModelCheckAlg.simplifySpecString(spec,false));
         s.attachToEdge(edgeId);
 
         e.setAttribute("spriteSpec"+specNum, s);
