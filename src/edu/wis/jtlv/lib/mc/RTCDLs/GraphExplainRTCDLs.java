@@ -74,7 +74,8 @@ class GraphEdgeSpecInfo{
 
 public class GraphExplainRTCDLs extends MultiGraph {
     private SpriteManager sman;
-    public String negSpecStr="";
+    public Spec spec=null, negSpec=null;
+    RTCDLsTester negSpecTester=null;
 
     public RTCDLs_ModelCheckAlg getChecker() {
         return checker;
@@ -86,11 +87,15 @@ public class GraphExplainRTCDLs extends MultiGraph {
 
     private RTCDLs_ModelCheckAlg checker;
 
-    public GraphExplainRTCDLs(String specStr, String negSpecStr, RTCDLs_ModelCheckAlg checker) {
-        super("A counterexample of " + specStr);
-        this.negSpecStr=negSpecStr;
+    public GraphExplainRTCDLs(Spec spec, Spec negSpec, RTCDLsTester negSpecTester, RTCDLs_ModelCheckAlg checker) throws SpecException {
+        super("A counterexample of " + RTCDLs_ModelCheckAlg.simplifySpecString(spec,false) );
+        this.spec = spec;
+        this.negSpec = negSpec;
+        this.negSpecTester = negSpecTester;
         this.checker = checker;
+
         sman = new SpriteManager(this);
+
     }
 
     public Node addNode(int pathNo, int stateNo, BDD stateBDD) {

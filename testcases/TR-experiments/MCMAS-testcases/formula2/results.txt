@@ -1,0 +1,151 @@
+Verifying properties...
+  Formula number 1: (AF (r && (AF a))), is FALSE in the model
+  The following is a counterexample for the formula: 
+   < 0 1 2 3 4 3 > 
+   < 0 5 6 7 8 9 8 > 
+   < 1 10 11 10 > 
+   < 2 12 13 12 > 
+   < 3 14 15 14 > 
+   < 4 16 4 > 
+  States description: 
+------------- State: 0 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 1
+  r = false
+  s = false
+----------------------------------------
+------------- State: 1 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 2
+  r = false
+  s = true
+----------------------------------------
+------------- State: 2 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 2
+  r = false
+  s = true
+----------------------------------------
+------------- State: 3 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 6
+  r = true
+  s = true
+----------------------------------------
+------------- State: 4 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 7
+  r = true
+  s = true
+----------------------------------------
+------------- State: 5 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 2
+  r = false
+  s = true
+----------------------------------------
+------------- State: 6 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 2
+  r = false
+  s = true
+----------------------------------------
+------------- State: 7 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 6
+  r = true
+  s = true
+----------------------------------------
+------------- State: 8 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 7
+  r = true
+  s = true
+----------------------------------------
+------------- State: 9 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 6
+  r = true
+  s = true
+----------------------------------------
+------------- State: 10 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 6
+  r = true
+  s = true
+----------------------------------------
+------------- State: 11 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 7
+  r = true
+  s = true
+----------------------------------------
+------------- State: 12 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 6
+  r = true
+  s = true
+----------------------------------------
+------------- State: 13 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 7
+  r = true
+  s = true
+----------------------------------------
+------------- State: 14 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 7
+  r = true
+  s = true
+----------------------------------------
+------------- State: 15 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 6
+  r = true
+  s = true
+----------------------------------------
+------------- State: 16 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 6
+  r = true
+  s = true
+----------------------------------------
+done, 1 formulae successfully read and checked
+execution time = 0.042
+number of reachable states = 16
+BDD memory in use = 9020176
+

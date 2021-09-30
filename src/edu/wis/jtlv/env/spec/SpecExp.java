@@ -2,7 +2,7 @@ package edu.wis.jtlv.env.spec;
 
 import edu.wis.jtlv.env.Env;
 import edu.wis.jtlv.env.core.spec.InternalSpecLanguage;
-import edu.wis.jtlv.lib.mc.RTCDLs.RTCDLs_ModelCheckAlg;
+import edu.wis.jtlv.lib.mc.RTCDLs_old.RTCDLs_ModelCheckAlg;
 import net.sf.javabdd.BDD;
 import net.sf.javabdd.BDDVarSet;
 

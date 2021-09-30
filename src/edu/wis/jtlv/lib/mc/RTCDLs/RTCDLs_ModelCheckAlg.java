@@ -19,27 +19,77 @@ import swing.Statistic;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Vector;
 
 import static swing.MCTKFrame.*;
 
 class CacheSpecTesterInfo {
-    Spec spec;
-    BDD specBdd;
-    Vector<String> AuxVarNames; // the set of aux variables created for the tester of spec
+    Spec spec=null; // a formula for creating its tester T_{spec}
+    BDD specBdd=null; // \chi(spec)
+    //LinkedHashSet<ModuleBDDField> auxVars; // X_{spec}: the auxiliary variables created for spec, not including the auxiliray variables for the maximal sub-formulas (Af or Ef) of spec
+    LinkedHashSet<SMVModule> testerSet; // the set of sub-testers of spec, not including the sub-testers for the maximal sub-formulas (Af or Ef) of spec
+    BDD feasibleStates=null;    // if spec=Ef, then feasibleStates is the feasible states of D||T_f
+                                // if spec=Af, then feasibleStates is the feasible states of D||T_!f
 
-    CacheSpecTesterInfo(Spec spec, BDD specBdd){
+    CacheSpecTesterInfo(    Spec spec,
+                            BDD specBdd,
+                            LinkedHashSet<SMVModule> specTesterSet,
+                            BDD feasibleStates  // only store for spec=Ef or Af
+    ){
         this.spec=spec;
         this.specBdd=specBdd;
-        this.AuxVarNames=new Vector<String>();
+
+        this.testerSet = new LinkedHashSet<>();
+        if(specTesterSet!=null) this.testerSet.addAll(specTesterSet);
+
+        if(this.spec!=null) {
+            SpecExp se = (SpecExp) this.spec;
+            Operator op = se.getOperator();
+            if (op==Operator.EE || op==Operator.AA)
+                this.feasibleStates = feasibleStates;
+            else
+                this.feasibleStates = null;
+        }
     }
+
+
+    BDD getBdd(){
+        if(spec instanceof SpecBDD)
+            return ((SpecBDD)spec).getVal();
+        else { // spec is SpecExp
+            return specBdd;
+        }
+    }
+
+    boolean testerIsEmpty(){
+        return testerSet.size() <= 0;
+    }
+
+    // return X_{specStr}: the set of auxiliary variables created for spec
+    LinkedHashSet<ModuleBDDField> getAuxVars() {
+        LinkedHashSet<ModuleBDDField> auxVars = new LinkedHashSet<>();
+        if(testerSet==null) return auxVars;
+
+        for(SMVModule subTester : testerSet)
+            auxVars.addAll(subTester.getAll_couples());
+        return auxVars;
+    }
+
+    BDDVarSet getAuxVars_BDDVarSet() {
+        BDDVarSet vs = Env.getEmptySet();
+        for (ModuleBDDField var : getAuxVars())
+            vs = vs.id().union(var.support());
+        return vs;
+    }
+
 }
 
 // the tester contains the initial conditions and transitions of ALL temporal operators in a spec
 // including these temporal operators restricted by path quantifier E or A
 class RTCDLsTester {
-    SMVModule module;
-    Vector<String> auxVarNames;
+    int atomTesterCount=0;
+    LinkedHashMap<String, SMVModule> atomTesterSet; // mapping a principal temporal sub-formula to its tester
     LinkedHashMap<String, CacheSpecTesterInfo> cacheSpecsInfo;
 
 //    LinkedHashMap<String, BDD> cachePrinTempSpecBDDs;
@@ -47,34 +97,99 @@ class RTCDLsTester {
         // bdd is the BDD of the spec's output formula
 
     RTCDLsTester(){
-        module=new SMVModule("Tester");
-        module.conjunctTrans(Env.TRUE());
-        auxVarNames=new Vector<String>();
+        atomTesterSet = new LinkedHashMap<>();
         cacheSpecsInfo=new LinkedHashMap<String, CacheSpecTesterInfo>();
     }
 
-    Vector<String> getCreatedAuxVarNames(int beforeVarsNum, int afterVarsNum){
-        return (Vector<String>) auxVarNames.subList(beforeVarsNum,afterVarsNum);
+    CacheSpecTesterInfo putSpecInfo(Spec spec, BDD specBdd, LinkedHashSet<SMVModule> specTesterSet, BDD feasibleStates){
+        if(spec==null) return null;
+        if(specBdd==null) return null;
+        return cacheSpecsInfo.put(spec.toString(),
+                new CacheSpecTesterInfo(spec,specBdd,specTesterSet,feasibleStates));
     }
 
-    CacheSpecTesterInfo cachePutSpec(Spec spec, BDD specBdd){
-        return cacheSpecsInfo.put(spec.toString(),new CacheSpecTesterInfo(spec,specBdd));
-    }
-
-    CacheSpecTesterInfo cacheGetSpec(String specStr){
+    CacheSpecTesterInfo getSpecInfo(String specStr){
         return cacheSpecsInfo.get(specStr);
     }
 
-    BDD cacheGetSpecBdd(Spec spec){
+
+    BDD getSpecBdd(Spec spec){
         BDD ret=null;
         if(spec instanceof SpecBDD)
             return ((SpecBDD)spec).getVal();
         else { // spec is SpecExp
-            CacheSpecTesterInfo specInfo = this.cacheGetSpec(spec.toString());
+            CacheSpecTesterInfo specInfo = this.getSpecInfo(spec.toString());
             if(specInfo!=null) return specInfo.specBdd;
             else return null;
         }
     }
+/*
+    boolean specTesterIsEmpty(String specStr) {
+        CacheSpecTesterInfo specInfo = getSpecInfo(specStr);
+        if(specInfo==null) return true;
+        if(specInfo.testerSet.size()<=0) return true;
+        else return false;
+    }
+
+ */
+
+
+    BDDVarSet varSet_to_BDDVarSet(LinkedHashSet<ModuleBDDField> varSet) {
+        BDDVarSet vs = Env.getEmptySet();
+        for (ModuleBDDField var : varSet)
+            vs = vs.id().union(var.support());
+        return vs;
+    }
+
+    // build a tester for principally temporal formula specStr
+    SMVModule buildEmptyAtomTester(String specStr) throws ModuleException {
+        if(atomTesterSet.containsKey(specStr)) return atomTesterSet.get(specStr);
+
+        String testerName="Tester"+(++atomTesterCount);
+        SMVModule m = new SMVModule(testerName);
+        m.conjunctTrans(Env.TRUE());
+
+        /*
+        if(init!=null) m.setInitial(init);
+        m.conjunctTrans(Env.TRUE());
+        if(trans!=null) m.conjunctTrans(trans);
+        if(justice!=null) m.addJustice(justice);
+*/
+        atomTesterSet.put(specStr, m);
+        return m;
+    }
+
+    // returns the set of testers for spec1 and spec2, plus aTester
+    LinkedHashSet<SMVModule> unionTesters(String specStr1, String specStr2, SMVModule aTester) {
+        LinkedHashSet<SMVModule> testers = new LinkedHashSet<SMVModule>();
+        CacheSpecTesterInfo spec1Info=null, spec2Info=null;
+
+        if(specStr1!=null) {
+            spec1Info = getSpecInfo(specStr1);
+            if (spec1Info != null) testers.addAll(spec1Info.testerSet);
+        }
+        if(specStr2!=null) {
+            spec2Info = getSpecInfo(specStr2);
+            if (spec2Info != null) testers.addAll(spec2Info.testerSet);
+        }
+        if(aTester!=null) testers.add(aTester);
+
+        return testers;
+    }
+/*
+    boolean cacheAddSpecAuxVar(Spec spec, ModuleBDDField auxVar) {
+        CacheSpecTesterInfo specInfo = cacheGetSpec(spec.toString());
+        if(specInfo==null) return false;
+        return specInfo.auxVars.add(auxVar);
+    }
+
+    boolean cacheDelSpecAuxVar(Spec spec, ModuleBDDField auxVar) {
+        CacheSpecTesterInfo specInfo = cacheGetSpec(spec.toString());
+        if(specInfo==null) return false;
+        return specInfo.auxVars.remove(auxVar);
+    }
+
+ */
 }
 
 class NodePath {
@@ -82,16 +197,19 @@ class NodePath {
     int loopIndex; // the first node's index of the period of the lasso node path; loopIndex==-1 denotes that the path is finite path
     int pathIndex;
 
+    BDD firstState=null; // the D||T-state of the first node in the path
+
     public NodePath(int pathIndex){
         nodes = new Vector<String>();
         loopIndex = -1;
         this.pathIndex=pathIndex;
     }
 
-    public NodePath(int pathIndex, Vector<String> nodeIdList, int loopIndex){
+    public NodePath(int pathIndex, Vector<String> nodeIdList, int loopIndex, BDD firstState){
         this.pathIndex=pathIndex;
         this.nodes = nodeIdList;
         this.loopIndex = loopIndex;
+        this.firstState = firstState;
     }
 
     // return the index of the position of the path
@@ -134,11 +252,12 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
 
     //private Spec chkProp; // the property actually checked
     private BDD chkBdd; // the BDD obtained by checking chkProp
-    private BDDVarSet visibleVars;
+    private BDDVarSet stateVarSet; // the set of state variables of the original model
 
+    private BDD D_feasibleStates = null; // the feasible states of the original model D to be checked
     private BDD feasibleStatesForWitnessE=null;
 
-    private RTCDLsTester tester=null;
+    private RTCDLsTester testerInfo =null;
 
     private int tester_id = 0;
     private int field_id = 0;
@@ -182,6 +301,7 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
     public RTCDLs_ModelCheckAlg(Module design, Spec property) {
         super(design);
         this.property = property;
+        stateVarSet = design.moduleUnprimeVars();
     }
 
     /**
@@ -197,13 +317,10 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         super(design);
         this.mainFrame=mainFrame;
 //		this.tester = user_tester;
+        stateVarSet = design.moduleUnprimeVars();
     }
 
-    public boolean testerIsEmpty(SMVModule tester) {
-        if (tester == null)
-            return true;
-        return tester.getAll_couples().size() == 0;
-    }
+
 
     // return the BDDs of the aux variables for the tester
     private BDDVarSet tester_getAuxVars_BDDVarSet(SMVModule tester) {
@@ -214,6 +331,31 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         return vs;
     }
 
+    BDDVarSet getBDDVarSet(LinkedHashSet<ModuleBDDField> moduleVarSet) {
+        BDDVarSet vs = Env.getEmptySet();
+        for (ModuleBDDField var : moduleVarSet)
+            vs = vs.id().union(var.support());
+        return vs;
+    }
+
+/*
+    LinkedHashSet<ModuleBDDField> getSpecAuxVars(Spec spec) {
+         CacheSpecTesterInfo specInfo = tester.getSpecInfo(spec.toString());
+         if(specInfo==null)
+             return new LinkedHashSet<ModuleBDDField>();
+         else
+             return specInfo.auxVars; // not null
+    }
+
+    boolean setSpecAuxVars(Spec spec, LinkedHashSet<ModuleBDDField> auxVars) {
+        CacheSpecTesterInfo specInfo = tester.getSpecInfo(spec.toString());
+        if(specInfo==null) return false;
+        if(auxVars==null) specInfo.auxVars=null;
+        else specInfo.auxVars = (LinkedHashSet<ModuleBDDField>) auxVars.clone();
+        return true;
+    }
+ */
+
     // Premises: auxVarNames is the vector of aux variables created for spec, it must be created before used
     // Results: this.tester is created for spec; this.testerAuxVarNames contains the set of created aux variables
     public BDD sat(Spec spec)
@@ -223,40 +365,52 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         }
         if (spec instanceof SpecRange || spec instanceof SpecAgentIdentifier) return null;
 
-        CacheSpecTesterInfo specInfo = tester.cacheGetSpec(spec.toString());
+        CacheSpecTesterInfo specInfo = testerInfo.getSpecInfo(spec.toString());
         if(specInfo!=null) return specInfo.specBdd;
         // now spec is not in the cache
 
         SMVModule design = (SMVModule) getDesign();
         SpecExp se = (SpecExp) spec;
         Operator op = se.getOperator();
-        Spec[] ch = se.getChildren();
+        Spec[] child = se.getChildren();
         BDD lc = null, rc = null;
         ModuleBDDField x = null;
         BDD xBdd; // output variable of the tester
 
         BDD specBdd=null;
+
+        LinkedHashSet<ModuleBDDField> auxVars=null;
+
+        CacheSpecTesterInfo c1Info=null, c2Info=null;
+        LinkedHashSet<SMVModule> testers=null; // the set of sub-testers for spec
+
         //-----------------------------------------------------------------------------------------------------------
         // logical connectives
         //-----------------------------------------------------------------------------------------------------------
         if (op == Operator.NOT) {
-            lc = sat(ch[0]);
+            lc = sat(child[0]);
             specBdd = lc.not();
-            tester.cachePutSpec(spec,specBdd);
+
+            testerInfo.putSpecInfo(spec,specBdd,
+                    testerInfo.unionTesters(child[0].toString(),null,null),null);
             return specBdd;
         }
         if (op == Operator.AND) {
-            lc = sat(ch[0]);
-            rc = sat(ch[1]);
+            lc = sat(child[0]);
+            rc = sat(child[1]);
             specBdd=lc.and(rc);
-            tester.cachePutSpec(spec,specBdd);
+
+            testerInfo.putSpecInfo(spec,specBdd,
+                    testerInfo.unionTesters(child[0].toString(),child[1].toString(),null),null);
             return specBdd;
         }
         if (op == Operator.OR) {
-            lc = sat(ch[0]);
-            rc = sat(ch[1]);
+            lc = sat(child[0]);
+            rc = sat(child[1]);
             specBdd=lc.or(rc);
-            tester.cachePutSpec(spec,specBdd);
+
+            testerInfo.putSpecInfo(spec,specBdd,
+                    testerInfo.unionTesters(child[0].toString(),child[1].toString(),null),null);
             return specBdd;
         }
         //-----------------------------------------------------------------------------------------------------------
@@ -271,34 +425,56 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         // the tester of the temporal formula spec will be composited into specTester
         //-----------------------------------------------------------------------------------------------------------
         if (op == Operator.NEXT) {
-            lc = sat(ch[0]);
-            x = tester.module.addVar("X" + (++field_id)); // boolean variable
+            lc = sat(child[0]);
+
+            SMVModule T = testerInfo.buildEmptyAtomTester(spec.toString());
+            x = T.addVar("X"); // boolean variable
             xBdd = x.getDomain().ithVar(1);
             BDD p_lc = Env.prime(lc);
-            tester.module.conjunctTrans(xBdd.imp(p_lc));
-            tester.cachePutSpec(spec,xBdd);
+            T.conjunctTrans(xBdd.imp(p_lc));
+            consoleOutput(0, "emph", "Variable " + x.toFullString() + " is created for " + simplifySpecString(spec.toString(),false) + "\n");
+
+            //xBdd.andWith(design.feasible());
+
+            testerInfo.putSpecInfo(spec,xBdd,
+                    testerInfo.unionTesters(child[0].toString(),null,T),null);
             return xBdd;
         }
         if (op == Operator.UNTIL) {
-            lc = sat(ch[0]);
-            rc = sat(ch[1]);
-            x = tester.module.addVar("X" + (++field_id)); // boolean variable
+            lc = sat(child[0]);
+            rc = sat(child[1]);
+
+            SMVModule T = testerInfo.buildEmptyAtomTester(spec.toString());
+            x = T.addVar("X"); // boolean variable
             xBdd = x.getDomain().ithVar(1);
             BDD p_x = Env.prime(xBdd);
             //tester.addInitial(xBdd.imp(c1.or(c2)));
-            tester.module.conjunctTrans(xBdd.imp(rc.or(lc.and(p_x))));
-            tester.module.addJustice(xBdd.imp(rc));
-            tester.cachePutSpec(spec,xBdd);
+            T.conjunctTrans(xBdd.imp(rc.or(lc.and(p_x))));
+            T.addJustice(xBdd.imp(rc));
+            consoleOutput(0, "emph", "Variable " + x.toFullString() + " is created for " + simplifySpecString(spec.toString(),false) + "\n");
+
+            //xBdd.andWith(design.feasible());
+
+            testerInfo.putSpecInfo(spec,xBdd,
+                    testerInfo.unionTesters(child[0].toString(),child[1].toString(),T),null);
             return xBdd;
         }
         if (op == Operator.RELEASES) {
-            lc = sat(ch[0]);
-            rc = sat(ch[1]);
-            x = tester.module.addVar("X" + (++field_id)); // boolean variable
+            lc = sat(child[0]);
+            rc = sat(child[1]);
+
+            SMVModule T = testerInfo.buildEmptyAtomTester(spec.toString());
+            x = T.addVar("X"); // boolean variable
             xBdd = x.getDomain().ithVar(1);
             BDD p_x = Env.prime(xBdd);
-            tester.module.conjunctTrans(xBdd.imp(rc.and(lc.or(p_x))));
-            tester.cachePutSpec(spec,xBdd);
+            T.conjunctTrans(xBdd.imp(rc.and(lc.or(p_x))));
+            consoleOutput(0, "emph", "Variable " + x.toFullString() + " is created for " + simplifySpecString(spec.toString(),false) + "\n");
+
+            //BDD feas=design.feasible2(); //this.ce_fair_g(Env.TRUE());
+            //xBdd.andWith(feas);
+
+            testerInfo.putSpecInfo(spec,xBdd,
+                    testerInfo.unionTesters(child[0].toString(),child[1].toString(),T),null);
             return xBdd;
         }
         if (op == Operator.B_UNTIL) {
@@ -312,30 +488,12 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         if(op == Operator.LDL_SERE_SAT){ // <ch[0]> ch[1]
             return satLDLsereSAT(spec);
         }
-        if(op == Operator.LDL_SERE_IMP){ // [ch[0]] ch[1]
-            return satLDLsereIMP(spec);
-        }
+//        if(op == Operator.LDL_SERE_IMP){ // [ch[0]] ch[1]
+//            return satLDLsereIMP(spec);
+//        }
 
         //otherwise
         throw new ModelCheckException("Cannot handle the specification " + spec + ".");
-    }
-
-    // Premise: sereSpec!=null and sereSpec is SERE formula
-    public static boolean isTestOnly(Spec sereSpec) throws SpecException {
-        if(sereSpec instanceof SpecAgentIdentifier || sereSpec instanceof SpecRange)
-            throw new SpecException("Syntax Error: "+RTCDLs_ModelCheckAlg.simplifySpecString(sereSpec,false)+" is not SERE sub-formula.");
-        if(sereSpec instanceof SpecBDD) return false;
-        // now sereSpec is SpecExp
-        SpecExp se = (SpecExp) sereSpec;
-        Operator op=se.getOperator();
-        Spec[] ch=se.getChildren();
-        if(op.isPropOp()){
-            for(Spec c : ch)
-                if(!isTestOnly(c)) return false;
-            return true;
-        }else if(op==Operator.LDL_TEST){
-            return true;
-        }else return false;
     }
 
     private SMVModule context_module = null; // the context module used for bexp()
@@ -395,7 +553,8 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         if(a==0 && b==0) {
             // spec=c1 BU 0..0 c2 which equals to c2
             c2 = sat(child[2]);
-            tester.cachePutSpec(spec,c2);
+            testerInfo.putSpecInfo(spec,c2,
+                    testerInfo.unionTesters(null,child[2].toString(),null),null);
             return c2;
         }
 
@@ -405,18 +564,20 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
 
         ModuleBDDField x = null, l = null, w = null;
         BDD xBdd; // output variable of the tester
-        x = tester.module.addVar("X" + (++field_id)); // boolean variable
+
+        SMVModule T = testerInfo.buildEmptyAtomTester(spec.toString());
+        x = T.addVar("X"); // boolean variable
         xBdd = x.getDomain().ithVar(1);
 
         if ((a == b) || (a == 0 && b > 0)) {
-            l = tester.module.addVar("L" + field_id, 0, b);
+            l = T.addVar("L", 0, b);
             w = null;
-            ValueDomStmt xe = new ValueDomStmt(tester.module, x); // the expression of variable x
+            ValueDomStmt xe = new ValueDomStmt(T, x); // the expression of variable x
             OpNext pxe = new OpNext(xe); // the expression of next(x)
-            ValueDomStmt le = new ValueDomStmt(tester.module, l); // the expression of variable l
+            ValueDomStmt le = new ValueDomStmt(T, l); // the expression of variable l
             OpNext ple = new OpNext(le); // the expression of next(l)
 
-            set_context_module(tester.module);
+            set_context_module(T);
             BDD lGT0 = bexp2bdd(bexp(l, ">", "0")); // l>0
             BDD NxE1 = bexp2bdd(bexp(pxe,"=","1")); // x'=1
             BDD NlElM1 = bexp2bdd(bexp(ple,"=",bexp(l,"-","1"))); // l'=l-1
@@ -434,27 +595,29 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                     new ValueConsStrStmt(tester, new String[]{"" + b}))).eval_stmt().toBDD(); //l=b
 */
             if (a == b) {
-                tester.module.conjunctTrans(xBdd.and(lGT0).imp(c1.and(NxE1).and(NlElM1))); // (x & l>0) -> (c1 & x' & l'=l-1)
-                tester.module.conjunctTrans(xBdd.and(lE0).imp(c2)); // (x & l=0) -> c2
+                T.conjunctTrans(xBdd.and(lGT0).imp(c1.and(NxE1).and(NlElM1))); // (x & l>0) -> (c1 & x' & l'=l-1)
+                T.conjunctTrans(xBdd.and(lE0).imp(c2)); // (x & l=0) -> c2
             } else { // a==0 && b>0
-                tester.module.conjunctTrans(xBdd.and(lGT0).imp(c2.or(c1.and(NxE1).and(NlElM1)))); // (x & l>0) -> (c2 | (c1 & x' & l'=l-1))
-                tester.module.conjunctTrans(xBdd.and(lE0).imp(c2)); // (x & l=0) -> c2
+                T.conjunctTrans(xBdd.and(lGT0).imp(c2.or(c1.and(NxE1).and(NlElM1)))); // (x & l>0) -> (c2 | (c1 & x' & l'=l-1))
+                T.conjunctTrans(xBdd.and(lE0).imp(c2)); // (x & l=0) -> c2
             }
 
             BDD specBdd=xBdd.and(lEb); // x & l=b;
-            tester.cachePutSpec(spec,specBdd);
+            testerInfo.putSpecInfo(spec,specBdd,
+                    testerInfo.unionTesters(child[0].toString(),child[2].toString(),T),null);
             return specBdd;
         } else { // 0<a<b
-            l = tester.module.addVar("L" + field_id, 0, a);
-            w = tester.module.addVar("W" + field_id, 0, b - a);
-            ValueDomStmt xe = new ValueDomStmt(tester.module, x); // the expression of variable x
+            l = T.addVar("L", 0, a);
+            w = T.addVar("W", 0, b - a);
+
+            ValueDomStmt xe = new ValueDomStmt(T, x); // the expression of variable x
             OpNext pxe = new OpNext(xe); // the expression of next(x)
-            ValueDomStmt le = new ValueDomStmt(tester.module, l); // the expression of variable l
+            ValueDomStmt le = new ValueDomStmt(T, l); // the expression of variable l
             OpNext ple = new OpNext(le); // the expression of next(l)
-            ValueDomStmt we = new ValueDomStmt(tester.module, w); // the expression of variable w
+            ValueDomStmt we = new ValueDomStmt(T, w); // the expression of variable w
             OpNext pwe = new OpNext(we); // the expression of next(w)
 
-            set_context_module(tester.module);
+            set_context_module(T);
             BDD lGT0 = bexp2bdd(bexp(l, ">", "0")); // l>0
             BDD NxE1 = bexp2bdd(bexp(pxe,"=","1")); // x'=1
             BDD NlElM1 = bexp2bdd(bexp(ple,"=",bexp(l,"-","1"))); // l'=l-1
@@ -466,37 +629,14 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
             BDD NwEwM1 = bexp2bdd(bexp(pwe,"=",bexp(w,"-","1"))); // w'=w-1
             BDD wE0 = bexp2bdd(bexp(w,"=","0")); //w=0
             BDD wEbMa = bexp2bdd(bexp(w, "=", ""+(b-a))); //w=b-a
-/*
-            BDD lGT0 = new StmtOperator(tester, new OpGT(new ValueDomStmt(tester, l),
-                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD(); //l>0
-            BDD NxE1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, x)), //x'=1
-                    new ValueConsStrStmt(tester, new String[]{"1"}))).eval_stmt().toBDD();
-            BDD NlElM1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, l)), //l'=l-1
-                    new OpMinus(new ValueDomStmt(tester, l), new ValueConsStrStmt(tester, new String[]{"1"})))).eval_stmt().toBDD();
-            BDD lE0 = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, l),
-                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD(); //l=0
-            BDD lEa = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, l),
-                    new ValueConsStrStmt(tester, new String[]{"" + a}))).eval_stmt().toBDD(); //l=a
-            BDD wGT0 = new StmtOperator(tester, new OpGT(new ValueDomStmt(tester, w),
-                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();//w>0
-            BDD NwEw = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, w)), //w'=w
-                    new ValueDomStmt(tester, w))).eval_stmt().toBDD();
-            BDD NlE0 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, l)), //l'=0
-                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();
-            BDD NwEwM1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, w)),//next(w)=w-1
-                    new OpMinus(new ValueDomStmt(tester, w), new ValueConsStrStmt(tester, new String[]{"1"})))).eval_stmt().toBDD();
-           BDD wE0 = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, w),
-                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();//w=0
-            BDD wEbMa = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, w),
-                    new ValueConsStrStmt(tester, new String[]{"" + (b - a)}))).eval_stmt().toBDD();//w=b-a
-*/
 
-            tester.module.conjunctTrans(xBdd.and(lGT0).and(wGT0).imp(c1.and(NxE1).and(NlElM1).and(NwEw))); // (x & l>0 & w>0) -> (c1 & x' & l'=l-1 & w'=w)
-            tester.module.conjunctTrans(xBdd.and(lE0).and(wGT0).imp(c2.or(c1.and(NxE1).and(NlE0).and(NwEwM1)))); // (x & l=0 & w>0) -> (c2 | (c1 & x' & l'=0 & w'=w-1))
-            tester.module.conjunctTrans(xBdd.and(lE0).and(wE0).imp(c2)); // (x & l=0 & w=0) -> c2
+            T.conjunctTrans(xBdd.and(lGT0).and(wGT0).imp(c1.and(NxE1).and(NlElM1).and(NwEw))); // (x & l>0 & w>0) -> (c1 & x' & l'=l-1 & w'=w)
+            T.conjunctTrans(xBdd.and(lE0).and(wGT0).imp(c2.or(c1.and(NxE1).and(NlE0).and(NwEwM1)))); // (x & l=0 & w>0) -> (c2 | (c1 & x' & l'=0 & w'=w-1))
+            T.conjunctTrans(xBdd.and(lE0).and(wE0).imp(c2)); // (x & l=0 & w=0) -> c2
 
             BDD specBdd = xBdd.and(lEa).and(wEbMa); // x & l=a & w=b-a;
-            tester.cachePutSpec(spec,specBdd);
+            testerInfo.putSpecInfo(spec,specBdd,
+                    testerInfo.unionTesters(child[0].toString(),child[2].toString(),T),null);
             return specBdd;
         }
     }
@@ -518,7 +658,8 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         if(a==0 && b==0) {
             // spec=c1 BR 0..0 c2 which equals to c2
             c2 = sat(child[2]);
-            tester.cachePutSpec(spec,c2);
+            testerInfo.putSpecInfo(spec,c2,
+                    testerInfo.unionTesters(null,child[2].toString(),null),null);
             return c2;
         }
 
@@ -528,56 +669,49 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
 
         ModuleBDDField x = null, l = null, w = null;
         BDD xBdd; // output variable of the tester
-        x = tester.module.addVar("X" + (++field_id)); // boolean variable
+
+        SMVModule T = testerInfo.buildEmptyAtomTester(spec.toString());
+        x = T.addVar("X"); // boolean variable
         xBdd = x.getDomain().ithVar(1);
+
         if ((a == b) || (a == 0 && b > 0)) {
-            l = tester.module.addVar("L" + field_id, 0, b);
+            l = T.addVar("L", 0, b);
             w = null;
-            ValueDomStmt xe = new ValueDomStmt(tester.module, x); // the expression of variable x
+            ValueDomStmt xe = new ValueDomStmt(T, x); // the expression of variable x
             OpNext pxe = new OpNext(xe); // the expression of next(x)
-            ValueDomStmt le = new ValueDomStmt(tester.module, l); // the expression of variable l
+            ValueDomStmt le = new ValueDomStmt(T, l); // the expression of variable l
             OpNext ple = new OpNext(le); // the expression of next(l)
 
-            set_context_module(tester.module);
+            set_context_module(T);
             BDD lGT0 = bexp2bdd(bexp(l, ">", "0")); // l>0
             BDD NxE1 = bexp2bdd(bexp(pxe,"=","1")); // x'=1
             BDD NlElM1 = bexp2bdd(bexp(ple,"=",bexp(l,"-","1"))); // l'=l-1
             BDD lE0 = bexp2bdd(bexp(l,"=","0")); //l=0
             BDD lEb = bexp2bdd(bexp(l,"=",""+b)); //l=b
-/*
-            BDD lGT0 = new StmtOperator(tester, new OpGT(new ValueDomStmt(tester, l),
-                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD(); //l>0
-            BDD NxE1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, x)), //next(x)
-                    new ValueConsStrStmt(tester, new String[]{"1"}))).eval_stmt().toBDD();
-            BDD NlElM1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, l)), //next(l)=l-1
-                    new OpMinus(new ValueDomStmt(tester, l), new ValueConsStrStmt(tester, new String[]{"1"})))).eval_stmt().toBDD();
-            BDD lE0 = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, l),
-                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD(); //l=0
-            BDD lEb = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, l),
-                    new ValueConsStrStmt(tester, new String[]{"" + b}))).eval_stmt().toBDD(); //l=b
-*/
+
             if (a == b) {
-                tester.module.conjunctTrans(xBdd.and(lGT0).imp(c1.or(NxE1.and(NlElM1)))); // (x & l>0) -> (c1 | (x' & l'=l-1))
-                tester.module.conjunctTrans(xBdd.and(lE0).imp(c2)); // (x & l=0) -> c2
+                T.conjunctTrans(xBdd.and(lGT0).imp(c1.or(NxE1.and(NlElM1)))); // (x & l>0) -> (c1 | (x' & l'=l-1))
+                T.conjunctTrans(xBdd.and(lE0).imp(c2)); // (x & l=0) -> c2
             } else { // a==0 && b>0
-                tester.module.conjunctTrans(xBdd.and(lGT0).imp(c2.and(c1.or(NxE1.and(NlElM1))))); // (x & l>0) -> (c2 & (c1 | (x' & l'=l-1)))
-                tester.module.conjunctTrans(xBdd.and(lE0).imp(c2)); // (x & l=0) -> c2
+                T.conjunctTrans(xBdd.and(lGT0).imp(c2.and(c1.or(NxE1.and(NlElM1))))); // (x & l>0) -> (c2 & (c1 | (x' & l'=l-1)))
+                T.conjunctTrans(xBdd.and(lE0).imp(c2)); // (x & l=0) -> c2
             }
 
             BDD specBdd = xBdd.and(lEb); // x & l=b;
-            tester.cachePutSpec(spec,specBdd);
+            testerInfo.putSpecInfo(spec,specBdd,
+                    testerInfo.unionTesters(child[0].toString(),child[2].toString(),T),null);
             return specBdd;
         } else { // 0<a<b
-            l = tester.module.addVar("L" + field_id, 0, a);
-            w = tester.module.addVar("W" + field_id, 0, b - a);
-            ValueDomStmt xe = new ValueDomStmt(tester.module, x); // the expression of variable x
+            l = T.addVar("L", 0, a);
+            w = T.addVar("W", 0, b - a);
+            ValueDomStmt xe = new ValueDomStmt(T, x); // the expression of variable x
             OpNext pxe = new OpNext(xe); // the expression of next(x)
-            ValueDomStmt le = new ValueDomStmt(tester.module, l); // the expression of variable l
+            ValueDomStmt le = new ValueDomStmt(T, l); // the expression of variable l
             OpNext ple = new OpNext(le); // the expression of next(l)
-            ValueDomStmt we = new ValueDomStmt(tester.module, w); // the expression of variable w
+            ValueDomStmt we = new ValueDomStmt(T, w); // the expression of variable w
             OpNext pwe = new OpNext(we); // the expression of next(w)
 
-            set_context_module(tester.module);
+            set_context_module(T);
             BDD lGT0 = bexp2bdd(bexp(l, ">", "0")); // l>0
             BDD NxE1 = bexp2bdd(bexp(pxe,"=","1")); // x'=1
             BDD NlElM1 = bexp2bdd(bexp(ple,"=",bexp(l,"-","1"))); // l'=l-1
@@ -589,36 +723,14 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
             BDD NwEwM1 = bexp2bdd(bexp(pwe,"=",bexp(w,"-","1"))); // w'=w-1
             BDD wE0 = bexp2bdd(bexp(w,"=","0")); //w=0
             BDD wEbMa = bexp2bdd(bexp(w, "=", ""+(b-a))); //w=b-a
-/*
-            BDD lGT0 = new StmtOperator(tester, new OpGT(new ValueDomStmt(tester, l),
-                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD(); //l>0
-            BDD NxE1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, x)), //next(x)
-                    new ValueConsStrStmt(tester, new String[]{"1"}))).eval_stmt().toBDD();
-            BDD NlElM1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, l)), //next(l)=l-1
-                    new OpMinus(new ValueDomStmt(tester, l), new ValueConsStrStmt(tester, new String[]{"1"})))).eval_stmt().toBDD();
-            BDD lE0 = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, l),
-                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD(); //l=0
-            BDD lEa = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, l),
-                    new ValueConsStrStmt(tester, new String[]{"" + a}))).eval_stmt().toBDD(); //l=a
-            BDD wGT0 = new StmtOperator(tester, new OpGT(new ValueDomStmt(tester, w),
-                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();//w>0
-            BDD NwEw = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, w)), //next(w)=w)
-                    new ValueDomStmt(tester, w))).eval_stmt().toBDD();
-            BDD NlE0 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, l)), //next(l)=0)
-                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();
-            BDD NwEwM1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, w)),//next(w)=w-1
-                    new OpMinus(new ValueDomStmt(tester, w), new ValueConsStrStmt(tester, new String[]{"1"})))).eval_stmt().toBDD();
-            BDD wE0 = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, w),
-                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();//w=0
-            BDD wEbMa = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, w),
-                    new ValueConsStrStmt(tester, new String[]{"" + (b - a)}))).eval_stmt().toBDD();//w=b-a
- */
-            tester.module.conjunctTrans(xBdd.and(lGT0).and(wGT0).imp(c1.or(NxE1.and(NlElM1).and(NwEw)))); // (x & l>0 & w>0) -> (c1 | (x' & l'=l-1 & w'=w))
-            tester.module.conjunctTrans(xBdd.and(lE0).and(wGT0).imp(c2.and(c1.or(NxE1.and(NlE0).and(NwEwM1))))); // (x & l=0 & w>0) -> (c2 & (c1 | (x' & l'=0 & w'=w-1)))
-            tester.module.conjunctTrans(xBdd.and(lE0).and(wE0).imp(c2)); // (x & l=0 & w=0) -> c2
+
+            T.conjunctTrans(xBdd.and(lGT0).and(wGT0).imp(c1.or(NxE1.and(NlElM1).and(NwEw)))); // (x & l>0 & w>0) -> (c1 | (x' & l'=l-1 & w'=w))
+            T.conjunctTrans(xBdd.and(lE0).and(wGT0).imp(c2.and(c1.or(NxE1.and(NlE0).and(NwEwM1))))); // (x & l=0 & w>0) -> (c2 & (c1 | (x' & l'=0 & w'=w-1)))
+            T.conjunctTrans(xBdd.and(lE0).and(wE0).imp(c2)); // (x & l=0 & w=0) -> c2
 
             BDD specBdd = xBdd.and(lEa).and(wEbMa); // x & l=a & w=b-a;
-            tester.cachePutSpec(spec,specBdd);
+            testerInfo.putSpecInfo(spec,specBdd,
+                    testerInfo.unionTesters(child[0].toString(),child[2].toString(),T),null);
             return specBdd;
         }
     }
@@ -630,23 +742,38 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         SpecExp se = (SpecExp) spec;
         Operator op = se.getOperator();
         Spec[] child = se.getChildren();
-        BDD c1 = null, specBdd = null;
         if (op != Operator.EE) return null;
 
-        c1 = sat(child[0]); // build the sub-tester of child[0]
-        specBdd = design.feasible().and(c1);
-/*
-        int oldTesterVariablesNumber = tester.module.getAll_couples().size(); // the set of tester variables before building the sub-tester for child[0]
-        c1 = sat(child[0]); // build the sub-tester of child[0]
-        if(tester.module.getAll_couples().size()<=oldTesterVariablesNumber){
-            // child[0] does not contain any temporal operator
-            specBdd = originalFeasibleStates.and(c1);
-        }else{
-            // child[0] contains temporal operator(s)
-            specBdd = design.feasible().and(c1);
+        BDD c1 = sat(child[0]); // build the sub-tester of child[0]
+
+        CacheSpecTesterInfo c1Info = null;
+        c1Info = testerInfo.getSpecInfo(child[0].toString());
+        if(c1Info==null) return null;
+
+        BDD specBdd=null;
+        if(c1Info.testerSet.size()<=0){
+            //the tester for c1 is EMPTY
+            specBdd = D_feasibleStates.and(c1);
+
+            testerInfo.putSpecInfo(spec, specBdd, null,D_feasibleStates);
+        }else {
+            // now the tester for c1 is NOT empty
+            // (1) compose the sub-testers of child[0] to the original model D, such that design=D||T_c1
+            for (SMVModule tester : c1Info.testerSet) design.syncComposition(tester); // design=D||T_c1
+
+            // (2) compute the set specBdd of feasible states of D satisfying c1
+            BDD DTc1_feas = design.feasible();
+
+            LinkedHashSet<ModuleBDDField> c1AuxVars = c1Info.getAuxVars();
+            BDDVarSet bddC1AuxVarSet = getBDDVarSet(c1AuxVars);
+            specBdd = DTc1_feas.and(c1).exist(bddC1AuxVarSet);
+
+            // (3) decompose the sub-testers of child[0] from the current model, such that design=D, the original model
+            for (SMVModule tester : c1Info.testerSet) design.decompose(tester); // design=D
+
+            testerInfo.putSpecInfo(spec, specBdd, null, DTc1_feas);
         }
-*/
-        tester.cachePutSpec(spec,specBdd);
+
         return specBdd;
     }
 
@@ -657,28 +784,81 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         SpecExp se = (SpecExp) spec;
         Operator op = se.getOperator();
         Spec[] child = se.getChildren();
-        BDD c1 = null, specBdd = null;
         if (op != Operator.AA) return null;
 
-        BDD negC1 = null;
-        Spec negChild0 = NNF(new SpecExp(Operator.NOT, child[0]));
-        negC1 = sat(negChild0);
-        // specBdd = feas /\ !(feas /\ !child[0]) = feas /\ (!feas \/ !!child[0]) = feas /\ !!child[0] = feas /\ !negC1
-        specBdd = design.feasible().and(negC1.not());
-/*
-        int oldTesterVariablesNumber = tester.module.getAll_input_variables().size();
-        negC1 = sat(negChild0);
-        if(tester.module.getAll_couples().size()<=oldTesterVariablesNumber){
-            // child[0] does not contain any temporal operator
-            // specBdd = feas /\ !(feas /\ !child[0]) = feas /\ (!feas \/ !!child[0]) = feas /\ !!child[0] = feas /\ !negC1
-            specBdd = originalFeasibleStates.and(negC1.not());
-        }else{
-            // child[0] contains temporal operator(s)
-            specBdd = design.feasible().and(negC1.not());
-        }
-*/
-        tester.cachePutSpec(spec,specBdd);
+        Spec EnegC1 = NNF(new SpecExp( Operator.EE,
+                                    new SpecExp(Operator.NOT, child[0])));
+        BDD bddEnegC1 = sat(EnegC1);
+        BDD specBdd = D_feasibleStates.and(bddEnegC1.not());
+        testerInfo.putSpecInfo(spec, specBdd, null, D_feasibleStates);
         return specBdd;
+    }
+        // return the set of states satisfying spec
+    // spec = AA child[0]
+    public BDD satAA_old(Spec spec) throws ModelCheckException, SMVParseException, ModuleException, ModelCheckAlgException, SpecException {
+        SMVModule design = (SMVModule) getDesign();
+        SpecExp se = (SpecExp) spec;
+        Operator op = se.getOperator();
+        Spec[] child = se.getChildren();
+        if (op != Operator.AA) return null;
+
+        Spec negC1 = NNF(new SpecExp(Operator.NOT, child[0]));
+        BDD bddNegC1 = sat(negC1);
+
+        CacheSpecTesterInfo nc1Info=null;
+        nc1Info = testerInfo.getSpecInfo(negC1.toString());
+        if(nc1Info==null) return null;
+
+        BDD specBdd=null;
+        if(nc1Info.testerSet.size()<=0){
+            // the tester for negC1 is EMPTY
+            specBdd = D_feasibleStates.and(bddNegC1.not());
+
+            testerInfo.putSpecInfo(spec,specBdd,null,D_feasibleStates);
+        }else{
+            // the tester for negC1 is NOT empty
+            // (1) compose the sub-testers of !child[0] to the original model D, such that design=D||T_nc1
+            for (SMVModule tester : nc1Info.testerSet) design.syncComposition(tester); // design=D||T_nc1
+
+            // (2) compute the set specBdd of feasible states of D satisfying c1
+            BDD DTnc1_feas = design.feasible();
+
+            LinkedHashSet<ModuleBDDField> nc1AuxVars = nc1Info.getAuxVars();
+            BDDVarSet bddNC1AuxVarSet = getBDDVarSet(nc1AuxVars);
+            BDD DTnc1_feas_negC1 = DTnc1_feas.and(bddNegC1);
+            BDD D_feas_negC1 = DTnc1_feas_negC1.exist(bddNC1AuxVarSet);
+            specBdd = DTnc1_feas.and(D_feas_negC1.not()).exist(bddNC1AuxVarSet);
+
+//        BDDVarSet allAuxVars = tester_getAuxVars_BDDVarSet(tester.module);
+//        BDD D_feas_negC1 = DTnc1_feas_negC1.exist(allAuxVars); // the set of D-feasible states that does not satisfy c1
+//        specBdd = feas.and(feas_negC1_no_auxVars.not()).and(negC1.not());
+//        BDD specBdd = DTnc1_feas.and(D_feas_negC1.not());
+
+            // (3) decompose the sub-testers of child[0] from the current model, such that design=D, the original model
+            for (SMVModule tester : nc1Info.testerSet) design.decompose(tester); // design=D
+
+            testerInfo.putSpecInfo(spec, specBdd, null, DTnc1_feas);
+        }
+
+        return specBdd;
+    }
+
+    // Premise: sereSpec!=null and sereSpec is SERE formula
+    public static boolean isTestOnly(Spec sereSpec) throws SpecException {
+        if(sereSpec instanceof SpecAgentIdentifier || sereSpec instanceof SpecRange)
+            throw new SpecException("Syntax Error: "+ edu.wis.jtlv.lib.mc.RTCDLs_old.RTCDLs_ModelCheckAlg.simplifySpecString(sereSpec,false)+" is not SERE sub-formula.");
+        if(sereSpec instanceof SpecBDD) return false;
+        // now sereSpec is SpecExp
+        SpecExp se = (SpecExp) sereSpec;
+        Operator op=se.getOperator();
+        Spec[] ch=se.getChildren();
+        if(op.isPropOp()){
+            for(Spec c : ch)
+                if(!isTestOnly(c)) return false;
+            return true;
+        }else if(op==Operator.LDL_TEST){
+            return true;
+        }else return false;
     }
 
     // spec = <ch[0]>ch[1]
@@ -698,16 +878,20 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
 
         if(ch[0].isPropSpec()){
             // if ch[0] is prop. sub-formula (including SpecBDD), then add transition x -> (ch[0) & ch[1]')
-            lc = sat(ch[0]); tester.cachePutSpec(ch[0],lc);
-            rc = sat(ch[1]); tester.cachePutSpec(ch[1],rc);
+            lc = sat(ch[0]); testerInfo.putSpecInfo(ch[0],lc,null,null); // tester.cachePutSpec(ch[0],lc);
+            rc = sat(ch[1]); testerInfo.putSpecInfo(ch[1],rc,null,null); // tester.cachePutSpec(ch[1],rc);
             BDD p_rc = Env.prime(rc);
 
-            x = tester.module.addVar("X" + (++field_id)); // boolean variable
+            SMVModule T = testerInfo.buildEmptyAtomTester(spec.toString());
+            x = T.addVar("X"); // boolean variable
             xBdd = x.getDomain().ithVar(1);
+            consoleOutput(0, "emph", "Variable " + x.toFullString() + " is created for " + simplifySpecString(spec.toString(),false) + "\n");
 
-            tester.module.conjunctTrans(xBdd.imp(lc.and(p_rc)));
-            tester.cachePutSpec(spec,xBdd);
-            consoleOutput(0,"emph","Output variable "+xBdd+" is created for "+simplifySpecString(spec,false)+"\n");
+            T.conjunctTrans(xBdd.imp(lc.and(p_rc)));
+
+            testerInfo.putSpecInfo(spec,xBdd,
+                    testerInfo.unionTesters(ch[0].toString(),ch[1].toString(),T),null); //           tester.cachePutSpec(spec,xBdd);
+
             return xBdd;
         }else{// ch[0] must be SpecExp
             SpecExp ch0se = (SpecExp) ch[0];
@@ -717,23 +901,27 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                 // ch[0] = ch0ch[0]?
                 StringBuilder sb = new StringBuilder("");
                 if(!ch0ch[0].isLDLSpec(sb))
-                    throw new SpecException("Syntax Error: " + RTCDLs_ModelCheckAlg.simplifySpecString(sb.toString(),false));
+                    throw new SpecException("Syntax Error: " + simplifySpecString(sb.toString(),false));
                 // now ch0ch[0] is LDL sub-formula, and ch[0]=ch0ch[0]?
                 BDD b0 = sat(ch0ch[0]).and(sat(ch[1]));
-                tester.cachePutSpec(spec,b0);
+                testerInfo.putSpecInfo(spec,b0,
+                        testerInfo.unionTesters(ch0ch[0].toString(),ch[1].toString(),null),null); //tester.cachePutSpec(spec,b0);
                 return b0;
             }else if(ch0op == Operator.LDL_OR){
                 // ch[0] = ch0ch[0] || ch0ch[1]
                 Spec spec0=new SpecExp(Operator.LDL_SERE_SAT,ch0ch[0],ch[1]);
                 BDD b0=sat(spec0); // b0=sat(<ch0ch[0]>ch[1])
-                tester.cachePutSpec(spec0,b0);
+                testerInfo.putSpecInfo(spec0,b0,
+                        testerInfo.unionTesters(ch0ch[0].toString(),ch[1].toString(),null),null); //tester.cachePutSpec(spec0,b0);
 
                 Spec spec1=new SpecExp(Operator.LDL_SERE_SAT,ch0ch[1],ch[1]);
                 BDD b1=sat(spec1); // b1=sat(<ch0ch[1]>ch[1])
-                tester.cachePutSpec(spec1,b1);
+                testerInfo.putSpecInfo(spec1,b1,
+                        testerInfo.unionTesters(ch0ch[1].toString(),ch[1].toString(),null),null); //tester.cachePutSpec(spec1,b1);
 
                 BDD b2=b0.or(b1);
-                tester.cachePutSpec(spec,b2);
+                testerInfo.putSpecInfo(spec,b2,
+                        testerInfo.unionTesters(spec0.toString(),spec1.toString(),null),null); //tester.cachePutSpec(spec,b2);
                 return b2;
             }else if(ch0op == Operator.LDL_AND){
                 throw new SpecException("Current version does not support SERE operator LDL_AND.");
@@ -741,30 +929,43 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                 // ch[0] = ch0ch[0] , ch0ch[1]
                 Spec spec1=new SpecExp(Operator.LDL_SERE_SAT,ch0ch[1],ch[1]);
                 BDD b1=sat(spec1); // b1=sat(<ch0ch[1]>ch[1])
-                tester.cachePutSpec(spec1,b1);
+                testerInfo.putSpecInfo(spec1,b1,
+                        testerInfo.unionTesters(ch0ch[1].toString(),ch[1].toString(),null),null); //tester.cachePutSpec(spec1,b1);
 
                 BDD b0=sat(new SpecExp(Operator.LDL_SERE_SAT,ch0ch[0],new SpecBDD(b1))); // b0=sat(<ch0ch[0]>b1)
-                tester.cachePutSpec(spec,b0);
+                testerInfo.putSpecInfo(spec,b0,
+                        testerInfo.unionTesters(ch0ch[0].toString(),spec1.toString(),null),null); //tester.cachePutSpec(spec,b0);
                 return b0;
-            }else if(ch0op == Operator.LDL_REPEAT){ // spec = <ch[0]>ch[1]
-                // ch[0] = ch0ch[0][*]
-                rc = sat(ch[1]);
-
-                if(RTCDLs_ModelCheckAlg.isTestOnly(ch0ch[0])){
-                    // ch0ch[0] is test-only
-                    tester.cachePutSpec(spec,rc);
-                    return rc;
+            }else if(ch0op == Operator.LDL_REPEAT){ // spec = <r*>ch[1] where r=ch0ch[0]
+                Spec r=ch0ch[0];
+                if(isTestOnly(r)) {
+                    Spec spec1=new SpecExp(Operator.LDL_SERE_SAT,r,ch[1]); // spec1=<r>ch[1]
+                    return sat(spec1);
                 }
-                // now ch0ch[0] is NOT test-only
+                // now r is NOT test-only
 
-                x = tester.module.addVar("X" + (++field_id)); // boolean variable
+                SMVModule T = testerInfo.buildEmptyAtomTester(spec.toString());
+                x = T.addVar("X"); // boolean variable
                 xBdd = x.getDomain().ithVar(1);
+                Spec specX = new SpecBDD(xBdd);
+                Spec rho=new SpecExp(Operator.LDL_SERE_SAT,r,specX); // rho = <r>x
 
-                BDD b0=sat(new SpecExp(Operator.LDL_SERE_SAT,ch0ch[0],new SpecBDD(xBdd))); // b0=sat(<ch0ch[0]>x)
-                tester.module.conjunctTrans(xBdd.imp(rc.or(b0)));
-                tester.module.addJustice(xBdd.imp(rc));
-                tester.cachePutSpec(spec,xBdd);
-                consoleOutput(0,"emph","Output variable "+xBdd+" is created for "+simplifySpecString(spec,false)+"\n");
+                SpecExp rse=(SpecExp) r;
+                Operator rop=rse.getOperator();
+                Spec[] rch=rse.getChildren();
+
+                if(r.isPropSpec()){
+
+                }else if(rop==Operator.LDL_OR){ // r=r1+r2
+
+                }else if(rop==Operator.LDL_CONC){ // r=r1;r2
+
+                }else if(rop==Operator.LDL_REPEAT){ // r=r1*
+
+                }else{ // rop==Operator.LDL_TEST is impossile because r is test-only
+
+                }
+
                 return xBdd;
             }else{ //ch0op is LDL_BOUNDED_REPEAT or other operators){
                 throw new SpecException("Current version does not support the operator "+ch0op);
@@ -772,6 +973,7 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         }
 
     }
+   /*
 
     // spec = [ch[0]]ch[1]
     public BDD satLDLsereIMP(Spec spec) throws SpecException, SMVParseException, ModelCheckException, ModuleException, ModelCheckAlgException {
@@ -808,7 +1010,7 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                 // ch[0] = ch0ch[0]?
                 StringBuilder sb = new StringBuilder("");
                 if(!ch0ch[0].isLDLSpec(sb))
-                    throw new SpecException("Syntax Error: " + RTCDLs_ModelCheckAlg.simplifySpecString(sb.toString(),false));
+                    throw new SpecException("Syntax Error: " + edu.wis.jtlv.lib.mc.RTCDLs_old.RTCDLs_ModelCheckAlg.simplifySpecString(sb.toString(),false));
                 // now ch0ch[0] is LDL sub-formula, and ch[0]=ch0ch[0]?
                 Spec neg_ch0ch0 = new SpecExp(Operator.NOT,ch0ch[0]);
                 BDD sat_neg_ch0ch0 = sat(neg_ch0ch0); tester.cachePutSpec(neg_ch0ch0,sat_neg_ch0ch0);
@@ -844,7 +1046,7 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                 // ch[0] = ch0ch[0][*]
                 rc = sat(ch[1]);
 
-                if(RTCDLs_ModelCheckAlg.isTestOnly(ch0ch[0])){
+                if(edu.wis.jtlv.lib.mc.RTCDLs_old.RTCDLs_ModelCheckAlg.isTestOnly(ch0ch[0])){
                     // ch0ch[0] is test-only
                     tester.cachePutSpec(spec,rc);
                     return rc;
@@ -864,6 +1066,7 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         }
 
     }
+*/
 
     //------------------------------------------------------------------------------------------------------------------
     // return the Negation Normal Form of spec, which includes the following operators:
@@ -895,8 +1098,7 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                 || op == Operator.AA
                 || op == Operator.CAN_ENFORCE
                 || op == Operator.CANNOT_AVOID
-            )
-        {
+                ) {
             return new SpecExp(op, NNF(child[0]));
         }
 
@@ -1034,7 +1236,6 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
             // NNF([ch[0]]ch[1]) = [ch[0]]NNF(ch[1])
             return new SpecExp(op, child[0], NNF(child[1]));
         }
-
 
         if (op != Operator.NOT) return spec; // if op is not NOT and is not handled by the above code, then return spec itself
 
@@ -1261,7 +1462,7 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
     @Override
     public AlgResultI preAlgorithm() throws AlgExceptionI, SMVParseException, ModelCheckException, ModuleException {
         SMVModule design = (SMVModule) getDesign(); // without the composed tester...
-        if(tester!=null && tester.module!=null) design.decompose(tester.module);
+
 /*
         design.removeAllIniRestrictions();//reset IniRestrictions
         SpecBDDMap.clear();
@@ -1424,54 +1625,66 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         return this.allPredsIn(p.id(), res.id());
     }
 
-    public AlgResultString modelCheckingOneSpec(Spec aSpec) throws SpecException, ModelCheckException, SMVParseException, ModuleException, ModelCheckAlgException {
-        consoleOutput(0,"emph","Model checking RTCDL* property: " + simplifySpecString(aSpec,false) +"\n");
+    public AlgResultString modelCheckingOneSpec(Spec aProperty) throws SpecException, ModelCheckException, ModuleException, ModelCheckAlgException, SMVParseException {
+        consoleOutput(0,"emph","Model checking RTCTL* property: " + simplifySpecString(aProperty,false) +"\n");
         if(statistic==null) statistic=new Statistic();
         else statistic.beginStatistic(true,false);
 
-        Spec chkProp;
-        if (!aSpec.isStateSpec()) {
-            chkProp = NNF(new SpecExp(Operator.EE,
-                    new SpecExp(Operator.NOT, aSpec))); // newp = E !property
+        Spec negProp;
+        if (!aProperty.isStateSpec()) { // aProperty is not state formula
+            negProp = NNF(new SpecExp(Operator.EE,
+                    new SpecExp(Operator.NOT, aProperty))); // newp = E !property
         } else { // the property is a state formula
-            chkProp = NNF(new SpecExp(Operator.NOT, aSpec)); // newp = !property
+            negProp = NNF(new SpecExp(Operator.NOT, aProperty)); // newp = !property
         }
-        //consoleOutput(0,"normal","The negative propperty: " + simplifySpecString(chkProp,false)+"\n");
-        visibleVars = this.getRelevantVars(getDesign(), chkProp);
+        consoleOutput(0,"emph","The negative propperty: " + simplifySpecString(negProp,false)+"\n");
+        //visibleVars = this.getRelevantVars(getDesign(), chkProp);
         // now chkProp is a state property
 
         SMVModule design = (SMVModule) getDesign(); // now design does not contain the tester
         restoreOriginalModuleData();
 
-        tester = new RTCDLsTester();
-        design.syncComposition(tester.module); // the tester will be built in the following function sat()
-        BDD chkBdd = sat(chkProp);
-        // now design is the composition of the original model and the tester of the verified property
+        if(D_feasibleStates==null) D_feasibleStates = design.feasible();
 
-        // saving to the previous restriction state
-        Vector<BDD> old_ini_restrictions = design.getAllIniRestrictions();
-        int chkBdd_idx = design.restrictIni(chkBdd);
-        BDD feas = design.feasible();// feas = the feasible states of D||T from design.init /\ chkBdd
-//        BDD feas = ce_fair_g(Env.TRUE());
+        testerInfo = new RTCDLsTester();
 
-        BDD Init_unSat = feas.and(design.initial()).and(chkBdd);
-        // the initial_condition seems redundant
-        design.removeIniRestriction(chkBdd_idx);
-        design.setAllIniRestrictions(old_ini_restrictions);
+        BDD bddNegProp = sat(negProp);
 
-        String res="";
-        if (Init_unSat.isZero()) {
-            res = "*** Property is TRUE ***\n";
-            design.decompose(tester.module);
-            consoleOutput(0, "emph", res);
-            consoleOutput(0, "weak", statistic.getUsedInfo(true, true, true, true));
+        BDD D_feas_init_unSat = D_feasibleStates.and(design.initial()).and(bddNegProp);
+        if (D_feas_init_unSat.isZero()) {
+            String res="*** Property is TRUE ***\n";
+            consoleOutput(0,"emph", res);
+            consoleOutput(0,"weak", statistic.getUsedInfo(true,true,true,true));
             return new AlgResultString(true, res);
-        }else{
-            res = "*** Property is FALSE ***\n";
-            design.decompose(tester.module);
-            consoleOutput(0, "error", res);
-            consoleOutput(0, "weak", statistic.getUsedInfo(true, true, true, true));
-            return new AlgResultString(false, res);
+        } else {
+            graph = new GraphExplainRTCDLs(aProperty, negProp, testerInfo, this);
+            graph.addAttribute("ui.title", graph.getId());
+            // design with the composed tester...
+            // create the initial node
+            BDD initState = D_feas_init_unSat.satOne(getDesign().moduleUnprimeVars(), false);
+            Node n = graph.addNode(1, 0, initState);
+            n.setAttribute("ui.class", "initialState");
+
+//            graph.nodeAddSpec(n.getId(), chkProp);
+            boolean ok = witness(negProp, n);
+
+            String returned_msg = "";
+            returned_msg = "*** Property is FALSE ***\n";
+            consoleOutput(0,"error", returned_msg);
+            consoleOutput(0,"weak", statistic.getUsedInfo(true,true,true,true));
+
+            new Thread(){@Override
+                public void run() {
+                    isOpeningCounterexampleWindow=true;
+                try {
+                    new ViewerExplainRTCDLs(graph);
+                } catch (SpecException e) {
+                    e.printStackTrace();
+                }
+            }
+            }.start();
+            //design.decompose(tester.module); // delay the decomposition of tester to reserve the tester during showing the counterexample
+            return new AlgResultString(false, returned_msg);
         }
     }
 
@@ -1631,7 +1844,7 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                     witness(child[0],n);
                     witness(child[1],n);
                 }else if(op==Operator.OR){
-                    BDD lc = tester.cacheGetSpecBdd(child[0]); if(lc==null) return false; //SpecBDDMap.get(child[0]);
+                    BDD lc = testerInfo.getSpecBdd(child[0]); if(lc==null) return false; //SpecBDDMap.get(child[0]);
                     BDD state=graph.nodeGetBDD(nodeId);
                     if (!state.and(lc).isZero()) witness(child[0],n);
                     else witness(child[1],n);
@@ -1748,8 +1961,8 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                 witness(child[0],n);
                 witness(child[1],n);
             }else if(op==Operator.OR){ // spec=f\/g
-                BDD f=tester.cacheGetSpecBdd(child[0]); if(f==null) return false;
-                BDD g=tester.cacheGetSpecBdd(child[1]); if(g==null) return false;
+                BDD f= testerInfo.getSpecBdd(child[0]); if(f==null) return false;
+                BDD g= testerInfo.getSpecBdd(child[1]); if(g==null) return false;
                 if (!state.and(f).isZero() && !needExpE(child[0])) witness(child[0],n);
                 else if (!state.and(g).isZero() && !needExpE(child[1])) witness(child[1],n);
                 else if (!state.and(f).isZero()) witness(child[0],n);
@@ -1781,8 +1994,8 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         if(op==Operator.AND) // spec=f/\g
             return needCrtPath(child[0],n) || needCrtPath(child[1],n);
         else if(op==Operator.OR){ // spec=f\/g
-            BDD f=tester.cacheGetSpecBdd(child[0]); if(f==null) return false;  //SpecBDDMap.get(child[0]);
-            BDD g=tester.cacheGetSpecBdd(child[1]); if(g==null) return false;  //SpecBDDMap.get(child[1]);
+            BDD f= testerInfo.getSpecBdd(child[0]); if(f==null) return false;  //SpecBDDMap.get(child[0]);
+            BDD g= testerInfo.getSpecBdd(child[1]); if(g==null) return false;  //SpecBDDMap.get(child[1]);
             if(!state.and(f).isZero() && state.and(g).isZero()) // n.s|=f and n.s|=\=g
                 return needCrtPath(child[0],n);
             else if(state.and(f).isZero() && !state.and(g).isZero()) // n.s|=\=f and n.s|=g
@@ -1792,20 +2005,20 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
             else return needCrtPath(child[1],n);
         }else if(op.isTemporalOp()) { // spec is a principally temporal formula
             if(op==Operator.UNTIL){
-                BDD g=tester.cacheGetSpecBdd(child[1]);
+                BDD g= testerInfo.getSpecBdd(child[1]);
                 if(!state.and(g).isZero()) // n|=g
                     return needCrtPath(child[1],n);
                 else return true;
             }else if(op==Operator.RELEASES){
-                BDD f=tester.cacheGetSpecBdd(child[0]);
-                BDD g=tester.cacheGetSpecBdd(child[1]);
+                BDD f= testerInfo.getSpecBdd(child[0]);
+                BDD g= testerInfo.getSpecBdd(child[1]);
                 if(!state.and(f.and(g)).isZero()) // n|=f/\g
                     return needCrtPath(child[0],n) || needCrtPath(child[1],n);
                 else return true;
             }else if(op==Operator.B_UNTIL){
                 SpecRange range = (SpecRange) child[1];
                 int a = range.getFrom();
-                BDD g=tester.cacheGetSpecBdd(child[2]); // spec=f U 0..b g
+                BDD g= testerInfo.getSpecBdd(child[2]); // spec=f U 0..b g
                 if(a==0 && !state.and(g).isZero()) // a=0 & n|=g
                     return needCrtPath(child[2],n);
                 else return true;
@@ -1813,8 +2026,8 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                 SpecRange range = (SpecRange) child[1];
                 int a = range.getFrom();
                 int b = range.getTo();
-                BDD f=tester.cacheGetSpecBdd(child[0]);
-                BDD g=tester.cacheGetSpecBdd(child[2]);
+                BDD f= testerInfo.getSpecBdd(child[0]);
+                BDD g= testerInfo.getSpecBdd(child[2]);
                 if(a==0 && b==0 && !state.and(g).isZero()) // a=b=0 & n|=g
                     return needCrtPath(child[2],n);
                 else if(a==0 && b>0 && !state.and(f.and(g)).isZero()) // a=0 & b>0 & n|=f/\g
@@ -1847,8 +2060,8 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
             witnessEonNode(child[0], n);
             witnessEonNode(child[1], n);
         }else if(op==Operator.OR){ // spec=f\/g
-            BDD f=tester.cacheGetSpecBdd(child[0]); if(f==null) return;
-            BDD g=tester.cacheGetSpecBdd(child[1]); if(g==null) return;
+            BDD f= testerInfo.getSpecBdd(child[0]); if(f==null) return;
+            BDD g= testerInfo.getSpecBdd(child[1]); if(g==null) return;
             if(!state.and(f).isZero() && state.and(g).isZero()) // n.s|=f and n.s|=\=g
                 witnessEonNode(child[0],n);
             else if(state.and(f).isZero() && !state.and(g).isZero()) // n.s|=\=f and n.s|=g
@@ -1859,12 +2072,12 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                 witnessEonNode(child[1],n);
         }else if(op.isTemporalOp()) { // spec is a principally temporal formula
             if(op==Operator.UNTIL){
-                BDD g=tester.cacheGetSpecBdd(child[1]);
+                BDD g= testerInfo.getSpecBdd(child[1]);
                 if(!state.and(g).isZero()) // n|=g
                     witnessEonNode(child[1],n);
             }else if(op==Operator.RELEASES){
-                BDD f=tester.cacheGetSpecBdd(child[0]);
-                BDD g=tester.cacheGetSpecBdd(child[1]);
+                BDD f= testerInfo.getSpecBdd(child[0]);
+                BDD g= testerInfo.getSpecBdd(child[1]);
                 if(!state.and(f.and(g)).isZero()) { // n|=f/\g
                     witnessEonNode(child[0], n);
                     witnessEonNode(child[1], n);
@@ -1872,15 +2085,15 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
             }else if(op==Operator.B_UNTIL){
                 SpecRange range = (SpecRange) child[1];
                 int a = range.getFrom();
-                BDD g=tester.cacheGetSpecBdd(child[2]); // spec=f U 0..b g
+                BDD g= testerInfo.getSpecBdd(child[2]); // spec=f U 0..b g
                 if(a==0 && !state.and(g).isZero()) // a=0 & n|=g
                     witnessEonNode(child[2],n);
             }else if(op==Operator.B_RELEASES){
                 SpecRange range = (SpecRange) child[1];
                 int a = range.getFrom();
                 int b = range.getTo();
-                BDD f=tester.cacheGetSpecBdd(child[0]);
-                BDD g=tester.cacheGetSpecBdd(child[2]);
+                BDD f= testerInfo.getSpecBdd(child[0]);
+                BDD g= testerInfo.getSpecBdd(child[2]);
                 if(a==0 && b==0 && !state.and(g).isZero()) witnessEonNode(child[2],n); // a=b=0 & n|=g
                 else if(a==0 && b>0 && !state.and(f.and(g)).isZero()) { // a=0 & b>0 & n|=f/\g
                     witnessEonNode(child[0],n);
@@ -1909,8 +2122,8 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         if(op==Operator.AND)
             return witnessEonNode_old(child[0],n) || witnessEonNode_old(child[1],n);
         else if(op==Operator.OR){
-            BDD lc=tester.cacheGetSpecBdd(child[0]); if(lc==null) return false;  //SpecBDDMap.get(child[0]);
-            BDD rc=tester.cacheGetSpecBdd(child[1]); if(rc==null) return false;  //SpecBDDMap.get(child[1]);
+            BDD lc= testerInfo.getSpecBdd(child[0]); if(lc==null) return false;  //SpecBDDMap.get(child[0]);
+            BDD rc= testerInfo.getSpecBdd(child[1]); if(rc==null) return false;  //SpecBDDMap.get(child[1]);
             if(child[0].isPropSpec() && !state.and(lc).isZero()) // f is prop formula && n|=f
                 //return witness(child[0],n);
                 graph.nodeAddSpec(n.getId(),child[0]);
@@ -1923,23 +2136,23 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                 return witnessEonNode_old(child[1],n);
         }else if(op.isTemporalOp()) { // spec is a principally temporal formula
             if(op==Operator.UNTIL){
-                BDD g=tester.cacheGetSpecBdd(child[1]);
+                BDD g= testerInfo.getSpecBdd(child[1]);
                 if(!state.and(g).isZero()) return witness(child[1],n); else return false;// n|=g
             }else if(op==Operator.RELEASES){
-                BDD f=tester.cacheGetSpecBdd(child[0]);
-                BDD g=tester.cacheGetSpecBdd(child[1]);
+                BDD f= testerInfo.getSpecBdd(child[0]);
+                BDD g= testerInfo.getSpecBdd(child[1]);
                 if(!state.and(f.and(g)).isZero()) return witness(child[0],n) && witness(child[1],n); else return false; // n|=f/\g
             }else if(op==Operator.B_UNTIL){
                 SpecRange range = (SpecRange) child[1];
                 int a = range.getFrom();
-                BDD g=tester.cacheGetSpecBdd(child[2]); // spec=f U 0..b g
+                BDD g= testerInfo.getSpecBdd(child[2]); // spec=f U 0..b g
                 if(a==0 && !state.and(g).isZero()) return witness(child[2],n); else return false; // a=0 & n|=g
             }else if(op==Operator.B_RELEASES){
                 SpecRange range = (SpecRange) child[1];
                 int a = range.getFrom();
                 int b = range.getTo();
-                BDD f=tester.cacheGetSpecBdd(child[0]);
-                BDD g=tester.cacheGetSpecBdd(child[2]);
+                BDD f= testerInfo.getSpecBdd(child[0]);
+                BDD g= testerInfo.getSpecBdd(child[2]);
                 if(a==0 && b==0 && !state.and(g).isZero()) return witness(child[2],n); // a=b=0 & n|=g
                 else if(a==0 && b>0 && !state.and(f.and(g)).isZero()) return witness(child[0],n) && witness(child[2],n); // a=0 & b>0 & n|=f/\g
                 else return false;
@@ -2038,8 +2251,8 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                 witnessE(child[0],n);
                 witnessE(child[1],n);
             }else if (op==Operator.OR) { // spec = f \/ g
-                BDD f=tester.cacheGetSpecBdd(child[0]); if(f==null) return false;
-                BDD g=tester.cacheGetSpecBdd(child[1]); if(g==null) return false;
+                BDD f= testerInfo.getSpecBdd(child[0]); if(f==null) return false;
+                BDD g= testerInfo.getSpecBdd(child[1]); if(g==null) return false;
                 if (!state.and(f).isZero() && !needExpE(child[0]) && !needExpT(child[0])) witnessE(child[0],n);
                 else if (!state.and(g).isZero() && !needExpE(child[1]) && !needExpE(child[1])) witnessE(child[1],n);
                 else if (!state.and(f).isZero()) witnessE(child[0],n);
@@ -2062,36 +2275,68 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
     ) throws SpecException, ModelCheckException, ModelCheckAlgException, SMVParseException, ModuleException {
         if(n==null) return false;
 
-        BDD fromState = n.getAttribute("BDD");
+        BDD fromState = n.getAttribute("BDD");  // fromState is the state of the starting node
         int pathNo = n.getAttribute("pathNo");
         int stateNo = n.getAttribute("stateNo");
         String fromNodeId = pathNo+"."+stateNo;
         if (fromState == null || fromState.isZero()) return false;
 
+        BDDVarSet auxBDDVarSet = Env.globalUnprimeVarsMinus(stateVarSet);
+        BDD D_fromState = fromState.exist(auxBDDVarSet); // D_fromState is the D-state of the starting node
+
         SpecExp se = (SpecExp) spec;
         Operator op = se.getOperator();
 
         //-------------------------------------------------------------------------------------
-        // create a feasible lasso path pi from n such that pi|=spec; and then explainPath(spec, pi, 0);
+        // create a feasible lasso path pi from n such that (D||T_spec, pi)|=spec; and then explainPath(spec, pi, 0);
         //-------------------------------------------------------------------------------------
-        SMVModule DT = (SMVModule) getDesign(); // DT is the parallel composition of design and the tester of spec
+        // (1) construct design = D||T_spec
+        CacheSpecTesterInfo specInfo = null;
+        specInfo = testerInfo.getSpecInfo(spec.toString());
+        if(specInfo==null) {
+            consoleOutput(0,"error","lassoPath(spec,n): the information of spec is unavaliable.\n");
+            return false;
+        }
+
+        SMVModule DT = (SMVModule) getDesign(); // DT is the original model D
         ModuleWithWeakFairness weakDT=null;
         if (DT instanceof ModuleWithWeakFairness) weakDT = (ModuleWithWeakFairness) DT;
 
-        if(feasibleStatesForWitnessE==null) {
-            feasibleStatesForWitnessE = DT.feasible();
-            DT.restrictTrans(feasibleStatesForWitnessE.and(Env.prime(feasibleStatesForWitnessE)));
+        BDDVarSet specAuxBDDVarSet = Env.getEmptySet();
+        if(specInfo.testerSet.size()>0){
+            // the tester of spec is NOT empty
+            for (SMVModule tester : specInfo.testerSet) DT.syncComposition(tester);
+            LinkedHashSet<ModuleBDDField> specAuxVars = specInfo.getAuxVars();
+            specAuxBDDVarSet = getBDDVarSet(specAuxVars);
         }
+        BDDVarSet specAllBDDVarSet = stateVarSet.union(specAuxBDDVarSet);
+
+        // DT is the parallel composition of design and the tester of spec, if the tester of spec is not empty
+        CacheSpecTesterInfo EspecInfo = null;
+        EspecInfo = testerInfo.getSpecInfo(new SpecExp(Operator.EE,spec).toString());
+        if(EspecInfo==null){
+            consoleOutput(0,"error","lassoPath(spec,n): the feasible states of E spec is unavailable.\n");
+            return false;
+        }
+        BDD DT_feas = EspecInfo.feasibleStates;
+
+        BDD DT_fromStates = D_fromState.and(DT_feas.and(specInfo.getBdd())); // DT_fromState is the set of D||T_spec states implied by D_fromState
+        //BDD DT_fromState = DT_fromStates.satOne(DT.moduleUnprimeVars(),false);
 
         // saving to the previous restriction state
         Vector<BDD> oldTransRestrictions = DT.getAllTransRestrictions();
 
-        // (1) Z' := n.s
-        BDD Zp=fromState;
-        // (2) Z := n.s ◦ R*
-        BDD Z=DT.allSucc(fromState);  // now Z is the set of reachable states from n.s
-        // (3) T := R ∧ (Z × Z);
+        DT.restrictTrans(DT_feas.and(Env.prime(DT_feas)));
         int oldTransRestrictionsSize = DT.getTransRestrictionsSize();
+
+        //----------------------------------------------------------------------------------
+        // Step S1
+        //----------------------------------------------------------------------------------
+        // (1) Z' := n.s
+        BDD Zp=DT_fromStates;
+        // (2) Z := n.s ◦ R*
+        BDD Z=DT.allSucc(DT_fromStates);  // now Z is the set of reachable states from n.s
+        // (3) T := R ∧ (Z × Z);
         DT.restrictTrans(Z.id());
         boolean c=!Z.equals(Zp);
         while(c){
@@ -2111,6 +2356,10 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                 }
             }
         }
+        //----------------------------------------------------------------------------------
+        // now Z is the set of D||T_spec states containing all fair SCCs which are reachable from and closest to DT_fromStates
+        // Step S2
+        //----------------------------------------------------------------------------------
 
         // restore old trans restrictions
         Vector<BDD> addedTransRestrictions=new Vector<BDD>();
@@ -2119,8 +2368,8 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
             DT.removeTransRestriction(oldTransRestrictionsSize);
         }
         // (16)
-        Zp=fromState;
-        BDD reach=fromState, glue; // "glue" is the set of states that glues the prefix and the loop together
+        Zp=DT_fromStates;
+        BDD reach=DT_fromStates, glue; // "glue" is the set of states that glues the prefix and the loop together
         glue=Zp.and(Z);
         while (glue.isZero()) { // (17)
             Zp=DT.succ(Zp.id()).and(reach.not()); // (18) Y is the set of new successors that have never visited before
@@ -2146,25 +2395,34 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         BDD scc=Env.FALSE(), scc2, t=Env.FALSE(), t2;
         while (!glue.isZero()) { // (21)
             // (22)
-            t2=glue.satOne(DT.moduleUnprimeVars(), false);
+            t2=glue.satOne(specAllBDDVarSet, false);
             glue=glue.id().and(t2.not()); // glue = glue - {t2}
             // (23)
             scc2=DT.allPred(t2); // DT.allSucc(t2).and(DT.allPred(t2));
             // (24)
-            if(scc.isZero() || scc2.satCount(DT.moduleUnprimeVars())<scc.satCount(DT.moduleUnprimeVars())) {
+            if(scc.isZero() || scc2.satCount(specAllBDDVarSet)<scc.satCount(specAllBDDVarSet)) {
                 scc=scc2; t=t2;
             }
         }
 
+        //----------------------------------------------------------------------------------
+        // (1) scc is a fair SCC within Z that contains minimal number of states, from all fair SCCs within Z which are reachable from and closest to DT_fromStates
+        // (2) t is a state in scc that is closest to DT_fromStates
+        // Step S3
+        //----------------------------------------------------------------------------------
 
         // (25-26)
         // restore old trans restrictions
         while(DT.getTransRestrictionsSize()>oldTransRestrictionsSize) { DT.removeTransRestriction(oldTransRestrictionsSize); }
         Vector<BDD> prefix = new Vector<BDD>();
-        BDD[] path = DT.shortestPath(fromState, t);
+        BDD[] path = DT.shortestPath(DT_fromStates, t);
         for (int i = 0; i < path.length-1; i++) // abandon the last state of "path" because it is the first state of the glued loop
             prefix.add(path[i]);
 
+        //----------------------------------------------------------------------------------
+        // "prefix" is the shortest path from DT_fromStates to t
+        // Step S4: construct a fair cycle path "period" within scc from t
+        //----------------------------------------------------------------------------------
         // (27)
         DT.restrictTrans(scc.id());
 
@@ -2183,7 +2441,7 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                 fulfill = Env.FALSE();
                 for (int j = 0; j < period.size(); j++) {
                     fulfill = period.elementAt(j).and(weakDT.justiceAt(i))
-                            .satOne(weakDT.moduleUnprimeVars(), false);
+                            .satOne(specAllBDDVarSet, false);
                     if (!fulfill.isZero())
                         break;
                 }
@@ -2211,7 +2469,7 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                     for (int j = 0; j < period.size(); j++) {
                         fulfill = period.elementAt(j).and(
                                 strongDT.qCompassionAt(i)).satOne(
-                                strongDT.moduleUnprimeVars(), false);
+                                specAllBDDVarSet, false);
                         // fulfill =
                         // period.elementAt(j).and(design.qCompassionAt(i)).satOne();
                         if (!fulfill.isZero()) {
@@ -2259,7 +2517,7 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                     // period[1] is not a successor of itself: Add state to
                     // period.
                     period.add(DT.succ(period.firstElement()).satOne(
-                            DT.moduleUnprimeVars(), false));
+                            specAllBDDVarSet, false));    // DT.moduleUnprimeVars()
                     // period.add(design.succ(period.firstElement()).satOne());
 
                     // Close cycle.
@@ -2340,7 +2598,7 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         // restore old trans restrictions
         while(DT.getTransRestrictionsSize()>oldTransRestrictionsSize) { DT.removeTransRestriction(oldTransRestrictionsSize); }
 
-        NodePath nodePath = new NodePath(trunkNodePaths.size(), trunkNodePath, loopNodeIdx);
+        NodePath nodePath = new NodePath(trunkNodePaths.size(), trunkNodePath, loopNodeIdx, path[0]);
         trunkNodePaths.add(nodePath);
 
         if(!op.isTemporalOp()){
@@ -2349,10 +2607,18 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
         }
 
         //-------------------------------------------------------------------------------------
-        return explainPath(spec, nodePath, 0);
+        boolean b= explainPath(spec, nodePath, 0);
         //-------------------------------------------------------------------------------------
+
+        DT.setAllTransRestrictions(oldTransRestrictions);;
+        if(specInfo.testerSet.size()>0){
+            // the tester of spec is NOT empty
+            for (SMVModule tester : specInfo.testerSet) DT.decompose(tester);
+        }
+        return b;
     }
-                                // premise: n.s |= E spec
+
+    // premise: n.s |= E spec
     // generate the witness for n.s |= E spec
     // this algorithm extended from the WITNESS algorithm in the paper "MODEL CHECKING WITH STRONG FAIRNESS"
     public boolean witnessE_old(Spec spec,
@@ -2590,7 +2856,7 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
 
         DT.setAllTransRestrictions(old_trans_restrictions);
 
-        NodePath nodePath = new NodePath(trunkNodePaths.size(), trunkNodePath, loopNodeIdx);
+        NodePath nodePath = new NodePath(trunkNodePaths.size(), trunkNodePath, loopNodeIdx, null);  // TODO: firstState is temporally setted to be null
         trunkNodePaths.add(nodePath);
 
         if(!op.isTemporalOp()){
@@ -2911,7 +3177,7 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                 boolean fNeedExplain = needExpE(child[0]) || needExpT(child[0]);
                 Spec p,q;
                 if(!fNeedExplain) {p=child[0]; q=child[1];} else {p=child[1]; q=child[0];}
-                BDD pBdd = tester.cacheGetSpecBdd(p); if(pBdd==null) return false; // SpecBDDMap.get(p);
+                BDD pBdd = testerInfo.getSpecBdd(p); if(pBdd==null) return false; // SpecBDDMap.get(p);
                 if (!startState.and(pBdd).isZero())
                     return explainPath(p,path,pos);
                 else return explainPath(q,path,pos);
@@ -2920,11 +3186,11 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                 // explain spec according to its semantics over path^pos;
 
                 if(op==Operator.NEXT){ //spec=X f
-                    BDD X=tester.cacheGetSpecBdd(spec); if(X==null) return false; // SpecBDDMap.get(spec);
+                    BDD X= testerInfo.getSpecBdd(spec); if(X==null) return false; // SpecBDDMap.get(spec);
                     if(X==null || startState.and(X).isZero()) return false;
                     int ni=path.at(pos+1);
                     BDD nextState=graph.nodeGetBDD(path.get(ni));
-                    BDD Xf=tester.cacheGetSpecBdd(child[0]); if(Xf==null) return false; //SpecBDDMap.get(child[0]);
+                    BDD Xf= testerInfo.getSpecBdd(child[0]); if(Xf==null) return false; //SpecBDDMap.get(child[0]);
                     if(Xf==null || nextState.and(Xf).isZero()) return false;
 
                     String firstEdgeId=snid+"->"+path.get(ni);
@@ -2935,9 +3201,9 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                     else graph.edgeAddSpec(eid, child[0], path, pos + 1, false);
                     //return explainPath(child[0],path,pos+1);
                 }else if(op==Operator.UNTIL){
-                    BDD X=tester.cacheGetSpecBdd(spec); if(X==null) return false; //SpecBDDMap.get(spec);
-                    BDD Xf=tester.cacheGetSpecBdd(child[0]); if(Xf==null) return false; //SpecBDDMap.get(child[0]);
-                    BDD Xg=tester.cacheGetSpecBdd(child[1]); if(Xg==null) return false; //SpecBDDMap.get(child[1]);
+                    BDD X= testerInfo.getSpecBdd(spec); if(X==null) return false; //SpecBDDMap.get(spec);
+                    BDD Xf= testerInfo.getSpecBdd(child[0]); if(Xf==null) return false; //SpecBDDMap.get(child[0]);
+                    BDD Xg= testerInfo.getSpecBdd(child[1]); if(Xg==null) return false; //SpecBDDMap.get(child[1]);
                     if(X==null) return false;
                     if(Xf==null) return false;
                     if(Xg==null) return false;
@@ -2963,9 +3229,9 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                         }
                     }
                 }else if(op==Operator.RELEASES){
-                    BDD X=tester.cacheGetSpecBdd(spec); if(X==null) return false; //SpecBDDMap.get(spec);
-                    BDD Xf=tester.cacheGetSpecBdd(child[0]); if(Xf==null) return false; //SpecBDDMap.get(child[0]);
-                    BDD Xg=tester.cacheGetSpecBdd(child[1]); if(Xg==null) return false; //SpecBDDMap.get(child[1]);
+                    BDD X= testerInfo.getSpecBdd(spec); if(X==null) return false; //SpecBDDMap.get(spec);
+                    BDD Xf= testerInfo.getSpecBdd(child[0]); if(Xf==null) return false; //SpecBDDMap.get(child[0]);
+                    BDD Xg= testerInfo.getSpecBdd(child[1]); if(Xg==null) return false; //SpecBDDMap.get(child[1]);
                     if(X==null) return false;
                     if(Xf==null) return false;
                     if(Xg==null) return false;
@@ -3003,9 +3269,9 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                     if(b<0) throw new ModelCheckException("The upper bound of " + spec + "cannot be less than 0.");
                     if(a>b) throw new ModelCheckException("The lower bound of " + spec + "cannot be larger than the upper bound.");
 
-                    BDD X=tester.cacheGetSpecBdd(spec); if(X==null || (X!=null && startState.and(X).isZero())) return false;
-                    BDD Xf=tester.cacheGetSpecBdd(child[0]); if(Xf==null) return false;
-                    BDD Xg=tester.cacheGetSpecBdd(child[2]); if(Xg==null) return false;
+                    BDD X= testerInfo.getSpecBdd(spec); if(X==null || (X!=null && startState.and(X).isZero())) return false;
+                    BDD Xf= testerInfo.getSpecBdd(child[0]); if(Xf==null) return false;
+                    BDD Xg= testerInfo.getSpecBdd(child[2]); if(Xg==null) return false;
 
                     graph.edgeAddSpec(path.get(path.at(pos))+"->"+path.get(path.at(pos+1)), spec,path,pos,true);
 
@@ -3049,9 +3315,9 @@ public class RTCDLs_ModelCheckAlg extends ModelCheckAlgI {
                     if(b<0) throw new ModelCheckException("The upper bound of " + spec + "cannot be less than 0.");
                     if(a>b) throw new ModelCheckException("The lower bound of " + spec + "cannot be larger than the upper bound.");
 
-                    BDD X=tester.cacheGetSpecBdd(spec); if(X==null || (X!=null && startState.and(X).isZero())) return false;
-                    BDD Xf=tester.cacheGetSpecBdd(child[0]); if(Xf==null) return false;
-                    BDD Xg=tester.cacheGetSpecBdd(child[2]); if(Xg==null) return false;
+                    BDD X= testerInfo.getSpecBdd(spec); if(X==null || (X!=null && startState.and(X).isZero())) return false;
+                    BDD Xf= testerInfo.getSpecBdd(child[0]); if(Xf==null) return false;
+                    BDD Xg= testerInfo.getSpecBdd(child[2]); if(Xg==null) return false;
 
                     graph.edgeAddSpec(path.get(path.at(pos))+"->"+path.get(path.at(pos+1)), spec,path,pos,true);
 

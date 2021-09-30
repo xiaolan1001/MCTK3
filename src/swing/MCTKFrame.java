@@ -7,7 +7,7 @@ import edu.wis.jtlv.env.module.SMVModule;
 import edu.wis.jtlv.env.spec.Spec;
 import edu.wis.jtlv.env.spec.SpecException;
 import edu.wis.jtlv.lib.mc.ModelCheckAlgException;
-import edu.wis.jtlv.lib.mc.RTCDLs.RTCDLs_ModelCheckAlg;
+import edu.wis.jtlv.lib.mc.RTCDLs_old.RTCDLs_ModelCheckAlg;
 import edu.wis.jtlv.lib.mc.RTCTLs.RTCTLs_ModelCheckAlg;
 import edu.wis.jtlv.lib.mc.RTCTLs.ViewerExplainRTCTLs;
 import edu.wis.jtlv.old_lib.mc.ModelCheckException;

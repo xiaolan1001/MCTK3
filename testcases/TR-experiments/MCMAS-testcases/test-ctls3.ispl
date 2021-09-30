@@ -1,0 +1,67 @@
+-- generating pdf counterexamples: dot -T pdf -o test.pdf formula1.dot
+Agent e
+  Vars:
+    l : 1..11;
+    s : boolean;
+    r : boolean;
+    a : boolean;
+  end Vars
+  Actions = {a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11};
+  
+  Protocol:
+    l=1: {a2};
+    l=2: {a2,a3,a6};
+    l=3: {a4};
+    l=4: {a5,a8};
+    l=5: {a3};
+    l=6: {a7};
+    l=7: {a6,a8};
+    l=8: {a8,a9};
+    l=9: {a9,a10};
+    l=10: {a8,a10,a11};
+    l=11: {a8};
+  end Protocol
+  
+  Evolution:
+    (l=2 and s=true and r=false and a=false) if (Action=a2);
+    (l=3 and s=true and r=false and a=false) if (Action=a3);
+    (l=4 and s=true and r=true and a=false) if (Action=a4);
+    (l=5 and s=true and r=true and a=false) if (Action=a5);
+    (l=6 and s=true and r=true and a=false) if (Action=a6);
+    (l=7 and s=true and r=true and a=false) if (Action=a7);
+    (l=8 and s=false and r=false and a=false) if (Action=a8);
+    (l=9 and s=true and r=false and a=false) if (Action=a9);
+    (l=10 and s=false and r=true and a=false) if (Action=a10);
+    (l=11 and s=false and r=false and a=true) if (Action=a11);
+  end Evolution
+end Agent
+
+Evaluation
+  s if (e.s=true);
+  r if (e.r=true);
+  a if (e.a=true);
+  l4 if (e.l=4);
+  l7 if (e.l=7);
+  l8 if (e.l=8);
+end Evaluation
+
+InitStates
+  e.l=1 and e.s=false and e.r=false and e.a=false;
+end InitStates
+
+Fairness
+ s;
+ r;
+end Fairness
+
+Formulae
+--CTL* A G(s -> (s U (r and A X F a)));
+--CTL* A G (s -> E ((!r) U a));
+
+--CTL* (A G(s -> (s U (r and A X F a)))) or (A G (s -> E ((!r) U a)));  --formula 1
+
+--AF(r and AF a); -- formula 2
+
+LTL G(s -> (s U (r and X F a)));
+  
+end Formulae

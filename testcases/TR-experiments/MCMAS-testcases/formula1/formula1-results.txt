@@ -1,0 +1,91 @@
+Verifying properties...
+  Formula number 1: ((A (G (s -> (s U (r && (A (X (F a)))))))) || (A (G (s -> (E ((! r) U a)))))), is FALSE in the model
+  The following is a counterexample for the formula: 
+   < 0 1 2 3 4 5 6 7 8 5 > 
+   < 0 9 9 > 
+  States description: 
+------------- State: 0 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 1
+  r = false
+  s = false
+----------------------------------------
+------------- State: 1 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 2
+  r = false
+  s = true
+----------------------------------------
+------------- State: 2 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 2
+  r = false
+  s = true
+----------------------------------------
+------------- State: 3 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 2
+  r = false
+  s = true
+----------------------------------------
+------------- State: 4 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 2
+  r = false
+  s = true
+----------------------------------------
+------------- State: 5 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 6
+  r = true
+  s = true
+----------------------------------------
+------------- State: 6 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 7
+  r = true
+  s = true
+----------------------------------------
+------------- State: 7 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 6
+  r = true
+  s = true
+----------------------------------------
+------------- State: 8 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 7
+  r = true
+  s = true
+----------------------------------------
+------------- State: 9 -----------------
+Agent Environment
+Agent e
+  a = false
+  l = 2
+  r = false
+  s = true
+----------------------------------------
+done, 1 formulae successfully read and checked
+execution time = 0.06
+number of reachable states = 16
+BDD memory in use = 9935920
+
