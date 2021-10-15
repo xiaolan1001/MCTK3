@@ -2069,7 +2069,7 @@ public class RTCTLs_ModelCheckAlg extends ModelCheckAlgI {
         // (2) Z := n.s ◦ R*
         BDD Z=DT.allSucc(DT_fromStates);  // now Z is the set of reachable states from n.s
         // (3) T := R ∧ (Z × Z);
-        DT.restrictTrans(Z.id());
+        DT.restrictTrans(Z.id().and(Env.prime(Z)));
         boolean c=!Z.equals(Zp);
         while(c){
             Zp=Z;
@@ -2079,12 +2079,12 @@ public class RTCTLs_ModelCheckAlg extends ModelCheckAlgI {
                 Y=Z.and(DT.succ(Z));
                 if(Y.equals(Z)) break; else Z=Y;
             }
-            if(!Z.equals(Zp)){ DT.restrictTrans(Z.id()); Zp=Z; c=true; }
+            if(!Z.equals(Zp)){ DT.restrictTrans(Z.id().and(Env.prime(Z))); Zp=Z; c=true; }
 
             if (weakDT!=null) {
                 for (int i = 0; i < weakDT.justiceNum(); i++) {
                     Z=DT.allSucc(Z.id().and(weakDT.justiceAt(i)));
-                    if(!Z.equals(Zp)){ DT.restrictTrans(Z.id()); Zp=Z; c=true; }
+                    if(!Z.equals(Zp)){ DT.restrictTrans(Z.id().and(Env.prime(Z))); Zp=Z; c=true; }
                 }
             }
         }
@@ -2156,7 +2156,7 @@ public class RTCTLs_ModelCheckAlg extends ModelCheckAlgI {
         // Step S4: construct a fair cycle path "period" within scc from t
         //----------------------------------------------------------------------------------
         // (27)
-        DT.restrictTrans(scc.id());
+        DT.restrictTrans(scc.id().and(Env.prime(scc)));
 
         // (28)
         Vector<BDD> period = new Vector<BDD>();

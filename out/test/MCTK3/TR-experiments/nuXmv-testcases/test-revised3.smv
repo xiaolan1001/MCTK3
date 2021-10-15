@@ -1,0 +1,53 @@
+MODULE main
+VAR
+  l : 1..11;
+  s: boolean;
+  r: boolean;
+  a: boolean;
+
+JUSTICE s;
+JUSTICE r;
+
+INIT l=1;
+
+TRANS l=1 -> (!s & !r & !a);
+TRANS l=2 -> (s & !r & !a);
+TRANS l=3 -> (s & !r & !a);
+TRANS l=4 -> (s & r & !a);
+TRANS l=5 -> (s & r & !a);
+TRANS l=6 -> (s & r & !a);
+TRANS l=7 -> (s & r & !a);
+TRANS l=8 -> (!s & !r & !a);
+TRANS l=9 -> (s & !r & !a);
+TRANS l=10 -> (!s & r & !a);
+TRANS l=11 -> (!s & !r & a);
+
+
+TRANS 
+(l=1 & next(l)=2) |
+(l=2 & next(l)=2) |
+(l=2 & next(l)=3) |
+(l=2 & next(l)=6) |
+(l=3 & next(l)=4) |
+(l=4 & next(l)=5) |
+(l=4 & next(l)=8) |
+(l=5 & next(l)=3) |
+(l=6 & next(l)=7) |
+(l=7 & next(l)=6) |
+(l=7 & next(l)=8) |
+(l=8 & next(l)=8) |
+(l=8 & next(l)=9) |
+(l=9 & next(l)=9) |
+(l=9 & next(l)=10) |
+(l=10 & next(l)=8) |
+(l=10 & next(l)=10) |
+(l=10 & next(l)=11) |
+(l=11 & next(l)=8);
+
+--RTCTL*SPEC (A G (s -> (s U (r & A X F a)))) | (A G (s -> E(!r U a) )); --Formula 1
+--RTCTL*SPEC A F(r & A F a); --Formula 2
+--RTCTL*SPEC G (s -> (s U (r & X F a))); --Formula 3
+
+--SPEC AF(r & AF a); --Formula 2
+--SPEC AG(s -> A[s U (r & AX AF a)]);
+LTLSPEC G (s -> (s U (r & X F a))); --Formula 3
