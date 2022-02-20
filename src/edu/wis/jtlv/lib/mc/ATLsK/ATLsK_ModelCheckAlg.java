@@ -27,11 +27,13 @@ import java.util.Vector;
 import static edu.wis.jtlv.env.Env.all_couples;
 
 
+//学者注：不写public也能正确编译，但这个类将无法从命令行执行。
 class ATLsK_TesterVariables {
     ModuleBDDField var;     // the output variable
     ModuleBDDField lbound;  // the lower bound of the interval
     ModuleBDDField width;   // the width of the interval
 
+    //学者注：构造方法
     public ATLsK_TesterVariables(ModuleBDDField var, ModuleBDDField lbound, ModuleBDDField width) {
         this.var = var;
         this.lbound = lbound;
@@ -40,7 +42,7 @@ class ATLsK_TesterVariables {
 }
 
 /**
- * There are two methods to use this algorithms:
+ * There are two methods to use this algorithm:
  * <p>
  * 1. Given a specification \phi (as a formula in temporal logic) we want to
  * decide whether \phi is valid over finite state program P, i.e. whether all
@@ -54,6 +56,16 @@ class ATLsK_TesterVariables {
  *
  * @author yaniv sa'ar.
  * @version {@value Env#version}
+ */
+
+/**
+ * 学者注：对以上英文注释进行翻译。
+ * ATL*K模型检测算法
+ * 有两种方法使用该算法：
+ * 1.给定一个规约 \phi（形式为时态逻辑表示的公式），我们想要判定\phi在有限状态程序 P 中是否有效，
+ * 也即，该设计的所有计算是否都满足于\phi。
+ *
+ * 2.用该设计组成一个tester，并执行模型检测。如果此组合可行，那么抛出一个反例。
  */
 public class ATLsK_ModelCheckAlg extends ModelCheckAlgI {
     private Spec property;
@@ -153,13 +165,13 @@ public class ATLsK_ModelCheckAlg extends ModelCheckAlgI {
         //-----------------------------------------------------------------------------------------------------------
         // logical connectives
         //-----------------------------------------------------------------------------------------------------------
-        if (op == Operator.NOT) {
+        if (op == Operator.NOT) { //学者注：逻辑连接词非
             c1 = sat(child[0], tester).not();
             SpecBDDMap.put(child[0], c1.not());
             SpecTesterMap.put(child[0], tester);
             return c1;
         }
-        if (op == Operator.AND) {
+        if (op == Operator.AND) { //学者注：逻辑连接词与
             c1 = sat(child[0], tester);
             c2 = sat(child[1], tester);
             BDD c3 = c1.and(c2);
@@ -169,7 +181,7 @@ public class ATLsK_ModelCheckAlg extends ModelCheckAlgI {
             SpecTesterMap.put(child[1], tester);
             return c3;
         }
-        if (op == Operator.OR) {
+        if (op == Operator.OR) { //学者注：逻辑连接词或
             c1 = sat(child[0], tester);
             c2 = sat(child[1], tester);
             BDD c3 = c1.or(c2);
