@@ -65,12 +65,12 @@ class ATLsK_TesterVariables {
  * 1.给定一个规约 \phi（形式为时态逻辑表示的公式），我们想要判定\phi在有限状态程序 P 中是否有效，
  * 也即，该设计的所有计算是否都满足于\phi。
  *
- * 2.用该设计组成一个tester，并执行模型检测。如果此组合可行，那么抛出一个反例。
+ * 2.将design和tester组合，并执行模型检测。如果此组合可行，那么抛出一个反例。（feasible状态包括reachable状态和fair状态）
  */
 public class ATLsK_ModelCheckAlg extends ModelCheckAlgI {
-    private Spec property;
+    private Spec property;  //待验证的规约
 
-    private Spec chkProp; // the property actually checked
+    private Spec chkProp; // the property actually checked 实际验证的规约
     private BDD chkBdd; // the BDD obtained by checking chkBdd
     private BDDVarSet visibleVars;
 
@@ -79,10 +79,16 @@ public class ATLsK_ModelCheckAlg extends ModelCheckAlgI {
     private int createdPathNumber = 0; // the number of the paths currently created
     private int createdEpistemicEdgeNumber = 0;
     private int CycleStateNo = 0;//the position of the first state of period in path
-    private BDD[] returned_path = null;// a fair computation path of D || T
+    private BDD[] returned_path = null;// a fair computation path of D || T D和T并行组合的一个公平计算路径
     GraphExplainATLsK graph;
     boolean isShowGraph;
 
+    /**
+     * <p>
+     *     设置是否显示Graph
+     * </p>
+     * @param isShowGraph 布尔值：Ture显示；False不显示
+     */
     public void SetShowGraph(boolean isShowGraph) {
         this.isShowGraph = isShowGraph;
     }
