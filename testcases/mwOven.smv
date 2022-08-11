@@ -30,14 +30,14 @@ TRANS
     (s7 & next(s4))
     ;
 
---JUSTICE start & close & !error;
+JUSTICE start & close & !error;
 
---SPECIFICATIONS
---SPEC !E[TRUE U (start & close & heat & !error)];
---SPEC !EG ( (!start & !close & !heat & !error) |  (start & !close & !heat & error) | (start & close & !heat & error) );
---LTLSPEC !G !heat;
---SPEC (!EG ( (!start & !close & !heat & !error) |  (start & !close & !heat & error) | (start & close & !heat & error) )) | !EG !heat;
---ATL*SPEC A G(start -> A F heat);
---ATL*SPEC ! E F(!close & start & E((F heat) & (G error)));
---ATL*SPEC A G( (!close & start) -> A((G !heat) | (F !error)) );
---END
+----------ATL*--ATL*--ATL*--END
+RTCTL*SPEC !E[TRUE U (start & close & heat & !error)];
+SPEC !EG ( (!start & !close & !heat & !error) |  (start & !close & !heat & error) | (start & close & !heat & error) );
+LTLSPEC !G !heat;
+SPEC (!EG ( (!start & !close & !heat & !error) |  (start & !close & !heat & error) | (start & close & !heat & error) )) | !EG !heat;
+RTCTL*SPEC A G(start -> A F heat);
+SPEC ! E F(!close & start & E((F heat) & (G error)));
+SPEC A G( (!close & start) -> A((G !heat) | (F !error)) );
+RTCTL*SPEC E G TRUE;

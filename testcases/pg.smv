@@ -1,0 +1,32 @@
+MODULE main
+VAR
+    pc : 1..4;
+    x : {0, 1}
+    act : {none, skip};
+ASSIGN
+    init(pc) := 1;
+    init(act) := none;
+    next(pc) :=
+        case
+            pc = 1 : 2;
+            pc = 2 & act = skip : 3;
+            pc = 2 & act = none : 4;
+            pc = 3 : 2;
+        esac;
+    next(x) :=
+        case
+            pc = 1 : 1;
+            pc = 2 & act = none : 0;
+            TRUE : x;
+        esac;
+    next(act) :=
+        case
+            pc = 2 : {none, skip};
+            TRUE : none;
+        esac;
+RTCTL*SPEC E F G(x=1);
+RTCTL*SPEC A F A G(x=1);
+RTCTL*SPEC E F (x=0);
+RTCTL*SPEC E G!(x=0);
+RTCTL*SPEC E F G!(x=0);
+RTCTL*SPEC E F!(pc=4);
