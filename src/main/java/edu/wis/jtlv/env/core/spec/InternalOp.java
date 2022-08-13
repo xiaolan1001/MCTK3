@@ -4,14 +4,16 @@ public enum InternalOp {
 	// UNARY............
 	// Prop
 	NOT,
+	// LTL
+	FINALLY, GLOBALLY, HISTORICALLY, NEXT, NOT_PREV_NOT, ONCE, PREV,
+	// CTL
+	EX, EF, EG, AX, AF, AG,
 	//CTL*
 	AA, // all path
 	EE, // some path
-	// LTL
-	FINALLY, GLOBALLY, HISTORICALLY, NEXT, NOT_PREV_NOT, ONCE, PREV,
-
-	// CTL
-	EX, EF, EG, AX, AF, AG,
+	//ATL*
+	CAN_ENFORCE, // ATL* can enforce
+	CANNOT_AVOID, // ATL* cannot avoid
 
 	// BINARY............
 	// Prop
@@ -21,12 +23,9 @@ public enum InternalOp {
 	// CTL
 	ABF, ABG, EBF, EBG, AU, EU,
 	// RTLTL
-	B_FINALLY, B_GLOBALLY, B_UNTIL,
+	B_FINALLY, B_GLOBALLY,
 	//Knowledge
 	KNOW, SKNOW, NKNOW, NSKNOW,
-	//ATL*
-	CAN_ENFORCE, // ATL* can enforce
-	CANNOT_AVOID, // ATL* cannot avoid
 
 	// TRIPLET............
 	// Prop
@@ -34,7 +33,7 @@ public enum InternalOp {
 	// CTL
 	ABU, EBU,
 	//RTLTL
-	B_RELEASES,
+	B_RELEASES, B_UNTIL,
 
 	// LDL
 	LDL_OR,
@@ -54,11 +53,11 @@ public enum InternalOp {
 	// Groupings //////////////////////////////////////////////////////////////
 	// number of operands...
 	public static final InternalOp[] unaryOp = { NOT, FINALLY, GLOBALLY, HISTORICALLY,
-			NEXT, NOT_PREV_NOT, ONCE, PREV, EX, EF, EG, AX, AF, AG, EE, AA,
+			NEXT, NOT_PREV_NOT, ONCE, PREV, EX, EF, EG, AX, AF, AG, EE, AA, CAN_ENFORCE, CANNOT_AVOID,
 			LDL_TEST,
 			LDL_REPEAT};
 	public static final InternalOp[] binaryOp = { AND, OR, XOR, XNOR, IFF, IMPLIES,
-			RELEASES, SINCE, TRIGGERED, UNTIL, ABF, ABG, EBF, EBG, AU, EU, B_FINALLY, B_GLOBALLY, KNOW, SKNOW, NKNOW, NSKNOW, CAN_ENFORCE, CANNOT_AVOID,
+			RELEASES, SINCE, TRIGGERED, UNTIL, ABF, ABG, EBF, EBG, AU, EU, B_FINALLY, B_GLOBALLY, KNOW, SKNOW, NKNOW, NSKNOW,
 			LDL_OR,
 			LDL_AND,
 			LDL_CONC,

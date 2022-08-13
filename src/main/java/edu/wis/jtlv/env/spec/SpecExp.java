@@ -541,6 +541,18 @@ public class SpecExp implements Spec {
 		Spec[] ch = this.getChildren();
 
 		// special cases
+		if (op == Operator.AF)
+			return "A[" + "F " + ch[0] + "]";
+		if (op == Operator.EF)
+			return "E[" + "F " + ch[0] + "]";
+		if (op == Operator.AG)
+			return "A[" + "G " + ch[0] + "]";
+		if (op == Operator.EG)
+			return "E[" + "G " + ch[0] + "]";
+		if (op == Operator.AX)
+			return "A[" + "X " + ch[0] + "]";
+		if (op == Operator.EX)
+			return "E[" + "X " + ch[0] + "]";
 		if (op == Operator.AU)
 			return "A[" + ch[0] + " U " + ch[1] + "]";
 		if (op == Operator.EU)
