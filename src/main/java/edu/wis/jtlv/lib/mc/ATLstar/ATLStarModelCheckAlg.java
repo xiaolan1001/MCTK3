@@ -2,13 +2,13 @@ package edu.wis.jtlv.lib.mc.ATLstar;
 
 import edu.wis.jtlv.env.Env;
 import edu.wis.jtlv.env.core.smv.SMVParseException;
-import edu.wis.jtlv.env.module.Module;
-import edu.wis.jtlv.env.module.ModuleBDDField;
-import edu.wis.jtlv.env.module.ModuleException;
-import edu.wis.jtlv.env.module.SMVModule;
+import edu.wis.jtlv.env.core.smv.eval.*;
+import edu.wis.jtlv.env.core.smv.schema.SMVAgentInfo;
+import edu.wis.jtlv.env.module.*;
 import edu.wis.jtlv.env.spec.*;
 import edu.wis.jtlv.lib.AlgExceptionI;
 import edu.wis.jtlv.lib.AlgResultI;
+import edu.wis.jtlv.lib.AlgResultString;
 import edu.wis.jtlv.lib.mc.ModelCheckAlgException;
 import edu.wis.jtlv.lib.mc.ModelCheckAlgI;
 import edu.wis.jtlv.old_lib.mc.ModelCheckException;
@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Vector;
 
 public class ATLStarModelCheckAlg extends ModelCheckAlgI {
-    private static final Logger log = LogManager.getLogger(ATLStarModelCheckAlg.class);
     private Spec property;  //待验证的规约
     private BDDVarSet visibleVars; //可观察变量
 
@@ -32,6 +31,9 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
     private int testerID = 0;
 
     private int fieldId = 0;
+
+    private Spec checkProp; //实际验证的规约
+    private BDD checkBDD; //检测checkProp获得的BDD
 
     //无参构造
     public ATLStarModelCheckAlg() {
@@ -54,19 +56,19 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
     }
 
     /**
-     *
+     * 求解可满足状态
      * @param spec ATLStar 规约
      * @param tester the tester that holds the sub-testers of spec
-     * @return
-     * @throws ModuleException
-     * @throws SMVParseException
-     * @throws ModelCheckException
-     * @throws ModelCheckAlgException
-     * @throws SpecException
+     * @return BDD
+     * @throws ModuleException Module异常
+     * @throws SMVParseException SMV解析异常
+     * @throws ModelCheckException 模型检测异常
+     * @throws ModelCheckAlgException 模型检测算法异常
+     * @throws SpecException 规约异常
      */
     public BDD sat(Spec spec, SMVModule tester)
     throws ModuleException, SMVParseException, ModelCheckException, ModelCheckAlgException, SpecException {
-        log.info("ATLStarModelCheckAlg类的sat方法的spec值:{}",spec);
+        LoggerUtil.info("sat方法的spec属性值:{}",spec);
         if(spec instanceof SpecBDD) {
             return ((SpecBDD) spec).getVal();
         }
@@ -83,7 +85,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         if(op == Operator.NOT) {
             c1 = sat(children[0], tester);
             specBDDMap.put(children[0], c1.not());
-            specTesterMap.put(children[0], tester); //t:=(\emptyset,T,T,/emptyset)空测试器
+            specTesterMap.put(children[0], tester); //t:=(\emptyset,T,T,\emptyset)空测试器
             return c1;
         }
         if(op == Operator.AND) {
@@ -106,35 +108,37 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             specTesterMap.put(children[1], tester); //t:=tester1 || tester2
             return c3;
         }
+        //*************************************************
 
-        //*********************路径量词*********************
+        //*********************策略量词*********************
         if(op == Operator.CAN_ENFORCE) return satCanEnforce(spec);
         if(op == Operator.CANNOT_AVOID) return satCantAvoid(spec);
+        //*************************************************
 
         //*********************时态算子*********************
         if(op == Operator.NEXT) {
             x = tester.addVar("X" + (++fieldId));
             xBDD = x.getDomain().ithVar(1);
-            c1 = sat(children[0], tester);
+            c1 = sat(children[0], tester); //\sita\phi := TRUE
             specBDDMap.put(children[0], c1);
             specTesterMap.put(children[0], tester);
             BDD primeC1 = Env.prime(c1);
-            tester.conjunctTrans(xBDD.imp(primeC1));
-            return xBDD;
+            tester.conjunctTrans(xBDD.imp(primeC1)); //R\phi := x\phi -> f'
+            return xBDD; //J\phi := \emptyset
         }
         if(op == Operator.UNTIL) {
             x = tester.addVar("X" + (++fieldId));
             xBDD = x.getDomain().ithVar(1);
             c1 = sat(children[0], tester);
-            c2 = sat(children[1], tester);
+            c2 = sat(children[1], tester); //\sita\phi := x\phi -> f or g
             specBDDMap.put(children[0], c1);
             specBDDMap.put(children[1], c2);
             specTesterMap.put(children[0], tester);
             specTesterMap.put(children[1], tester);
 
             BDD primeX = Env.prime(xBDD);
-            tester.conjunctTrans(xBDD.imp(c2.or(c1.and(primeX))));
-            tester.addJustice(xBDD.imp(c2));
+            tester.conjunctTrans(xBDD.imp(c2.or(c1.and(primeX)))); //R\phi := x\phi -> g or (f and (f U g)')
+            tester.addJustice(xBDD.imp(c2)); //J\phi := {x\phi -> g}
 
             return xBDD;
         }
@@ -142,22 +146,35 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             x = tester.addVar("X" + (++fieldId));
             xBDD = x.getDomain().ithVar(1);
             c1 = sat(children[0], tester);
-            c2 = sat(children[1], tester);
+            c2 = sat(children[1], tester); //\sita\phi := TRUE
             specBDDMap.put(children[0], c1);
             specBDDMap.put(children[1], c2);
             specTesterMap.put(children[0], tester);
             specTesterMap.put(children[1], tester);
 
             BDD primeX = Env.prime(xBDD);
-            tester.conjunctTrans(xBDD.imp(c2.and(c1.or(primeX))));
+            tester.conjunctTrans(xBDD.imp(c2.and(c1.or(primeX)))); //R\phi := x\phi -> g and (f or (f U g)')
 
-            return xBDD;
+            return xBDD; //J\phi := \emptyset
         }
-        //otherwise
+        if(op == Operator.B_UNTIL) {
+            return satBUntil(spec, tester);
+        }
+        if(op == Operator.B_RELEASES) {
+            return satBRelease(spec, tester);
+        }
+        //***************************************************
+
+        //*********************认知模态算子*********************
+        if(op == Operator.KNOW) return satKnow(spec);
+        if(op == Operator.NKNOW) return satNKnow(spec);
+        //****************************************************
+
+        //*********************otherwise*********************
         throw new ModelCheckException("Cannot handle the specification " + spec + ".");
     }
 
-    public BDD satCanEnforce(Spec spec) throws ModelCheckException, SMVParseException,
+    private BDD satCanEnforce(Spec spec) throws ModelCheckException, SMVParseException,
             ModuleException, ModelCheckAlgException, SpecException {
         SMVModule design = (SMVModule) this.getDesign();
         SpecExp specExp = (SpecExp) spec;
@@ -175,7 +192,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         }
 
         SMVModule negC1Tester = new SMVModule("Tester" + (++testerID));
-        negC1 = sat(NNF(new SpecExp(Operator.NOT, children[children.length-1])), negC1Tester);
+        negC1 = sat(SpecUtil.NNF(new SpecExp(Operator.NOT, children[children.length-1])), negC1Tester);
         specBDDMap.put(children[children.length-1], negC1.not());
         if(!testerIsEmpty(negC1Tester)) {
             design.syncComposition(negC1Tester);
@@ -189,7 +206,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         return specBDD;
     }
 
-    public BDD satCantAvoid(Spec spec) throws ModelCheckException, SMVParseException,
+    private BDD satCantAvoid(Spec spec) throws ModelCheckException, SMVParseException,
             ModuleException, ModelCheckAlgException, SpecException {
         SMVModule design = (SMVModule) this.getDesign();
         SpecExp specExp = (SpecExp) spec;
@@ -221,116 +238,326 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         return specBDD;
     }
 
-    public static Spec NNF(Spec spec) throws ModelCheckException, SpecException {
-        log.info("ATLStarModelCheckAlg类的NNF方法的spec值:{}",spec);
-        if(!(spec instanceof SpecExp)) return spec;
+    private BDD satBUntil(Spec spec, SMVModule tester)
+        throws ModuleException, ModelCheckException, SMVParseException, ModelCheckAlgException, SpecException {
+        SpecExp specExp = (SpecExp) spec;
+        Operator op = specExp.getOperator();
+        if(op != Operator.B_UNTIL) return null;
 
-        SpecExp propExp = (SpecExp) spec;
-        Operator op = propExp.getOperator();
-        Spec[] children = propExp.getChildren();
+        Spec[] children = specExp.getChildren();
+        BDD c1, c2 = null;
+        ModuleBDDField x, l, w = null;
+        BDD xBDD; //测试器的输出变量
 
-        //除“非”以外的一元算子
-        if(op==Operator.NEXT
-                || op==Operator.CAN_ENFORCE
-                || op==Operator.CANNOT_AVOID) {
-            return new SpecExp(op, NNF(children[0]));
+        x = tester.addVar("X" + (++fieldId));
+        xBDD = x.getDomain().ithVar(1);
+        SpecRange range = (SpecRange) children[1];
+        int a = range.getFrom();
+        int b = range.getTo();
+
+        c1 = sat(children[0], tester);
+        c2 = sat(children[2], tester);
+        specBDDMap.put(children[0], c1);
+        specBDDMap.put(children[2], c2);
+        specTesterMap.put(children[0], tester);
+        specTesterMap.put(children[2], tester);
+
+        //0 < a = b 或 0 = a < b
+        if((a == b) || (a==0 && b>0)) {
+            //若\phi = f U a..a g 且 a>0, 则l属于[0,a]是表示区间下界的整型变量
+            //若\phi = f U 0..a g 且 a>0, 则l属于[0,a]是表示区间宽度的整型变量
+            l = tester.addVar("L" + fieldId, 0, b);
+
+            //l > 0
+            BDD lGreaterThan0 = new StmtOperator(tester, new OpGT(new ValueDomStmt(tester, l),
+                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();
+            //next(x)=1 或 x'
+            BDD nextXEqual1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, x)),
+                    new ValueConsStrStmt(tester, new String[]{"1"}))).eval_stmt().toBDD();
+            //next(l)=l-1 或 l'=l-1
+            BDD nextLEqualLMinus1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, l)),
+                    new OpMinus(new ValueDomStmt(tester, l), new ValueConsStrStmt(tester, new String[]{"1"}))))
+                    .eval_stmt()
+                    .toBDD();
+            //l = 0
+            BDD lEqual0 = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, l),
+                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();
+            //l = b
+            BDD lEqualB = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, l),
+                    new ValueConsStrStmt(tester, new String[]{""+b}))).eval_stmt().toBDD();
+
+            if (a == b) { //0 < a = b
+                //R\phi := (x & l>0) -> (f & x' & l'=l-1)
+                tester.conjunctTrans(xBDD.and(lGreaterThan0).imp(c1.and(nextXEqual1).and(nextLEqualLMinus1)));
+                //R\phi := (x & l=0) -> g
+                tester.conjunctTrans(xBDD.and(lEqual0).imp(c2));
+            } else { //a=0 & b>0
+                //R\phi := (x & l>0) -> (g | f & x' & l'=l-1)
+                tester.conjunctTrans(xBDD.and(lGreaterThan0).imp(c2.or(c1.and(nextXEqual1).and(nextLEqualLMinus1))));
+                //R\phi := (x & l=0) -> g
+                tester.conjunctTrans(xBDD.and(lEqual0).imp(c2));
+            }
+            //J\phi := \emptyset
+            return xBDD.and(lEqualB); //x & l=b
+        } else { //0 < a < b
+            //l属于[0,a]是表示区间下界的整型变量
+            l = tester.addVar("L"+fieldId, 0, a);
+            //w属于[0,b-a]是表示区间宽度的整型变量
+            w = tester.addVar("W"+fieldId, 0, b-a);
+
+            //next(x)=1 或 x'
+            BDD nextXEqual1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, x)),
+                    new ValueConsStrStmt(tester, new String[]{"1"}))).eval_stmt().toBDD();
+            //l > 0
+            BDD lGreaterThan0 = new StmtOperator(tester, new OpGT(new ValueDomStmt(tester, l),
+                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();
+            //l = 0
+            BDD lEqual0 = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, l),
+                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();
+            //l = a
+            BDD lEqualA = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, l),
+                    new ValueConsStrStmt(tester, new String[]{""+a}))).eval_stmt().toBDD();
+            //next(l)=0 或 l'=0
+            BDD nextLEqual0 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, l)),
+                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();
+            //next(l)=l-1 或 l'=l-1
+            BDD nextLEqualLMinus1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, l)),
+                    new OpMinus(new ValueDomStmt(tester, l), new ValueConsStrStmt(tester, new String[]{"1"}))))
+                    .eval_stmt()
+                    .toBDD();
+            //w > 0
+            BDD wGreaterThan0 = new StmtOperator(tester, new OpGT(new ValueDomStmt(tester, w),
+                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();
+            //w = 0
+            BDD wEqual0 = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, w),
+                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();
+            //next(w)=w 或 w'=w
+            BDD nextWEqualW = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, w)),
+                    new ValueDomStmt(tester, w))).eval_stmt().toBDD();
+            //next(w)=w-1 或 w'=w-1
+            BDD nextWEqualWMinus1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, w)),
+                    new OpMinus(new ValueDomStmt(tester, w), new ValueConsStrStmt(tester, new String[]{"1"}))))
+                    .eval_stmt()
+                    .toBDD();
+            //w = b - a
+            BDD wEqualBMinusA = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, w),
+                    new ValueConsStrStmt(tester, new String[]{""+(b-a)}))).eval_stmt().toBDD();
+            //R\phi := (x & l>0 & w>0) -> (f & x' & l'=l-1 & w'=w)
+            tester.conjunctTrans(xBDD.and(lGreaterThan0).and(wGreaterThan0).imp(c1.and(nextXEqual1).and(nextLEqualLMinus1).and(nextWEqualW)));
+            //R\phi := (x & l=0 & w>0) -> (g | (f & x' & l'=0 & w'=w-1))
+            tester.conjunctTrans(xBDD.and(lEqual0).and(wGreaterThan0).imp(c2.or(c1.and(nextXEqual1.and(nextLEqual0).and(nextWEqualWMinus1)))));
+            //R\phi := (x & l=0 & w=0) -> g
+            tester.conjunctTrans(xBDD.and(lEqual0).and(wEqual0).imp(c2));
+            //J\phi := \emptyset
+            return xBDD.and(lEqualA).and(wEqualBMinusA); //x & l=a & w=b-a
+        }
+    }
+
+    private BDD satBRelease(Spec spec, SMVModule tester)
+            throws ModuleException, ModelCheckException, SMVParseException, ModelCheckAlgException, SpecException {
+        SpecExp specExp = (SpecExp) spec;
+        Operator op = specExp.getOperator();
+        if(op != Operator.B_RELEASES) return null;
+
+        Spec[] children = specExp.getChildren();
+        BDD c1, c2 = null;
+        ModuleBDDField x, l, w = null;
+        BDD xBDD; //测试器的输出变量
+
+        x = tester.addVar("X" + (++fieldId));
+        xBDD = x.getDomain().ithVar(1);
+        SpecRange range = (SpecRange) children[1];
+        int a = range.getFrom();
+        int b = range.getTo();
+
+        c1 = sat(children[0], tester);
+        c2 = sat(children[2], tester);
+        specBDDMap.put(children[0], c1);
+        specBDDMap.put(children[2], c2);
+        specTesterMap.put(children[0], tester);
+        specTesterMap.put(children[2], tester);
+
+        //0 < a = b 或 0 = a < b
+        if((a == b) || (a==0 && b>0)) {
+            //若\phi = f R a..a g 且 a>0, 则l属于[0,a]是表示区间下界的整型变量
+            //若\phi = f R 0..a g 且 a>0, 则l属于[0,a]是表示区间宽度的整型变量
+            l = tester.addVar("L" + fieldId, 0, b);
+
+            //l > 0
+            BDD lGreaterThan0 = new StmtOperator(tester, new OpGT(new ValueDomStmt(tester, l),
+                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();
+            //next(x)=1 或 x'
+            BDD nextXEqual1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, x)),
+                    new ValueConsStrStmt(tester, new String[]{"1"}))).eval_stmt().toBDD();
+            //next(l)=l-1 或 l'=l-1
+            BDD nextLEqualLMinus1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, l)),
+                    new OpMinus(new ValueDomStmt(tester, l), new ValueConsStrStmt(tester, new String[]{"1"}))))
+                    .eval_stmt()
+                    .toBDD();
+            //l = 0
+            BDD lEqual0 = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, l),
+                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();
+            //l = b
+            BDD lEqualB = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, l),
+                    new ValueConsStrStmt(tester, new String[]{""+b}))).eval_stmt().toBDD();
+
+            if (a == b) { //0 < a = b
+                //R\phi := (x & l>0) -> (f & x' & l'=l-1)
+                tester.conjunctTrans(xBDD.and(lGreaterThan0).imp(c1.and(nextXEqual1).and(nextLEqualLMinus1)));
+                //R\phi := (x & l=0) -> g
+                tester.conjunctTrans(xBDD.and(lEqual0).imp(c2));
+            } else { //a=0 & b>0
+                //R\phi := (x & l>0) -> (g & f | (x' & l'=l-1))
+                tester.conjunctTrans(xBDD.and(lGreaterThan0).imp(c2.and(c1.or(nextXEqual1.and(nextLEqualLMinus1)))));
+                //R\phi := (x & l=0) -> g
+                tester.conjunctTrans(xBDD.and(lEqual0).imp(c2));
+            }
+            //J\phi := \emptyset
+            return xBDD.and(lEqualB); //x & l=b
+        } else { //0 < a < b
+            //l属于[0,a]是表示区间下界的整型变量
+            l = tester.addVar("L"+fieldId, 0, a);
+            //w属于[0,b-a]是表示区间宽度的整型变量
+            w = tester.addVar("W"+fieldId, 0, b-a);
+
+            //next(x)=1 或 x'
+            BDD nextXEqual1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, x)),
+                    new ValueConsStrStmt(tester, new String[]{"1"}))).eval_stmt().toBDD();
+            //l > 0
+            BDD lGreaterThan0 = new StmtOperator(tester, new OpGT(new ValueDomStmt(tester, l),
+                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();
+            //l = 0
+            BDD lEqual0 = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, l),
+                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();
+            //l = a
+            BDD lEqualA = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, l),
+                    new ValueConsStrStmt(tester, new String[]{""+a}))).eval_stmt().toBDD();
+            //next(l)=0 或 l'=0
+            BDD nextLEqual0 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, l)),
+                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();
+            //next(l)=l-1 或 l'=l-1
+            BDD nextLEqualLMinus1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, l)),
+                    new OpMinus(new ValueDomStmt(tester, l), new ValueConsStrStmt(tester, new String[]{"1"}))))
+                    .eval_stmt()
+                    .toBDD();
+            //w > 0
+            BDD wGreaterThan0 = new StmtOperator(tester, new OpGT(new ValueDomStmt(tester, w),
+                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();
+            //w = 0
+            BDD wEqual0 = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, w),
+                    new ValueConsStrStmt(tester, new String[]{"0"}))).eval_stmt().toBDD();
+            //next(w)=w 或 w'=w
+            BDD nextWEqualW = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, w)),
+                    new ValueDomStmt(tester, w))).eval_stmt().toBDD();
+            //next(w)=w-1 或 w'=w-1
+            BDD nextWEqualWMinus1 = new StmtOperator(tester, new OpEqual(new OpNext(new ValueDomStmt(tester, w)),
+                    new OpMinus(new ValueDomStmt(tester, w), new ValueConsStrStmt(tester, new String[]{"1"}))))
+                    .eval_stmt()
+                    .toBDD();
+            //w = b - a
+            BDD wEqualBMinusA = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, w),
+                    new ValueConsStrStmt(tester, new String[]{""+(b-a)}))).eval_stmt().toBDD();
+
+            //R\phi := (x & l>0 & w>0) -> (f | (x' & l'=l-1 & w'=w))
+            tester.conjunctTrans(xBDD.and(lGreaterThan0).and(wGreaterThan0).imp(c1.or(nextXEqual1.and(nextLEqualLMinus1).and(nextWEqualW))));
+            //R\phi := (x & l=0 & w>0) -> (g & (f | (x' & l'=0 & w'=w-1)))
+            tester.conjunctTrans(xBDD.and(lEqual0).and(wGreaterThan0).imp(c2.and(c1.or(nextXEqual1.and(nextLEqual0).and(nextWEqualWMinus1)))));
+            //R\phi := (x & l=0 & w=0) -> g
+            tester.conjunctTrans(xBDD.and(lEqual0).and(wEqual0).imp(c2));
+            //J\phi := \emptyset
+            return xBDD.and(lEqualA).and(wEqualBMinusA); //x & l=a & w=b-a
+        }
+    }
+
+    /**
+     * spec = i KNOW f
+     * @param spec 规约
+     * @return BDD
+     * @throws ModelCheckAlgException 模型检测算法异常
+     * @throws ModelCheckException 模型检测异常
+     * @throws SMVParseException SMV解析异常
+     * @throws ModuleException Module异常
+     * @throws SpecException Spec异常
+     */
+    private BDD satKnow(Spec spec)
+            throws ModelCheckAlgException, ModelCheckException, SMVParseException, ModuleException, SpecException {
+        SMVModule design = (SMVModule) getDesign();
+        SpecExp specExp = (SpecExp) spec;
+        Operator op = specExp.getOperator();
+        Spec[] children = specExp.getChildren();
+
+        BDD temp;
+        if(op != Operator.KNOW) return null;
+
+        //处理c1, f=children[1];
+        SMVModule negC1Tester = new SMVModule("Tester"+(++testerID));
+        BDD negC1 = sat(SpecUtil.NNF(new SpecExp(Operator.NOT, children[1])), negC1Tester);
+
+        specBDDMap.put(children[1], negC1.not());
+        specTesterMap.put(children[1], negC1Tester);
+
+        if(!testerIsEmpty(negC1Tester)) {
+            design.syncComposition(negC1Tester);
+            BDD feasibleStates = design.feasible(); //feasibleStates = fair(D || T)
+            BDDVarSet auxVars = testerGetAuxVars(negC1Tester);
+            //temp = forsome auxVars.(fair(D || T) & !c1)
+            temp = feasibleStates.and(negC1).exist(auxVars);
+        } else {
+            temp = negC1.and(design.feasible()); //temp = (fair(D) & !c1)
         }
 
-        //二元算子
-        if(op == Operator.IMPLIES) {
-            return new SpecExp(Operator.OR, NNF(new SpecExp(Operator.NOT, children[0])), NNF(children[1]));
+        //处理 "i KNOW c1"
+        String agentName = children[0].toString();
+        SMVAgentInfo agentInfo = getAgentInfo(agentName);
+        if (agentInfo == null)
+            throw new ModelCheckAlgException("Cannot find the information of agent " + agentName + ".");
+
+        BDDVarSet visibleVars = agentInfo.getVisVars_BDDVarSet();
+        BDDVarSet allInvisibleVars = Env.globalUnprimeVarsMinus(visibleVars);
+
+        // return ! forsome (V-O_i).temp
+        return temp.exist(allInvisibleVars).not();
+    }
+
+    private BDD satNKnow(Spec spec)
+            throws ModelCheckAlgException, ModelCheckException, SMVParseException, ModuleException, SpecException {
+        SMVModule design = (SMVModule) getDesign();
+        SpecExp specExp = (SpecExp) spec;
+        Operator op = specExp.getOperator();
+        Spec[] children = specExp.getChildren();
+
+        BDD temp;
+        if(op != Operator.NKNOW) return null;
+
+        //处理c1, f=children[1];
+        SMVModule c1Tester = new SMVModule("Tester"+(++testerID));
+        BDD c1 = sat(children[1], c1Tester);
+
+        specBDDMap.put(children[1], c1);
+        specTesterMap.put(children[1], c1Tester);
+
+        if(!testerIsEmpty(c1Tester)) {
+            design.syncComposition(c1Tester);
+            BDD feasibleStates = design.feasible(); //feasibleStates = fair(D || T)
+            BDDVarSet auxVars = testerGetAuxVars(c1Tester);
+            //temp = forsome auxVars.(fair(D || T) & c1)
+            temp = feasibleStates.and(c1).exist(auxVars);
+            design.decompose(c1Tester);
+        } else {
+            temp = c1.and(design.feasible()); //temp = (fair(D) & !c1)
         }
-        if(op==Operator.AND
-                || op==Operator.OR
-                || op==Operator.UNTIL
-                || op==Operator.RELEASES) {
-            return new SpecExp(op, NNF(children[0]), NNF(children[1]));
-        }
 
-        //F c1 = true UTIL c1
-        if(op == Operator.FINALLY) {
-            return new SpecExp(Operator.UNTIL, getTrueSpec(), NNF(children[0]));
-        }
+        //处理 "i NKNOW c1"
+        String agentName = children[0].toString();
+        SMVAgentInfo agentInfo = getAgentInfo(agentName);
+        if (agentInfo == null)
+            throw new ModelCheckAlgException("Cannot find the information of agent " + agentName + ".");
 
-        //(G c1) >> (! FINALLY !c1) >> !(true UTIL !c1) >> (false RELEASE c1)
-        if (op == Operator.GLOBALLY) {
-            return new SpecExp(Operator.RELEASES, getFalseSpec(), NNF(children[0]));
-        }
+        BDDVarSet visibleVars = agentInfo.getVisVars_BDDVarSet();
+        BDDVarSet allInvisibleVars = Env.globalUnprimeVarsMinus(visibleVars);
 
-        //NOT
-        if(op == Operator.NOT) {
-            Spec f = children[0];
-            if(!(f instanceof SpecExp))
-                return spec;
-
-            SpecExp specExp = (SpecExp) f;
-            Operator fOp = specExp.getOperator();
-            Spec[] fChildren = specExp.getChildren();
-            log.info("ATLStarModelCheckAlg类的NNF方法，fOp:{},fChildren[0]:{},fChildren[1]:{},fChildren[2]:{}",
-                    fOp, fChildren[0], fChildren[1], fChildren[2]);
-
-            //NNF(!!c1) >> NNF(c1)
-            if(fOp == Operator.NOT) {
-                return NNF(fChildren[0]);
-            }
-
-            //!(c1 AND c2) >> !c1 OR !c2
-            if(fOp == Operator.AND) {
-                return new SpecExp(Operator.OR, NNF(new SpecExp(Operator.NOT, fChildren[0])),
-                        NNF(new SpecExp(Operator.NOT, fChildren[1])));
-            }
-            //!(c1 OR c2) >> !c1 AND !c2
-            if(fOp == Operator.OR) {
-                return new SpecExp(Operator.AND, NNF(new SpecExp(Operator.NOT, fChildren[0])),
-                        NNF(new SpecExp(Operator.NOT, fChildren[1])));
-            }
-
-            //!(c1 IMPLIES c2) >> c1 AND !c2
-            if(fOp == Operator.IMPLIES) {
-                return new SpecExp(Operator.AND, NNF(fChildren[0]),
-                        NNF(new SpecExp(Operator.NOT, fChildren[1])));
-            }
-
-            //!(CAN_ENFORCE c1) >> CANNOT_AVOID !c1
-            if(fOp == Operator.CAN_ENFORCE) {
-                fChildren[fChildren.length-1] = new SpecExp(Operator.NOT, fChildren[fChildren.length-1]);
-                return new SpecExp(Operator.CANNOT_AVOID, fChildren);
-            }
-            //!(CANNOT_AVOID) c1 >> CAN_ENFORCE !c1
-            if(fOp == Operator.CANNOT_AVOID) {
-                fChildren[fChildren.length-1] = new SpecExp(Operator.NOT, fChildren[fChildren.length-1]);
-                return new SpecExp(Operator.CAN_ENFORCE, fChildren);
-            }
-
-            //! X c1 >> X !c1
-            if(fOp == Operator.NEXT) {
-                return new SpecExp(fOp, NNF(new SpecExp(Operator.NOT, fChildren[0])));
-            }
-
-            //!(F c1) >> !(true UTIL c1) >> false RELEASE ! c1
-            if(fOp == Operator.FINALLY) {
-                Spec negC1 = NNF(new SpecExp(Operator.NOT, fChildren[0]));
-                return new SpecExp(Operator.RELEASES, getFalseSpec(), negC1);
-            }
-
-            //!(G c1) >> true UTIL !c1
-            if(fOp == Operator.GLOBALLY) {
-                Spec negC1 = NNF(new SpecExp(Operator.NOT, fChildren[0]));
-                return new SpecExp(Operator.UNTIL, getTrueSpec(), negC1);
-            }
-
-            //!(c1 UTIL c2) >> !c1 RELEASE !c2
-            if(fOp == Operator.UNTIL) {
-                return new SpecExp(Operator.RELEASES,
-                        NNF(new SpecExp(Operator.NOT, fChildren[0])), NNF(new SpecExp(Operator.NOT, fChildren[1])));
-            }
-            //!(c1 RELEASE c2) >> !c1 UTIL c2
-            if(fOp == Operator.RELEASES) {
-                return new SpecExp(Operator.UNTIL,
-                        NNF(new SpecExp(Operator.NOT, fChildren[0])), NNF(new SpecExp(Operator.NOT, fChildren[1])));
-            }
-        }
-        throw new ModelCheckException("Failed to construct the Negation Normal Form of " + spec);
+        // return ! forsome (V-O_i).temp
+        return temp.exist(allInvisibleVars);
     }
 
     //tester判空方法
@@ -346,55 +573,96 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         return varSet;
     }
 
-    /**
-     *
-     * @return TRUE 规约
-     */
-    private static Spec getTrueSpec() {
-        Spec[] specs = Env.loadSpecString("LTLSPEC TRUE ;");
-
-        assert (specs != null) && (specs.length > 0);
-
-        return specs[0];
+    private SMVAgentInfo getAgentInfo(String agentName) throws ModelCheckAlgException {
+        return Env.getAll_agent_modules().get(getAgentFullName(agentName));
     }
 
-    /**
-     *
-     * @return TRUE 规约
-     */
-    private static Spec getFalseSpec() {
-        Spec[] specs = Env.loadSpecString("LTLSPEC FALSE ;");
+    private String getAgentFullName(String agentName) throws ModelCheckAlgException {
+        if (agentName == null || agentName.equals(""))
+            throw new ModelCheckAlgException("The agent name is null.");
 
-        assert (specs != null) && (specs.length > 0);
+        if (agentName.equals("main")) return agentName;
 
-        return specs[0];
+        int idx_dot = agentName.indexOf('.');
+        if (idx_dot == -1) {
+            return "main." + agentName;
+        } else if (!agentName.substring(0, idx_dot).equals("main")) // agentName = $$$$.####, where $$$$ is not "main"
+            throw new ModelCheckAlgException("The agent's name '" + agentName + "' is illegal.");
+        else { // the prefix of agentName is "main."
+            if (agentName.length() > "main.".length()) // agentName = main.$$$$
+                return agentName;
+            else // agentName = "main."
+                throw new ModelCheckAlgException("The agent's name '" + agentName + "' is illegal.");
+        }
+    }
+
+    private BDDVarSet getRelevantVars(Module module, Spec spec) {
+        BDDVarSet vars = Env.getEmptySet();
+        if(spec != null) {
+            vars = vars.id().union(spec.releventVars());
+        }
+        if(module != null) {
+            if(module instanceof ModuleWithWeakFairness) {
+                ModuleWithWeakFairness weakFairness = (ModuleWithWeakFairness) module;
+                for (int i=0; i < weakFairness.justiceNum(); i++) {
+                    vars = vars.id().union(weakFairness.justiceAt(i).support());
+                }
+            }
+            if(module instanceof ModuleWithStrongFairness) {
+                ModuleWithStrongFairness strongFairness = (ModuleWithStrongFairness) module;
+                for (int i=0; i < strongFairness.compassionNum(); i++) {
+                    vars = vars.id().union(strongFairness.pCompassionAt(i).support());
+                    vars = vars.id().union(strongFairness.qCompassionAt(i).support());
+                }
+            }
+        }
+        return vars;
     }
 
     @Override
     public AlgResultI preAlgorithm() throws AlgExceptionI, SMVParseException, ModelCheckException, ModuleException {
         SMVModule design = (SMVModule) getDesign();
-        design.removeAllIniRestrictions();
+        design.removeAllIniRestrictions(); //reset IniRestrictions
         specBDDMap.clear();
         for(Map.Entry<Spec, SMVModule> entry : specTesterMap.entrySet()) {
             ModuleBDDField[] testerVars = entry.getValue().getAllFields();
             for(ModuleBDDField var : testerVars) {
-
+                Env.all_couples.remove(var);
             }
+            design.decompose(entry.getValue());
         }
+        specTesterMap.clear();
         return null;
     }
 
     @Override
     public AlgResultI doAlgorithm() throws AlgExceptionI, ModelCheckException, ModuleException, SMVParseException, SpecException {
-        log.info("model checking ATL*K property: {}", this.property);
-        if(!this.property.isStateSpec()) {
+        LoggerUtil.info("model checking ATL*K property: {}", this.property);
+        if(this.property.isStateSpec()) { //规约为状态公式
+            this.checkProp = SpecUtil.NNF(new SpecExp(Operator.NOT, this.property)); //checkProp = !property
+        } //else 待补充(LTL, RTLTL, LDLSere, LDLPath)
 
+        visibleVars = this.getRelevantVars(getDesign(), checkProp);
+
+        SMVModule checkPropTester = null;
+        checkBDD = sat(checkProp, checkPropTester);
+        SMVModule design = (SMVModule) getDesign();
+        design.restrictIni(checkBDD);
+        BDD feasibleStates = design.feasible();
+        BDD initUnSat = feasibleStates.and(design.initial()).and(checkBDD);
+
+        if(initUnSat.isZero()) {
+            return new AlgResultString(true, "*** Property is TRUE ***");
+        } else {
+            String returnMsg = "";
+            returnMsg = "*** Property is NOT VALID ***\n ";
+            return new AlgResultString(false, returnMsg);
         }
-        return null;
     }
 
     @Override
     public AlgResultI postAlgorithm() throws AlgExceptionI {
+        this.getDesign().removeAllTransRestrictions();
         return null;
     }
 }

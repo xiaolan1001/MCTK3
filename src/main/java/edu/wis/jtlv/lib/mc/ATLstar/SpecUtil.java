@@ -488,7 +488,7 @@ public class SpecUtil {
     public static Spec getTrueSpec() {
         Spec[] specs = Env.loadSpecString("LTLSPEC TRUE ;");
 
-        assert (specs != null) && (specs.length > 0);
+        assert (specs != null) && (specs.length > 0); //断言在JAVA中应少用，取而代之异常
 
         return specs[0];
     }
@@ -500,7 +500,7 @@ public class SpecUtil {
     public static Spec getFalseSpec() {
         Spec[] specs = Env.loadSpecString("LTLSPEC FALSE ;");
 
-        assert (specs != null) && (specs.length > 0);
+        assert (specs != null) && (specs.length > 0); //断言在JAVA中应少用，取而代之异常
 
         return specs[0];
     }
