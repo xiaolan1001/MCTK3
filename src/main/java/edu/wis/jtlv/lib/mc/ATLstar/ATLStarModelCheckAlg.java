@@ -14,13 +14,14 @@ import edu.wis.jtlv.lib.mc.ModelCheckAlgI;
 import edu.wis.jtlv.old_lib.mc.ModelCheckException;
 import net.sf.javabdd.BDD;
 import net.sf.javabdd.BDDVarSet;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+/**
+ * ATL*模型检测算法
+ */
 public class ATLStarModelCheckAlg extends ModelCheckAlgI {
     private Spec property;  //待验证的规约
     private BDDVarSet visibleVars; //可观察变量
@@ -68,7 +69,6 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
      */
     public BDD sat(Spec spec, SMVModule tester)
     throws ModuleException, SMVParseException, ModelCheckException, ModelCheckAlgException, SpecException {
-        LoggerUtil.info("sat方法的spec属性值:{}",spec);
         if(spec instanceof SpecBDD) {
             return ((SpecBDD) spec).getVal();
         }
@@ -77,8 +77,8 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         SpecExp specExp = (SpecExp) spec;
         Operator op = specExp.getOperator();
         Spec[] children = specExp.getChildren();
-        BDD c1, c2;
-        ModuleBDDField x;
+        BDD c1, c2 = null;
+        ModuleBDDField x = null;
         BDD xBDD; //tester的输出变量
 
         //*********************逻辑连接词*********************
@@ -115,11 +115,17 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         if(op == Operator.CANNOT_AVOID) return satCantAvoid(spec);
         //*************************************************
 
+        //*********************路径量词*********************
+        if(op == Operator.EE) return satE(spec);
+        if(op == Operator.AA) return satA(spec);
+        //*************************************************
+
         //*********************时态算子*********************
         if(op == Operator.NEXT) {
+            //Xf正时态测试器构造 \sita\phi := TRUE
             x = tester.addVar("X" + (++fieldId));
             xBDD = x.getDomain().ithVar(1);
-            c1 = sat(children[0], tester); //\sita\phi := TRUE
+            c1 = sat(children[0], tester);
             specBDDMap.put(children[0], c1);
             specTesterMap.put(children[0], tester);
             BDD primeC1 = Env.prime(c1);
@@ -130,14 +136,14 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             x = tester.addVar("X" + (++fieldId));
             xBDD = x.getDomain().ithVar(1);
             c1 = sat(children[0], tester);
-            c2 = sat(children[1], tester); //\sita\phi := x\phi -> f or g
+            c2 = sat(children[1], tester); //\sita\phi := x\phi -> (f or g)
             specBDDMap.put(children[0], c1);
             specBDDMap.put(children[1], c2);
             specTesterMap.put(children[0], tester);
             specTesterMap.put(children[1], tester);
 
             BDD primeX = Env.prime(xBDD);
-            tester.conjunctTrans(xBDD.imp(c2.or(c1.and(primeX)))); //R\phi := x\phi -> g or (f and (f U g)')
+            tester.conjunctTrans(xBDD.imp(c2.or(c1.and(primeX)))); //R\phi := x\phi -> (g or (f and x\phi'))
             tester.addJustice(xBDD.imp(c2)); //J\phi := {x\phi -> g}
 
             return xBDD;
@@ -153,7 +159,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             specTesterMap.put(children[1], tester);
 
             BDD primeX = Env.prime(xBDD);
-            tester.conjunctTrans(xBDD.imp(c2.and(c1.or(primeX)))); //R\phi := x\phi -> g and (f or (f U g)')
+            tester.conjunctTrans(xBDD.imp(c2.and(c1.or(primeX)))); //R\phi := x\phi -> (g and (f or x\phi'))
 
             return xBDD; //J\phi := \emptyset
         }
@@ -182,9 +188,9 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         Spec[] children = specExp.getChildren();
         BDD negC1, specBDD = null;
 
-        assert (op == Operator.CAN_ENFORCE);
+        if (op != Operator.CAN_ENFORCE) return null;
 
-        //获得智能体列表
+        //获取智能体列表
         Vector<String> agentList = new Vector<>();
         for (int i = 0; i < children.length - 1; i++) {
             SpecAgentIdentifier agentId = (SpecAgentIdentifier) children[i];
@@ -194,14 +200,17 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         SMVModule negC1Tester = new SMVModule("Tester" + (++testerID));
         negC1 = sat(SpecUtil.NNF(new SpecExp(Operator.NOT, children[children.length-1])), negC1Tester);
         specBDDMap.put(children[children.length-1], negC1.not());
-        if(!testerIsEmpty(negC1Tester)) {
-            design.syncComposition(negC1Tester);
+        if(testerIsEmpty(negC1Tester)) {
+            //specBDD = !(feasibleStates & !c1)
+            specBDD = negC1.and(design.ATL_canEnforce_feasible(agentList)).not();
+
+        } else {
+            //specBDD = ! forsome auxVars.(feasibleNegC1 & !c1)
+            design.syncComposition(negC1Tester); //同步并行组合
+            //feasibleNegC1 = 一组智能体(agentList)强制使得!c1成立的可行状态(feasible states)
             BDD feasibleNegC1 = design.ATL_canEnforce_feasible(agentList);
             BDDVarSet auxVars = testerGetAuxVars(negC1Tester);
             specBDD = feasibleNegC1.and(negC1).exist(auxVars).not();
-        } else {
-            //specBDD = !(feasible states & !c1)
-            specBDD = negC1.and(design.ATL_canEnforce_feasible(agentList)).not();
         }
         return specBDD;
     }
@@ -214,7 +223,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         Spec[] children = specExp.getChildren();
         BDD c1, specBDD = null;
 
-        assert (op == Operator.CANNOT_AVOID);
+        if (op != Operator.CANNOT_AVOID) return null;
 
         //获得智能体列表
         Vector<String> agentList = new Vector<>();
@@ -226,15 +235,76 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         SMVModule c1Tester = new SMVModule("Tester" + (++testerID));
         c1 = sat(children[children.length-1], c1Tester);
         specBDDMap.put(children[children.length-1], c1);
-        if(!testerIsEmpty(c1Tester)) {
+        if(testerIsEmpty(c1Tester)) {
+            //specBDD = (feasibleStates & c1)
+            specBDD = c1.and(design.ATL_cannotAvoid_feasible(agentList));
+        } else {
             design.syncComposition(c1Tester);
+            // feasibleStates = fair(D||T)
             BDD feasibleC1 = design.ATL_cannotAvoid_feasible(agentList);
             BDDVarSet auxVars = testerGetAuxVars(c1Tester);
+            //specBDD = forsome auxVars.(feasibleStates & c1)
             specBDD = feasibleC1.and(c1).exist(auxVars);
-        } else {
-            //specBDD = (feasible states & c1)
-            specBDD = c1.and(design.ATL_cannotAvoid_feasible(agentList));
         }
+        return specBDD;
+    }
+
+    private BDD satE(Spec spec)
+        throws ModelCheckException, ModuleException, SMVParseException, ModelCheckAlgException, SpecException {
+        SMVModule design = (SMVModule) getDesign();
+        SpecExp specExp = (SpecExp) spec;
+        Operator op = specExp.getOperator();
+        Spec[] children = specExp.getChildren();
+
+        BDD c1, specBDD = null;
+        if(op != Operator.EE) return null;
+
+        SMVModule c1Tester = new SMVModule("Tester" + (++testerID));
+        c1 = sat(children[0], c1Tester);
+        specBDDMap.put(children[0], c1);
+        specTesterMap.put(children[0], c1Tester);
+
+        if(testerIsEmpty(c1Tester)) {
+            specBDD = c1.and(design.feasible());
+        } else {
+            design.syncComposition(c1Tester);
+            design.restrictIni(c1);
+            BDD feasibleStates = design.feasible();
+            BDDVarSet auxVars = testerGetAuxVars(c1Tester);
+            //o := fair(D || T) & c1, o为满足Ef的状态集合
+            //specBDD = forsome auxVars.fair(D || T) & c1
+            specBDD = feasibleStates.and(c1).exist(auxVars);
+        }
+
+        return specBDD;
+    }
+
+    private BDD satA(Spec spec)
+            throws ModelCheckException, ModuleException, SMVParseException, ModelCheckAlgException, SpecException {
+        SMVModule design = (SMVModule) getDesign();
+        SpecExp specExp = (SpecExp) spec;
+        Operator op = specExp.getOperator();
+        Spec[] children = specExp.getChildren();
+
+        BDD negC1, specBDD = null;
+        if(op != Operator.AA) return null;
+
+        SMVModule negC1Tester = new SMVModule("Tester" + (++testerID));
+        negC1 = sat(SpecUtil.NNF(new SpecExp(Operator.NOT, children[0])), negC1Tester);
+        specBDDMap.put(children[0], negC1.not());
+        specTesterMap.put(children[0], negC1Tester);
+
+        if(testerIsEmpty(negC1Tester)) {
+            specBDD = negC1.and(design.feasible()).not();
+        } else {
+            //o := !(fair(D || T(!c1)) & !c1)
+            //specBdd = ! forsome auxVars.(feasible(D || T(!c1)) & !c1)
+            design.syncComposition(negC1Tester);
+            BDD feasibleStates = design.feasible();
+            BDDVarSet auxVars = testerGetAuxVars(negC1Tester);
+            specBDD = feasibleStates.and(negC1).exist(auxVars).not();
+        }
+
         return specBDD;
     }
 
@@ -292,7 +362,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
                 //R\phi := (x & l=0) -> g
                 tester.conjunctTrans(xBDD.and(lEqual0).imp(c2));
             } else { //a=0 & b>0
-                //R\phi := (x & l>0) -> (g | f & x' & l'=l-1)
+                //R\phi := (x & l>0) -> (g | (f & x' & l'=l-1))
                 tester.conjunctTrans(xBDD.and(lGreaterThan0).imp(c2.or(c1.and(nextXEqual1).and(nextLEqualLMinus1))));
                 //R\phi := (x & l=0) -> g
                 tester.conjunctTrans(xBDD.and(lEqual0).imp(c2));
@@ -343,9 +413,11 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             BDD wEqualBMinusA = new StmtOperator(tester, new OpEqual(new ValueDomStmt(tester, w),
                     new ValueConsStrStmt(tester, new String[]{""+(b-a)}))).eval_stmt().toBDD();
             //R\phi := (x & l>0 & w>0) -> (f & x' & l'=l-1 & w'=w)
-            tester.conjunctTrans(xBDD.and(lGreaterThan0).and(wGreaterThan0).imp(c1.and(nextXEqual1).and(nextLEqualLMinus1).and(nextWEqualW)));
+            tester.conjunctTrans(xBDD.and(lGreaterThan0).and(wGreaterThan0)
+                    .imp(c1.and(nextXEqual1).and(nextLEqualLMinus1).and(nextWEqualW)));
             //R\phi := (x & l=0 & w>0) -> (g | (f & x' & l'=0 & w'=w-1))
-            tester.conjunctTrans(xBDD.and(lEqual0).and(wGreaterThan0).imp(c2.or(c1.and(nextXEqual1.and(nextLEqual0).and(nextWEqualWMinus1)))));
+            tester.conjunctTrans(xBDD.and(lEqual0).and(wGreaterThan0).
+                    imp(c2.or(c1.and(nextXEqual1).and(nextLEqual0).and(nextWEqualWMinus1))));
             //R\phi := (x & l=0 & w=0) -> g
             tester.conjunctTrans(xBDD.and(lEqual0).and(wEqual0).imp(c2));
             //J\phi := \emptyset
@@ -402,12 +474,12 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
                     new ValueConsStrStmt(tester, new String[]{""+b}))).eval_stmt().toBDD();
 
             if (a == b) { //0 < a = b
-                //R\phi := (x & l>0) -> (f & x' & l'=l-1)
-                tester.conjunctTrans(xBDD.and(lGreaterThan0).imp(c1.and(nextXEqual1).and(nextLEqualLMinus1)));
+                //R\phi := (x & l>0) -> (f | (x' & l'=l-1))
+                tester.conjunctTrans(xBDD.and(lGreaterThan0).imp(c1.or(nextXEqual1.and(nextLEqualLMinus1))));
                 //R\phi := (x & l=0) -> g
                 tester.conjunctTrans(xBDD.and(lEqual0).imp(c2));
             } else { //a=0 & b>0
-                //R\phi := (x & l>0) -> (g & f | (x' & l'=l-1))
+                //R\phi := (x & l>0) -> (g & (f | (x' & l'=l-1)))
                 tester.conjunctTrans(xBDD.and(lGreaterThan0).imp(c2.and(c1.or(nextXEqual1.and(nextLEqualLMinus1)))));
                 //R\phi := (x & l=0) -> g
                 tester.conjunctTrans(xBDD.and(lEqual0).imp(c2));
@@ -459,9 +531,11 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
                     new ValueConsStrStmt(tester, new String[]{""+(b-a)}))).eval_stmt().toBDD();
 
             //R\phi := (x & l>0 & w>0) -> (f | (x' & l'=l-1 & w'=w))
-            tester.conjunctTrans(xBDD.and(lGreaterThan0).and(wGreaterThan0).imp(c1.or(nextXEqual1.and(nextLEqualLMinus1).and(nextWEqualW))));
+            tester.conjunctTrans(xBDD.and(lGreaterThan0).and(wGreaterThan0).
+                    imp(c1.or(nextXEqual1.and(nextLEqualLMinus1).and(nextWEqualW))));
             //R\phi := (x & l=0 & w>0) -> (g & (f | (x' & l'=0 & w'=w-1)))
-            tester.conjunctTrans(xBDD.and(lEqual0).and(wGreaterThan0).imp(c2.and(c1.or(nextXEqual1.and(nextLEqual0).and(nextWEqualWMinus1)))));
+            tester.conjunctTrans(xBDD.and(lEqual0).and(wGreaterThan0).
+                    imp(c2.and(c1.or(nextXEqual1.and(nextLEqual0).and(nextWEqualWMinus1)))));
             //R\phi := (x & l=0 & w=0) -> g
             tester.conjunctTrans(xBDD.and(lEqual0).and(wEqual0).imp(c2));
             //J\phi := \emptyset
@@ -568,6 +642,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
     private BDDVarSet testerGetAuxVars(SMVModule tester) {
         BDDVarSet varSet = Env.getEmptySet();
         for(ModuleBDDField var : tester.getAll_couples()) {
+            //var.support()方法获取为该字段构造域的BDD变量集
             varSet = varSet.id().union(var.support());
         }
         return varSet;
@@ -622,7 +697,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
     @Override
     public AlgResultI preAlgorithm() throws AlgExceptionI, SMVParseException, ModelCheckException, ModuleException {
         SMVModule design = (SMVModule) getDesign();
-        design.removeAllIniRestrictions(); //reset IniRestrictions
+        design.removeAllIniRestrictions(); //重置初始状态限制
         specBDDMap.clear();
         for(Map.Entry<Spec, SMVModule> entry : specTesterMap.entrySet()) {
             ModuleBDDField[] testerVars = entry.getValue().getAllFields();
@@ -638,22 +713,28 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
     @Override
     public AlgResultI doAlgorithm() throws AlgExceptionI, ModelCheckException, ModuleException, SMVParseException, SpecException {
         LoggerUtil.info("model checking ATL*K property: {}", this.property);
-        if(this.property.isStateSpec()) { //规约为状态公式
+        if(this.property.isStateSpec()) {
+            //规约为状态公式, 例如ATL*SPEC  <dc2> (BF 6..13 dc2.paid );
             this.checkProp = SpecUtil.NNF(new SpecExp(Operator.NOT, this.property)); //checkProp = !property
-        } //else 待补充(LTL, RTLTL, LDLSere, LDLPath)
+        } //else 待补充(LTL, RTLTL, LDLSere, LDLPath) <<Ag>> = CTL*E, <<\emptyset>> = CTL*A
 
-        visibleVars = this.getRelevantVars(getDesign(), checkProp);
+        SMVModule design = (SMVModule) getDesign();
+
+        visibleVars = this.getRelevantVars(design, checkProp);
 
         SMVModule checkPropTester = null;
         checkBDD = sat(checkProp, checkPropTester);
-        SMVModule design = (SMVModule) getDesign();
-        design.restrictIni(checkBDD);
-        BDD feasibleStates = design.feasible();
-        BDD initUnSat = feasibleStates.and(design.initial()).and(checkBDD);
 
-        if(initUnSat.isZero()) {
+        design.restrictIni(checkBDD);
+        BDD feasibleStates = design.feasible(); //feasibleStates = fair(D || T)
+        //D.\sita & o & fair(D || T), o是checkBDD, D.\sita是模型的初始状态
+        BDD result = feasibleStates.and(design.initial()).and(checkBDD);
+
+        if(result.isZero()) {
+            //result = false, 即D满足\phi
             return new AlgResultString(true, "*** Property is TRUE ***");
         } else {
+            //否则D不满足\phi
             String returnMsg = "";
             returnMsg = "*** Property is NOT VALID ***\n ";
             return new AlgResultString(false, returnMsg);
