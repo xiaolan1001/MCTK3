@@ -26,7 +26,7 @@ public class SpecUtil {
      * @throws SpecException Spec异常
      */
     public static Spec NNF(Spec spec) throws ModelCheckException, SpecException {
-        LoggerUtil.info("spec:{}",spec);
+        //LoggerUtil.info("spec:{}",spec);
         if(!(spec instanceof SpecExp)) return spec;
 
         SpecExp propExp = (SpecExp) spec;
@@ -156,8 +156,8 @@ public class SpecUtil {
 
         //有界时态算子B_UNTIL, B_RELEASES, f U/R a..b g
         if(op==Operator.B_UNTIL || op==Operator.B_RELEASES) {
-            LoggerUtil.info("B_UNTIL/B_RELEASES, f:{}, U/R:{}, g:{}",
-                    children[0], children[1], children[2]);
+            //LoggerUtil.info("B_UNTIL/B_RELEASES, f:{}, U/R:{}, g:{}",
+                    //children[0], children[1], children[2]);
 
             SpecRange range = (SpecRange) children[1];
             int a = range.getFrom();
@@ -376,8 +376,8 @@ public class SpecUtil {
 
             //NOT(f UNTIL a..b g)
             if(fOp == Operator.B_UNTIL) {
-                LoggerUtil.info("B_UNTIL, f:{}, U:{}, g:{}",
-                        fChildren[0], fChildren[1], fChildren[2]);
+                //LoggerUtil.info("B_UNTIL, f:{}, U:{}, g:{}",
+                        //fChildren[0], fChildren[1], fChildren[2]);
 
                 SpecRange range = (SpecRange) fChildren[1];
                 int a = range.getFrom();
@@ -419,8 +419,8 @@ public class SpecUtil {
             }
             //NOT(f RELEASES a..b g)
             if(fOp == Operator.B_RELEASES) {
-                LoggerUtil.info("B_RELEASES, f:{}, R:{}, g:{}",
-                        fChildren[0], fChildren[1], fChildren[2]);
+                //LoggerUtil.info("B_RELEASES, f:{}, R:{}, g:{}",
+                        //fChildren[0], fChildren[1], fChildren[2]);
 
                 SpecRange range = (SpecRange) fChildren[1];
                 int a = range.getFrom();

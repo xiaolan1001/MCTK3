@@ -84,9 +84,9 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         //*********************逻辑连接词*********************
         if(op == Operator.NOT) {
             c1 = sat(children[0], tester);
-            specBDDMap.put(children[0], c1.not());
+            specBDDMap.put(children[0], c1);
             specTesterMap.put(children[0], tester); //t:=(\emptyset,T,T,\emptyset)空测试器
-            return c1;
+            return c1.not();
         }
         if(op == Operator.AND) {
             c1 = sat(children[0], tester);
@@ -136,13 +136,15 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             x = tester.addVar("X" + (++fieldId));
             xBDD = x.getDomain().ithVar(1);
             c1 = sat(children[0], tester);
-            c2 = sat(children[1], tester); //\sita\phi := x\phi -> (f or g)
+            c2 = sat(children[1], tester);
             specBDDMap.put(children[0], c1);
             specBDDMap.put(children[1], c2);
             specTesterMap.put(children[0], tester);
             specTesterMap.put(children[1], tester);
 
             BDD primeX = Env.prime(xBDD);
+            //f U g正时态测试器构造时似乎并不需要初始断言
+            tester.addInitial(xBDD.imp(c1.or(c2))); //\sita\phi := x\phi -> (f or g)
             tester.conjunctTrans(xBDD.imp(c2.or(c1.and(primeX)))); //R\phi := x\phi -> (g or (f and x\phi'))
             tester.addJustice(xBDD.imp(c2)); //J\phi := {x\phi -> g}
 
@@ -268,7 +270,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             specBDD = c1.and(design.feasible());
         } else {
             design.syncComposition(c1Tester);
-            design.restrictIni(c1);
+            //design.restrictIni(c1); //加上此行代码后，个别规约验证不符合预期要求
             BDD feasibleStates = design.feasible();
             BDDVarSet auxVars = testerGetAuxVars(c1Tester);
             //o := fair(D || T) & c1, o为满足Ef的状态集合
@@ -298,7 +300,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             specBDD = negC1.and(design.feasible()).not();
         } else {
             //o := !(fair(D || T(!c1)) & !c1)
-            //specBdd = ! forsome auxVars.(feasible(D || T(!c1)) & !c1)
+            //specBDD = ! forsome auxVars.(feasible(D || T(!c1)) & !c1)
             design.syncComposition(negC1Tester);
             BDD feasibleStates = design.feasible();
             BDDVarSet auxVars = testerGetAuxVars(negC1Tester);
@@ -717,6 +719,13 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             //规约为状态公式, 例如ATL*SPEC  <dc2> (BF 6..13 dc2.paid );
             this.checkProp = SpecUtil.NNF(new SpecExp(Operator.NOT, this.property)); //checkProp = !property
         } //else 待补充(LTL, RTLTL, LDLSere, LDLPath) <<Ag>> = CTL*E, <<\emptyset>> = CTL*A
+        else {
+            //NOT A f >> E NOT f
+            this.checkProp = SpecUtil.NNF(new SpecExp(Operator.EE,
+                    new SpecExp(Operator.NOT, property)));
+        }
+
+        LoggerUtil.info("the NNF of property is: {}", this.checkProp);
 
         SMVModule design = (SMVModule) getDesign();
 
