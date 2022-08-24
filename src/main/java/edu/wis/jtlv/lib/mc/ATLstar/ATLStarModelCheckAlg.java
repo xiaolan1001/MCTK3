@@ -267,6 +267,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         specTesterMap.put(children[0], c1Tester);
 
         if(testerIsEmpty(c1Tester)) {
+            //测试器为空, o := fair(D) & c1
             specBDD = c1.and(design.feasible());
         } else {
             design.syncComposition(c1Tester);
@@ -294,7 +295,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         SMVModule negC1Tester = new SMVModule("Tester" + (++testerID));
         negC1 = sat(SpecUtil.NNF(new SpecExp(Operator.NOT, children[0])), negC1Tester);
         specBDDMap.put(children[0], negC1.not());
-        specTesterMap.put(children[0], negC1Tester);
+        specTesterMap.put(children[0], negC1Tester); //c1, T(!c1)
 
         if(testerIsEmpty(negC1Tester)) {
             specBDD = negC1.and(design.feasible()).not();

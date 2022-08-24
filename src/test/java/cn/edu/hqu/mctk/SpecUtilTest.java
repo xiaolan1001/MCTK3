@@ -79,7 +79,7 @@ public class SpecUtilTest {
 
         //to_parse += "SPEC !E[TRUE BU 3..12 EX(start & close & heat & !error)]";      //CTL(RTCTL) done
 
-        to_parse += "RTCTL*SPEC A(G((!close & start) -> A(G !heat | F !error)))";    //RTCTL* done
+        //to_parse += "RTCTL*SPEC A(G((!close & start) -> A(G !heat | F !error)))";    //RTCTL* done
 
         //to_parse += "RTCTL*SPEC !E(TRUE U (start & close & heat & !error));";        //RTCTL* done
 
@@ -97,7 +97,7 @@ public class SpecUtilTest {
 
         //to_parse +="RTCTL*SPEC !A (E(start | close))";                               //RTCTL* error 文法解析问题
 
-        //to_parse += "RTCTL*SPEC E(TRUE BU 0..-1 E X start)";                         //RTCTL* error '-1'
+        to_parse += "RTCTL*SPEC E(TRUE BU 0..-1 E X start)";                         //RTCTL* error '-1'
 
         //to_parse += "RTCTL*SPEC [start -> close];";                                  //RTCTL* error '['
 
@@ -136,41 +136,43 @@ public class SpecUtilTest {
         //******************总结******************
         StringBuilder to_parse = new StringBuilder(); //使用StringBuilder类操作字符串拼接效率更高
 
-        to_parse.append("RTCTL*SPEC E G TRUE;");                                             //RTCTL* done
+        //to_parse.append("RTCTL*SPEC E G TRUE;");                                             //RTCTL* done
 
-        to_parse.append("RTCTL*SPEC !E(TRUE U (start & close & heat & !error));");           //RTCTL* done
+        //to_parse.append("RTCTL*SPEC !E(TRUE U (start & close & heat & !error));");           //RTCTL* done
 
-        to_parse.append("RTCTL*SPEC !(start & close);");                                      //RTCTL* done
+        //to_parse.append("RTCTL*SPEC !(start & close);");                                      //RTCTL* done
 
-        to_parse.append("RTCTL*SPEC E(TRUE U (start & close & heat & !error));");            //RTCTL* done
+        //to_parse.append("RTCTL*SPEC E(TRUE U (start & close & heat & !error));");            //RTCTL* done
 
-        to_parse.append("LTLSPEC !G !heat;");                                                //LTL done
+        //to_parse.append("LTLSPEC !G !heat;");                                                //LTL done
 
-        to_parse.append("RTCTL*SPEC A G(start -> A F heat);");                               //RTCTL* done
+        //to_parse.append("RTCTL*SPEC A G(start -> A F heat);");                               //RTCTL* done
 
-        to_parse.append("RTCTL*SPEC !E(TRUE BU 3..12 E X(start & close & heat & !error));");  //RTCTL* done
+        //to_parse.append("RTCTL*SPEC !E(TRUE BU 3..12 E X(start & close & heat & !error));");  //RTCTL* done
 
-        to_parse.append("RTCTL*SPEC E(TRUE BU 3..12 E X start);");                            //RTCTL* done
+        //to_parse.append("RTCTL*SPEC E(TRUE BU 3..12 E X start);");                            //RTCTL* done
 
-        to_parse.append("RTCTL*SPEC E(TRUE BU 0..0 E X start);");                             //RTCTL* done
+        //to_parse.append("RTCTL*SPEC E(TRUE BU 0..0 E X start);");                             //RTCTL* done
 
-        to_parse.append("RTCTL*SPEC E(G E X start);");                                        //RTCTL* done
+        //to_parse.append("RTCTL*SPEC E(G E X start);");                                        //RTCTL* done
 
-        to_parse.append("RTCTL*SPEC E(BG 3..12 E X start);");                                 //RTCTL* done
+        //to_parse.append("RTCTL*SPEC E(BG 3..12 E X start);");                                 //RTCTL* done
 
-        to_parse.append("RTCTL*SPEC !E(BF 3..12 E X start);");                                //RTCTL* done
+        //to_parse.append("RTCTL*SPEC !E(BF 3..12 E X start);");                                //RTCTL* done
 
-        to_parse.append("RTCTL*SPEC A(BG 3..12 start);");                                     //RTCTL* done
+        //to_parse.append("RTCTL*SPEC A(BG 3..12 start);");                                     //RTCTL* done
 
-        to_parse.append("RTCTL*SPEC A(BG 3..12 start) -> close;");                            //RTCTL* done
+        //to_parse.append("RTCTL*SPEC A(BG 3..12 start) -> close;");                            //RTCTL* done
 
-        to_parse.append("RTCTL*SPEC A(BG 3..12 start) xnor G close;");                        //RTCTL* done
+        //to_parse.append("RTCTL*SPEC A(BG 3..12 start) xnor G close;");                        //RTCTL* done
 
-        to_parse.append("RTCTL*SPEC A(BG 3..12 start) xor ! G close;");                       //RTCTL* done
+        //to_parse.append("RTCTL*SPEC A(BG 3..12 start) xor ! G close;");                       //RTCTL* done
 
-        to_parse.append("RTCTL*SPEC E close;");                                               //RTCTL* done
+        //to_parse.append("RTCTL*SPEC E close;");                                               //RTCTL* done
 
-        to_parse.append("RTCTL*SPEC A A G close;");                                           //RTCTL* done
+        //to_parse.append("RTCTL*SPEC A A G close;");                                           //RTCTL* done
+
+        to_parse.append("RTCTL*SPEC E(TRUE BU 0..-1 E X start);");                           //RTCTL* done
 
         //加载规约
         Spec[] specs = Env.loadSpecString(to_parse.toString());

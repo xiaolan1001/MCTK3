@@ -189,7 +189,8 @@ public class SpecUtil {
                 //a>=0 and b < 0(infinite), f U/R a..b g (b<0) >> f U/R a..a (f U/R g)
                 Spec tempSpec1 = NNF(children[0]);
                 Spec tempSpec2 = NNF(children[2]);
-                Spec tempSpec3 = new SpecExp(op, tempSpec1, tempSpec2);
+                Operator newOp = op == Operator.B_UNTIL ? Operator.UNTIL : Operator.RELEASES;
+                Spec tempSpec3 = new SpecExp(newOp, tempSpec1, tempSpec2);
                 SpecRange newRange = new SpecRange(a, a);
 
                 return new SpecExp(op, tempSpec1, newRange, tempSpec3);
