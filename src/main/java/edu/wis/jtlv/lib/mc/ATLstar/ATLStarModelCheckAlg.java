@@ -271,7 +271,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             specBDD = c1.and(design.feasible());
         } else {
             design.syncComposition(c1Tester);
-            //design.restrictIni(c1); //加上此行代码后，个别规约验证不符合预期要求
+            //design.restrictIni(c1); //加上此行代码后, 个别规约验证不符合预期要求, 不需要添加初始状态限制
             BDD feasibleStates = design.feasible();
             BDDVarSet auxVars = testerGetAuxVars(c1Tester);
             //o := fair(D || T) & c1, o为满足Ef的状态集合
@@ -702,21 +702,28 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         SMVModule design = (SMVModule) getDesign();
         design.removeAllIniRestrictions(); //重置初始状态限制
         specBDDMap.clear();
+        //通过Map.entrySet遍历value(容量大时推荐使用)
         for(Map.Entry<Spec, SMVModule> entry : specTesterMap.entrySet()) {
-            ModuleBDDField[] testerVars = entry.getValue().getAllFields();
-            for(ModuleBDDField var : testerVars) {
-                Env.all_couples.remove(var);
+            ModuleBDDField[] testerVars = null;
+            //当上条规约为某一断言f时, sat(!f), 遇NOT算子会将null的测试器添加至specTesterMap
+            //故entry.getValue()有可能为空
+            if(entry.getValue() != null) {
+                testerVars = entry.getValue().getAllFields();
+                for(ModuleBDDField var : testerVars) {
+                    Env.all_couples.remove(var);
+                }
+                design.decompose(entry.getValue());
             }
-            design.decompose(entry.getValue());
         }
         specTesterMap.clear();
+        design.feasible().free(); //不加此条语句会导致多条规约批量验证时出现问题
         return null;
     }
 
     @Override
     public AlgResultI doAlgorithm() throws AlgExceptionI, ModelCheckException, ModuleException, SMVParseException, SpecException {
         LoggerUtil.info("model checking ATL*K property: {}", this.property);
-        if(this.property.isStateSpec()) {
+        if(this.property.isStateSpec()) { //断言也属于状态公式
             //规约为状态公式, 例如ATL*SPEC  <dc2> (BF 6..13 dc2.paid );
             this.checkProp = SpecUtil.NNF(new SpecExp(Operator.NOT, this.property)); //checkProp = !property
         } //else 待补充(LTL, RTLTL, LDLSere, LDLPath) <<Ag>> = CTL*E, <<\emptyset>> = CTL*A
@@ -735,7 +742,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         SMVModule checkPropTester = null;
         checkBDD = sat(checkProp, checkPropTester);
 
-        design.restrictIni(checkBDD);
+        //design.restrictIni(checkBDD); //不需要将checkBDD添加为初始状态
         BDD feasibleStates = design.feasible(); //feasibleStates = fair(D || T)
         //D.\sita & o & fair(D || T), o是checkBDD, D.\sita是模型的初始状态
         BDD result = feasibleStates.and(design.initial()).and(checkBDD);

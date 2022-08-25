@@ -19,9 +19,9 @@ public class ATLStarModelCheckAlgTest {
 
         StringBuilder to_parse = new StringBuilder();
 
-        to_parse.append("LTLSPEC start;"); //invalid
+        //to_parse.append("LTLSPEC start;"); //invalid
         //to_parse.append("LTLSPEC  F start -> G heat;"); //invalid
-        //to_parse.append("LTLSPEC TRUE;"); //invalid
+        to_parse.append("LTLSPEC TRUE;"); //done
 
         //加载规约
         Spec[] specs = Env.loadSpecString(to_parse.toString());
