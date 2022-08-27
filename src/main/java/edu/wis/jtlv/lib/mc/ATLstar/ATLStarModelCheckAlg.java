@@ -592,7 +592,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         BDDVarSet visibleVars = agentInfo.getVisVars_BDDVarSet();
         BDDVarSet allInvisibleVars = Env.globalUnprimeVarsMinus(visibleVars);
 
-        // return ! forsome (V-O_i).temp
+        // return ! forsome (Vars-O_i).temp
         return temp.exist(allInvisibleVars).not();
     }
 
@@ -621,7 +621,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             temp = feasibleStates.and(c1).exist(auxVars);
             design.decompose(c1Tester);
         } else {
-            temp = c1.and(design.feasible()); //temp = (fair(D) & !c1)
+            temp = c1.and(design.feasible()); //temp = (fair(D) & c1)
         }
 
         //处理 "i NKNOW c1"
@@ -633,7 +633,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         BDDVarSet visibleVars = agentInfo.getVisVars_BDDVarSet();
         BDDVarSet allInvisibleVars = Env.globalUnprimeVarsMinus(visibleVars);
 
-        // return ! forsome (V-O_i).temp
+        // return forsome (Vars-O_i).temp
         return temp.exist(allInvisibleVars);
     }
 

@@ -16,7 +16,7 @@ import java.io.IOException;
 
 public class SpecUtilTest {
     /**
-     * 测试CTL公式的加载
+     * 测试CTL公式的加载(mux-sem.smv)
      * @throws Exception 异常处理
      */
     @Test
@@ -51,7 +51,7 @@ public class SpecUtilTest {
     }
 
     /**
-     * 测试RTCTL*的公式加载
+     * 测试RTCTL*的公式加载(mwOven.smv)
      * @throws Exception 异常处理
      */
     @Test
@@ -119,7 +119,75 @@ public class SpecUtilTest {
     }
 
     /**
-     * 测试NNF函数, NNF作用是指定规约spec生成该规约的否定范式
+     * 测试RTCTL*的公式加载(bit_transmission.smv)
+     * @throws Exception 将异常往上抛
+     */
+    @Test
+    public void testRTCTLs2() throws Exception {
+        //通过文件名加载module
+        Env.loadModule("testcases/bit_transmission.smv");
+        SMVModule main = (SMVModule) Env.getModule("main");
+        //为toString程序设置打印模式
+        main.setFullPrintingMode(true);
+
+        String toParse = "";
+        //toParse += "RTCTL*SPEC A G((receiver.state=r0 | receiver.state=r1) -> A F sender.ack);"; //done
+        //toParse += "RTCTL*SPEC !E(G(receiver.state=r0 | receiver.state=r1) -> (F sender.ack));"; //done
+        toParse += "RTCTL*SPEC A(F(sender KNOW (receiver.state=r0 | receiver.state=r1)));";      //done
+        //toParse += "RTCTL*SPEC A F(sender KNOW (receiver.state=r0 | receiver.state=r1));";       //done
+
+        //加载规约
+        Spec[] specs = Env.loadSpecString(toParse);
+
+        assert (specs != null) && (specs.length > 0);
+        for (Spec spec : specs) {
+            LoggerUtil.info("{}, spec:{}", spec instanceof SpecExp, SpecUtil.simplifySpecString(spec, false));
+        }
+    }
+
+    /**
+     * 测试RTCTL*的公式加载(dc3)
+     * @throws Exception 将异常往上抛
+     */
+    @Test
+    public void testRTCTLs3() throws Exception {
+        //通过文件名加载module
+        Env.loadModule("testcases/dc3.smv");
+        SMVModule main = (SMVModule) Env.getModule("main");
+        //为toString程序设置打印模式
+        main.setFullPrintingMode(true);
+
+        String toParse = "";
+        //toParse += "RTCTL*SPEC !dc1.paid -> A( G( (dc1 KNOW (!dc1.paid & !dc2.paid & !dc3.paid)) | " +
+        //        "( (dc1 KNOW (dc2.paid | dc3.paid)) & !(dc1 KNOW dc2.paid) & !(dc1 KNOW dc3.paid) ) ) );"; //done
+
+        //toParse += "RTCTL*SPEC A(X (dc1 KNOW dc2.said));"; //done
+        //toParse += "RTCTL*SPEC E(F(dc1 KNOW dc2.said));";  //done
+        //toParse += "RTCTL*SPEC !E(E( X(dc2.said))) ;";     //done
+        //toParse += "RTCTL*SPEC (dc1 KNOW dc2.said);";      //done
+        //toParse += "RTCTL*SPEC !dc1.paid -> A( G(dc1 KNOW (!dc1.paid & !dc2.paid & !dc3.paid)));";    //done
+        //toParse += "RTCTL*SPEC (G (!dc1.paid -> ((dc1 KNOW (!dc1.paid & !dc2.paid & !dc3.paid)))));"; //done
+        //toParse += "RTCTL*SPEC (G (!dc1.paid -> ((dc1 KNOW (!dc1.paid & !dc2.paid & !dc3.paid)) |" +
+        //        " ( (dc1 KNOW (dc2.paid | dc3.paid)) & !(dc1 KNOW dc2.paid) & !(dc1 KNOW dc3.paid) ))));";  //done
+
+        //toParse += "RTCTL*SPEC !dc1.paid -> A( G( (dc1 KNOW (!dc1.paid & !dc2.paid & !dc3.paid)) |" +
+        //        " ( (dc1 KNOW (dc2.paid | dc3.paid)) & !(dc1 KNOW dc2.paid) & !(dc1 KNOW dc3.paid) ) ) );"; //done
+
+        //toParse += "RTCTL*SPEC  <dc1, dc2> (BF 6..13 dc2.paid );"; //RTATL* error 算子的孩子节点数不匹配引发断言失败
+        //toParse += "RTCTL*SPEC <dc1,dc2,dc3,main>  dc1.paid | dc2.paid | dc3.paid;"; //RTATL* error同上
+        //toParse += "RTCTL*SPEC <dc1,main> TRUE U dc1.paid ;"; //RTATL* error同上
+
+        //加载规约
+        Spec[] specs = Env.loadSpecString(toParse);
+
+        assert (specs != null) && (specs.length > 0);
+        for (Spec spec : specs) {
+            LoggerUtil.info("{}, spec:{}", spec instanceof SpecExp, SpecUtil.simplifySpecString(spec, false));
+        }
+    }
+
+    /**
+     * 测试NNF函数, NNF作用是指定规约spec生成该规约的否定范式(mwOven.smv)
      * @throws Exception 异常处理
      */
     @Test
@@ -185,7 +253,7 @@ public class SpecUtilTest {
     }
 
     /**
-     * 比较SpecUtil类中的NNF()方法和RTCTLs_ModelCheckAlg类中的NNF()方法
+     * 比较SpecUtil类中的NNF()方法和RTCTLs_ModelCheckAlg类中的NNF()方法(mwOven.smv)
      * @throws Exception 异常处理
      */
     @Test

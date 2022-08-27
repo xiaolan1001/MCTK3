@@ -9,6 +9,10 @@ import edu.wis.jtlv.lib.mc.ATLstar.LoggerUtil;
 import org.junit.Test;
 
 public class ATLStarModelCheckAlgTest {
+    /**
+     * 使用RTATL*模型检测算法验证LTL公式(testcases/mwOven.smv)
+     * @throws Exception 异常处理
+     */
     @Test
     public void testLTLCheck() throws Exception {
         //通过文件名加载module
@@ -36,6 +40,11 @@ public class ATLStarModelCheckAlgTest {
             }
         }
     }
+
+    /**
+     * 使用RTATL*模型检测算法验证RTCTL*公式(testcases/mwOven.smv)
+     * @throws Exception 异常处理
+     */
     @Test
     public void testRTCTLsCheck() throws Exception {
         Env.loadModule("testcases/mwOven.smv");
@@ -74,6 +83,118 @@ public class ATLStarModelCheckAlgTest {
         assert (allSpecs != null) && (allSpecs.length > 0);
 
         for (Spec spec : allSpecs) {
+            if (spec.getLanguage() == InternalSpecLanguage.RTCTLs) {
+                ATLStarModelCheckAlg checker = new ATLStarModelCheckAlg(main, spec);
+                checker.preAlgorithm();
+                LoggerUtil.info(checker.doAlgorithm().resultString());
+                checker.postAlgorithm();
+            }
+        }
+    }
+
+    /**
+     * 使用RTATL*模型检测算法验证RTCTL*公式(testcases/bit_transmission.smv)
+     * @throws Exception 异常处理
+     */
+    @Test
+    public void testRTCTLsCheck2() throws Exception {
+        //通过文件名加载module
+        Env.loadModule("testcases/bit_transmission.smv");
+        SMVModule main = (SMVModule) Env.getModule("main");
+        //为toString程序设置打印模式
+        main.setFullPrintingMode(true);
+
+        String toParse = "";
+        //toParse += "RTCTL*SPEC A G((receiver.state=r0 | receiver.state=r1) -> A F sender.ack);"; //invalid
+        toParse += "RTCTL*SPEC !E(G(receiver.state=r0 | receiver.state=r1) -> (F sender.ack));"; //invalid
+
+        //加载规约
+        Spec[] specs = Env.loadSpecString(toParse);
+
+        assert (specs != null) && (specs.length > 0);
+        for (Spec spec : specs) {
+            if (spec.getLanguage() == InternalSpecLanguage.RTCTLs) {
+                ATLStarModelCheckAlg checker = new ATLStarModelCheckAlg(main, spec);
+                checker.preAlgorithm();
+                LoggerUtil.info(checker.doAlgorithm().resultString());
+                checker.postAlgorithm();
+            }
+        }
+    }
+
+    /**
+     * 使用RTATL*模型检测算法验证RTCTL*K公式(testcases/bit_transmission_actions.smv)
+     * @throws Exception 异常处理
+     */
+    @Test
+    public void testRTCTLsKCheck2() throws Exception {
+        //通过文件名加载module
+        Env.loadModule("testcases/bit_transmission_actions.smv");
+        SMVModule main = (SMVModule) Env.getModule("main");
+        //为toString程序设置打印模式
+        main.setFullPrintingMode(true);
+
+        String toParse = "";
+        //toParse += "RTCTL*SPEC A G((r.state=r0 | r.state=r1) -> A F s.ack);"; //done
+        //toParse += "RTCTL*SPEC !E(G(r.state=r0 | r.state=r1) -> (F s.ack));"; //invalid
+        //toParse += "RTCTL*SPEC E F(E G((r.state=r0 | r.state=r1) & !s.ack));"; //invalid
+
+        //toParse += "RTCTL*SPEC A(F(s KNOW (r.state=r0 | r.state=r1)));"; //invalid
+        //toParse += "RTCTL*SPEC A F(s.ack -> (s KNOW (r.state=r0 | r.state=r1)));"; //done
+        //toParse += "RTCTL*SPEC !E(TRUE BU 10..15 ((s.bit=1 & s.ack) -> (s KNOW (r.state=r0))));"; //invalid
+        toParse += "RTCTL*SPEC A G((s.bit=1 & s.ack) -> (s KNOW (r.state=r0)));"; //done
+
+        //toParse += "RTCTL*SPEC !E BG 10..15 ((s.bit=1 & s.ack) -> (s SKNOW (r.state=r0)));"; //error 暂时还未编写SKNOW算法
+        //toParse += "RTCTL*SPEC A BG 10..15 (s SKNOW (r.state=r0));"; //error 暂时还未编写SKNOW算法
+
+        //加载规约
+        Spec[] specs = Env.loadSpecString(toParse);
+
+        assert (specs != null) && (specs.length > 0);
+        for (Spec spec : specs) {
+            if (spec.getLanguage() == InternalSpecLanguage.RTCTLs) {
+                ATLStarModelCheckAlg checker = new ATLStarModelCheckAlg(main, spec);
+                checker.preAlgorithm();
+                LoggerUtil.info(checker.doAlgorithm().resultString());
+                checker.postAlgorithm();
+            }
+        }
+    }
+
+    /**
+     * 使用RTATL*模型检测算法验证RTCTL*公式(testcases/dc3.smv)
+     * @throws Exception 异常处理
+     */
+    @Test
+    public void testRTCTLsCheck3() throws Exception {
+        //通过文件名加载module
+        Env.loadModule("testcases/dc3.smv");
+        SMVModule main = (SMVModule) Env.getModule("main");
+        //为toString程序设置打印模式
+        main.setFullPrintingMode(true);
+
+        String toParse = "";
+        //toParse += "RTCTL*SPEC !dc1.paid -> A( G( (dc1 KNOW (!dc1.paid & !dc2.paid & !dc3.paid)) | " +
+        //        "( (dc1 KNOW (dc2.paid | dc3.paid)) & !(dc1 KNOW dc2.paid) & !(dc1 KNOW dc3.paid) ) ) );";
+
+        //toParse += "RTCTL*SPEC A(X (dc1 KNOW dc2.said));";
+        //toParse += "RTCTL*SPEC E(F(dc1 KNOW dc2.said));";
+        //toParse += "RTCTL*SPEC !E(E( X(dc2.said))) ;";
+        //toParse += "RTCTL*SPEC (dc1 KNOW dc2.said);";
+        //toParse += "RTCTL*SPEC !dc1.paid -> A( G(dc1 KNOW (!dc1.paid & !dc2.paid & !dc3.paid)));";
+        //toParse += "RTCTL*SPEC (G (!dc1.paid -> ((dc1 KNOW (!dc1.paid & !dc2.paid & !dc3.paid)))));";
+
+		//toParse += "RTCTL*SPEC (G (!dc1.paid -> ((dc1 KNOW (!dc1.paid & !dc2.paid & !dc3.paid)) |" +
+        //        " ( (dc1 KNOW (dc2.paid | dc3.paid)) & !(dc1 KNOW dc2.paid) & !(dc1 KNOW dc3.paid) ))));";
+
+		//toParse += "RTCTL*SPEC !dc1.paid -> A( G( (dc1 KNOW (!dc1.paid & !dc2.paid & !dc3.paid)) |" +
+        //        " ( (dc1 KNOW (dc2.paid | dc3.paid)) & !(dc1 KNOW dc2.paid) & !(dc1 KNOW dc3.paid) ) ) );";
+
+        //加载规约
+        Spec[] specs = Env.loadSpecString(toParse);
+
+        assert (specs != null) && (specs.length > 0);
+        for (Spec spec : specs) {
             if (spec.getLanguage() == InternalSpecLanguage.RTCTLs) {
                 ATLStarModelCheckAlg checker = new ATLStarModelCheckAlg(main, spec);
                 checker.preAlgorithm();
