@@ -33,13 +33,21 @@ public class SpecUtil {
         Operator op = propExp.getOperator();
         Spec[] children = propExp.getChildren();
 
-        //一元算子NEXT; 路径量词EE, AA; 策略量词CAN_ENFORCE, CANNOT_AVOID
+        //一元算子NEXT; 路径量词EE, AA
         if(op==Operator.NEXT
                 || op==Operator.EE
-                || op==Operator.AA
-                || op==Operator.CAN_ENFORCE
-                || op==Operator.CANNOT_AVOID) {
+                || op==Operator.AA) {
             return new SpecExp(op, NNF(children[0]));
+        }
+
+        //策略量词CAN_ENFORCE, CANNOT_AVOID
+        if(op==Operator.CAN_ENFORCE || op==Operator.CANNOT_AVOID) {
+            Spec[] elements = new Spec[children.length];
+            for (int i = 0; i < children.length; i++) {
+                elements[i] = children[i];
+            }
+            elements[elements.length-1] = NNF(elements[elements.length-1]);
+            return new SpecExp(op, elements);
         }
 
         //二元算子IMPLIES, XOR(异或), IFF/XNOR(当前仅当/同或,ab+a'b')
@@ -262,13 +270,21 @@ public class SpecUtil {
 
             //NOT(CAN_ENFORCE c1) >> CANNOT_AVOID NOT c1
             if(fOp == Operator.CAN_ENFORCE) {
-                fChildren[fChildren.length-1] = NNF(new SpecExp(Operator.NOT, fChildren[fChildren.length-1]));
-                return new SpecExp(Operator.CANNOT_AVOID, fChildren);
+                Spec[] elements = new Spec[fChildren.length];
+                for (int i = 0; i < fChildren.length; i++) {
+                    elements[i] = fChildren[i];
+                }
+                elements[elements.length-1] = NNF(new SpecExp(Operator.NOT, elements[elements.length-1]));
+                return new SpecExp(Operator.CANNOT_AVOID, elements);
             }
             //NOT(CANNOT_AVOID) c1 >> CAN_ENFORCE NOT c1
             if(fOp == Operator.CANNOT_AVOID) {
-                fChildren[fChildren.length-1] = NNF(new SpecExp(Operator.NOT, fChildren[fChildren.length-1]));
-                return new SpecExp(Operator.CAN_ENFORCE, fChildren);
+                Spec[] elements = new Spec[fChildren.length];
+                for (int i = 0; i < fChildren.length; i++) {
+                    elements[i] = fChildren[i];
+                }
+                elements[elements.length-1] = NNF(new SpecExp(Operator.NOT, elements[elements.length-1]));
+                return new SpecExp(Operator.CAN_ENFORCE, elements);
             }
 
             //NOT NEXT c1 >> NEXT NOT c1
@@ -506,6 +522,13 @@ public class SpecUtil {
         return specs[0];
     }
 
+    /**
+     * 简化公式, 若公式有main智能体(环境)时勿使用
+     * @param spec 规约
+     * @param delTrue
+     * @return
+     * @throws SpecException
+     */
     public static String simplifySpecString(Spec spec, boolean delTrue) throws SpecException {
         if(spec==null) return "";
         String res="";
@@ -524,6 +547,13 @@ public class SpecUtil {
         return res;
     }
 
+    /**
+     * 简化公式, 若公式有main智能体(环境)时勿使用
+     * @param specStr
+     * @param delTrue
+     * @return
+     * @throws SpecException
+     */
     public static String simplifySpecString(String specStr, boolean delTrue) throws SpecException {
         if(specStr == null) return "";
         String res = specStr.replaceAll("main.", "");

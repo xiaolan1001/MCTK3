@@ -14,7 +14,7 @@ public class InternalSpecExp extends InternalSpec {
 		// if (op == null)
 		// throw new SpecParseException("Cannot instantiate an expression"
 		// + " without an operator.");
-		assert (op.numOfOperands() == el.length);
+		assert op == InternalOp.CAN_ENFORCE || op == InternalOp.CANNOT_AVOID || (op.numOfOperands() == el.length);
 		// if (op.numOfOperands() != el.length)
 		// throw new SpecParseException("Operator " + op + " cannot be "
 		// + "instantiated with the supplied " + el.length

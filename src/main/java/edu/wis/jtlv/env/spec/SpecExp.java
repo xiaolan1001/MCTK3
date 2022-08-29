@@ -582,7 +582,7 @@ public class SpecExp implements Spec {
 				for (int i = 1; i < ch.length-1; i++)
 					agt_list+=","+ch[i];
 			}
-			return "<" + agt_list + "> " + ch[ch.length - 1];
+			return "<" + agt_list + "> [" + ch[ch.length - 1] + "]";
 		}
 		if (op == Operator.CANNOT_AVOID) {
 			String agt_list = "";
@@ -591,7 +591,7 @@ public class SpecExp implements Spec {
 				for (int i = 1; i < ch.length-1; i++)
 					agt_list+=","+ch[i];
 			}
-			return "[" + agt_list + "] " + ch[ch.length - 1];
+			return "[" + agt_list + "] [" + ch[ch.length - 1] + "]";
 		}
 
 		// epistemic
