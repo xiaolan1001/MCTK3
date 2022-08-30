@@ -202,6 +202,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         SMVModule negC1Tester = new SMVModule("Tester" + (++testerID));
         negC1 = sat(SpecUtil.NNF(new SpecExp(Operator.NOT, children[children.length-1])), negC1Tester);
         specBDDMap.put(children[children.length-1], negC1.not());
+        specTesterMap.put(children[children.length-1], negC1Tester);
         if(testerIsEmpty(negC1Tester)) {
             //specBDD = !(feasibleStates & !c1)
             specBDD = negC1.and(design.ATL_canEnforce_feasible(agentList)).not();
@@ -237,6 +238,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         SMVModule c1Tester = new SMVModule("Tester" + (++testerID));
         c1 = sat(children[children.length-1], c1Tester);
         specBDDMap.put(children[children.length-1], c1);
+        specTesterMap.put(children[children.length-1], c1Tester);
         if(testerIsEmpty(c1Tester)) {
             //specBDD = (feasibleStates & c1)
             specBDD = c1.and(design.ATL_cannotAvoid_feasible(agentList));
@@ -637,6 +639,118 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         return temp.exist(allInvisibleVars);
     }
 
+    /**
+     * &lt;A&gt; backreach(to, trans)<br/>
+     * 计算使用迁移关系trans可以到达to的状态集合, 具体操作是将可达性算法的post()替换为pre(), 并初始化new为to.
+     * @param agentList 一组智能体
+     * @param trans 迁移关系:(V, α, V')
+     * @param to 断言
+     * @return 最小不动点
+     * @throws ModelCheckAlgException 异常处理
+     */
+    public static BDD ATLCanEnforceAllPred(Vector<String> agentList, BDD trans, BDD to)
+            throws ModelCheckAlgException {
+        return ATLCanEnforceKPred(agentList, trans, to, Env.globalPrimeVars(), -1);
+    }
+
+    public static BDD ATLCanEnforceKPred(Vector<String> agentList, BDD trans,
+                                         BDD to, BDDVarSet primeVars, int k) throws ModelCheckAlgException {
+        int cnt = 1;
+        BDD oldPred, newPred = to;
+        do {
+            //储存先前结果
+            oldPred = newPred;
+            //计算新结果
+            newPred = oldPred.or(ATLCanEnforcePred(agentList, trans, oldPred, primeVars));
+            cnt++;
+        } while (!oldPred.equals(newPred) && (cnt != k)); //当到达不动点时停止
+
+        return newPred;
+    }
+
+    /**
+     * ATLPre(&lt;&lt;A&gt;&gt; X f)
+     * @param agentList
+     * @param trans
+     * @param to
+     * @param primeVars
+     * @return
+     * @throws ModelCheckAlgException
+     */
+    public static BDD ATLCanEnforcePred(Vector<String> agentList, BDD trans, BDD to, BDDVarSet primeVars)
+            throws ModelCheckAlgException {
+        BDDVarSet groupActions, notInGroupActions;
+        groupActions = ATLGetAgentActionVars(agentList);
+        if(groupActions == null)
+            throw new ModelCheckAlgException("Failed obtaining the action variables of the agents " + agentList);
+        //notInGroupActions = AllAgentActions - groupActions
+        notInGroupActions = ATLGetAllAgentActionVarsMinus(agentList);
+        if(notInGroupActions == null)
+            throw new ModelCheckAlgException("Failed obtaining the action variables of the adversary agents towards "
+                    + agentList);
+
+        BDD primeTo = Env.prime(to);
+        //forSome groupActions. forAll notInGroupActions. forAll V'. (trans(V*AllAgentActions, V')->to(V'))
+        //return trans.imp(primeTo)
+        //        .forAll(primeVars)
+        //        .forAll(notInGroupActions)
+        //        .exist(groupActions);
+        //forSome groupActions. forSome notInGroupActions. forSome V'. (trans(V*AllAgentActions, V') and to(V'))
+        //and (forSome groupActions. forAll notInGroupActions. forAll V'. (trans(V*AllAgentActions, V')->to(V')))
+        return (trans.and(primeTo)
+                .exist(primeVars)
+                .exist(notInGroupActions)
+                .exist(groupActions))
+                .and(trans.imp(primeTo)
+                        .forAll(primeVars)
+                        .forAll(notInGroupActions)
+                        .exist(groupActions));
+    }
+
+    /**
+     * [A] backreach(to, trans)<br/>
+     * 计算使用迁移关系trans可以到达to的状态集合, 具体操作是将可达性算法的post()替换为pre(), 并初始化new为to.
+     * @param agentList 一组智能体
+     * @param trans 迁移关系:(V, α, V')
+     * @param to 断言
+     * @return 最小不动点
+     * @throws ModelCheckAlgException 异常处理
+     */
+    public static BDD ATLCantAvoidAllPred(Vector<String> agentList, BDD trans, BDD to)
+            throws ModelCheckAlgException {
+        return ATLCantAvoidKPred(agentList, trans, to, Env.globalPrimeVars(), -1);
+    }
+
+    public static BDD ATLCantAvoidKPred(Vector<String> agentList, BDD trans, BDD to, BDDVarSet primeVars, int k)
+            throws ModelCheckAlgException{
+        int cnt = 1;
+        BDD oldPred, newPred = to;
+        do {
+            //储存先前结果
+            oldPred = newPred;
+            //计算新结果
+            newPred = oldPred.or(ATLCantAvoidPred(agentList, trans, oldPred, primeVars));
+            cnt++;
+        } while (!oldPred.equals(newPred) && (cnt != k)); //当到达不动点时停止
+
+        return newPred;
+    }
+
+    /**
+     * ATLPre([[A]] X f)
+     * @param agentList
+     * @param trans
+     * @param to
+     * @param primeVars
+     * @return
+     * @throws ModelCheckAlgException
+     */
+    public static BDD ATLCantAvoidPred(Vector<String> agentList, BDD trans, BDD to, BDDVarSet primeVars)
+            throws ModelCheckAlgException {
+        //[A]X to = !<A> !to
+        return ATLCanEnforcePred(agentList, trans, to.not(), primeVars).not();
+    }
+
     //tester判空方法
     private boolean testerIsEmpty(SMVModule tester) {
         return tester == null || tester.getAll_couples().size() == 0;
@@ -651,11 +765,11 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         return varSet;
     }
 
-    private SMVAgentInfo getAgentInfo(String agentName) throws ModelCheckAlgException {
+    private static SMVAgentInfo getAgentInfo(String agentName) throws ModelCheckAlgException {
         return Env.getAll_agent_modules().get(getAgentFullName(agentName));
     }
 
-    private String getAgentFullName(String agentName) throws ModelCheckAlgException {
+    private static String getAgentFullName(String agentName) throws ModelCheckAlgException {
         if (agentName == null || agentName.equals(""))
             throw new ModelCheckAlgException("The agent name is null.");
 
@@ -695,6 +809,56 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             }
         }
         return vars;
+    }
+
+    /**
+     * 获取agentList的动作变量集合
+     * @param agentList 一组智能体的名称
+     * @return 动作变量集合
+     * @throws ModelCheckAlgException 异常处理
+     */
+    private static BDDVarSet ATLGetAgentActionVars(Vector<String> agentList) throws ModelCheckAlgException {
+        BDDVarSet actionVars = Env.getEmptySet();
+        for(String agentName : agentList) {
+            SMVAgentInfo agentInfo = getAgentInfo(agentName);
+            if(agentInfo == null)
+                throw new ModelCheckAlgException("Cannot find the information of agent " + agentName + ".");
+            ModuleBDDField actionField = agentInfo.getActionVar();
+            if(actionField == null) continue;
+            actionVars = actionVars.id().union(actionField.support());
+        }
+
+        return actionVars;
+    }
+
+    /**
+     * actions(Ag) - actions(agentList)
+     * @param minusAgentList 一组智能体
+     * @return
+     * @throws ModelCheckAlgException
+     */
+    private static BDDVarSet ATLGetAllAgentActionVarsMinus(Vector<String> minusAgentList) throws ModelCheckAlgException {
+        BDDVarSet actionVars = Env.getEmptySet();
+
+        for (String agentFullName : Env.getAll_agent_modules().keySet()) {
+            boolean isExist = false;
+            for(String minusAgentName : minusAgentList) {
+                if(getAgentFullName(minusAgentName).equals(agentFullName)) {
+                    isExist = true;
+                    break;
+                }
+            }
+            if(!isExist) {
+                SMVAgentInfo agentInfo = getAgentInfo(agentFullName);
+                if(agentInfo == null)
+                    throw new ModelCheckAlgException("Cannot find the information of agent " + agentFullName + ".");
+                ModuleBDDField actionFiled = agentInfo.getActionVar();
+                if(actionFiled != null)
+                    actionVars = actionVars.id().union(actionFiled.support());
+            }
+        }
+
+        return actionVars;
     }
 
     @Override

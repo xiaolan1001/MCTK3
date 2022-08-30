@@ -43,7 +43,7 @@ public class SpecUtilTest {
         //to_parse += "SPEC AG EF proc[1].loc = 3\n";                            //CTL done
         //to_parse += "SPEC EX proc[2].loc = 2\n";                               //CTL done
         to_parse += "SPEC !EF proc[2].loc = 2\n";                              //CTL done
-        //to_parse += "SPEC ! E F proc[2].loc = 2\n";                            //CTL error 'EF'
+        //to_parse += "SPEC ! E F proc[2].loc = 2\n";                            //CTL error 'E F'
         Spec[] specs = Env.loadSpecString(to_parse);
         assert (specs != null) && (specs.length > 0);
         for (Spec spec : specs) {
@@ -94,11 +94,11 @@ public class SpecUtilTest {
 
         //to_parse += "RTCTL*SPEC !A (E X close)";                                     //RTCTL* done
 
+        to_parse += "RTCTL*SPEC E(TRUE BU 0..-1 E X start)";                         //RTCTL* done
+
         //to_parse +="RTCTL*SPEC !A close";                                            //RTCTL* error 文法解析问题
 
         //to_parse +="RTCTL*SPEC !A (E(start | close))";                               //RTCTL* error 文法解析问题
-
-        to_parse += "RTCTL*SPEC E(TRUE BU 0..-1 E X start)";                         //RTCTL* error '-1'
 
         //to_parse += "RTCTL*SPEC [start -> close];";                                  //RTCTL* error '['
 

@@ -190,6 +190,9 @@ public class ATLStarModelCheckAlgTest {
 		//toParse += "RTCTL*SPEC !dc1.paid -> A( G( (dc1 KNOW (!dc1.paid & !dc2.paid & !dc3.paid)) |" +
         //        " ( (dc1 KNOW (dc2.paid | dc3.paid)) & !(dc1 KNOW dc2.paid) & !(dc1 KNOW dc3.paid) ) ) );";
 
+        toParse += "RTCTL*SPEC  <dc1, dc2> (BF 6..13 dc2.paid );"; //RTATL*
+        //toParse += "RTCTL*SPEC <dc1,dc2,dc3,main>  dc1.paid | dc2.paid | dc3.paid;"; //RTATL*
+        //toParse += "RTCTL*SPEC <dc1,main> TRUE U dc1.paid ;"; //RTATL*
         //加载规约
         Spec[] specs = Env.loadSpecString(toParse);
 
