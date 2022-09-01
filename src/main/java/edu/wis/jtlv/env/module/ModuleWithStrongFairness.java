@@ -3,6 +3,7 @@ package edu.wis.jtlv.env.module;
 import edu.wis.jtlv.env.Env;
 import edu.wis.jtlv.lib.FixPoint;
 import edu.wis.jtlv.lib.mc.ATLsK.ATLsK_ModelCheckAlg;
+import edu.wis.jtlv.lib.mc.ATLstar.ATLStarModelCheckAlg;
 import edu.wis.jtlv.lib.mc.ModelCheckAlgException;
 import net.sf.javabdd.BDD;
 import net.sf.javabdd.BDDVarSet;
@@ -586,5 +587,201 @@ public abstract class ModuleWithStrongFairness extends ModuleWithWeakFairness {
 //        return state.and(Env.prime(to)).and(this.trans()).exist(Env.globalPrimeVars());
 		return ATLsK_ModelCheckAlg.ATL_cannotAvoid_pred(agentList, this.trans(), to, Env.globalPrimeVars()).and(state);
 	}
-	
+
+	//*******************************为ATLStarModelCheckAlg.java文件使用**********************************/
+	public BDD ATLCanEnforceFeasible(Vector<String> agentList) throws ModelCheckAlgException {
+		//保存先前的限制状态
+		Vector<BDD> oldTransRestriction = this.getAllTransRestrictions();
+
+		//reach := reach(\theta, \rho) 可达性算法, 计算初始状态\theta使用迁移关系\rho的可达状态集合
+		BDD res = this.allSucc(this.initial());
+		BDD reachable = res.id();
+
+		//确定公平性约束条件是否引用了加点(带撇)变量, 如果引用了, 则需要不同处理
+		boolean[] hasPrimedJ = new boolean[this.justiceNum()];
+		boolean[] hasPrimedCp = new boolean[this.compassionNum()];
+		boolean[] hasPrimedCq = new boolean[this.compassionNum()];
+		BDDVarSet primes = Env.globalPrimeVars();
+		for(int i=0; i < hasPrimedJ.length; i++) {
+			hasPrimedJ[i] = !this.justiceAt(i)
+					.biimp(this.justiceAt(i).exist(primes)).isUniverse();
+		}
+		for(int i=0; i < hasPrimedCp.length; i++) {
+			hasPrimedCp[i] = !this.pCompassionAt(i)
+					.biimp(this.pCompassionAt(i).exist(primes)).isUniverse();
+			hasPrimedCq[i] = !this.qCompassionAt(i)
+					.biimp(this.qCompassionAt(i).exist(primes)).isUniverse();
+		}
+
+		//R := \tau and new
+		this.restrictTrans(res.id());
+
+		for(FixPoint<BDD> ires = new FixPoint<>(); ires.advance(res);) {
+			//从res中删除没有后继的状态
+			//new := new and pre(new, \rho), 最大不动点.
+			res = this.ATLCanEnforceSccChains(agentList, res);
+			//R := R and new
+			this.restrictTrans(res.id());
+
+			for (int i = this.justiceNum()-1; i >=0 ; i--) {
+				BDD localJ = hasPrimedJ[i] ? this.ATLCanEnforceHasSuccessorsTo(agentList,
+						this.justiceAt(i), res) : this.justiceAt(i);
+
+				//new := <agentList> U (R, new and J)
+				res = ATLStarModelCheckAlg.ATLCanEnforceAllPred(agentList, this.trans(), res.and(localJ));
+				//R := R and new
+				this.restrictTrans(res.id());
+			}
+
+			for (int i = this.compassionNum()-1; i >=0 ; i--) {
+				BDD localCp = hasPrimedCp[i] ? this.ATLCanEnforceHasSuccessorsTo(agentList,
+						this.pCompassionAt(i), res) : this.pCompassionAt(i);
+				BDD localCq = hasPrimedCq[i] ? this.ATLCanEnforceHasSuccessorsTo(agentList,
+						this.qCompassionAt(i), res) : this.qCompassionAt(i);
+
+				//new := (new and !p) or <agentList> U (R, new and q)
+				res = res.and(localCp.not())
+						.or(ATLStarModelCheckAlg.ATLCanEnforceAllPred(agentList, this.trans(), res.and(localCq)));
+				//R := R and new
+				this.restrictTrans(res.id());
+			}
+		}
+
+		this.removeAllTransRestrictions();
+
+		this.restrictTrans(reachable);
+		//new := <agentList> U (R, new)
+		res = ATLStarModelCheckAlg.ATLCanEnforceAllPred(agentList, this.trans(), res);
+		this.removeAllTransRestrictions();
+
+		this.setAllTransRestrictions(oldTransRestriction);
+
+		//return <agentList> U (R, new)
+		return res;
+	}
+
+	public BDD ATLCantAvoidFeasible(Vector<String> agentList) throws ModelCheckAlgException {
+		//保存先前的限制状态
+		Vector<BDD> oldTransRestriction = this.getAllTransRestrictions();
+
+		//reach := reach(\theta, \rho) 可达性算法, 计算初始状态\theta使用迁移关系\rho的可达状态集合
+		BDD res = this.allSucc(this.initial());
+		BDD reachable = res.id();
+
+		//确定公平性约束条件是否引用了加点(带撇)变量, 如果引用了, 则需要不同处理
+		boolean[] hasPrimedJ = new boolean[this.justiceNum()];
+		boolean[] hasPrimedCp = new boolean[this.compassionNum()];
+		boolean[] hasPrimedCq = new boolean[this.compassionNum()];
+		BDDVarSet primes = Env.globalPrimeVars();
+		for(int i=0; i < hasPrimedJ.length; i++) {
+			hasPrimedJ[i] = !this.justiceAt(i)
+					.biimp(this.justiceAt(i).exist(primes)).isUniverse();
+		}
+		for(int i=0; i < hasPrimedCp.length; i++) {
+			hasPrimedCp[i] = !this.pCompassionAt(i)
+					.biimp(this.pCompassionAt(i).exist(primes)).isUniverse();
+			hasPrimedCq[i] = !this.qCompassionAt(i)
+					.biimp(this.qCompassionAt(i).exist(primes)).isUniverse();
+		}
+
+		//R := \tau and new
+		this.restrictTrans(res.id());
+
+		for(FixPoint<BDD> ires = new FixPoint<>(); ires.advance(res);) {
+			//从res中删除没有后继的状态
+			//new := new and pre(new, \rho), 最大不动点.
+			res = this.ATLCantAvoidSccChains(agentList, res);
+			//R := R and new
+			this.restrictTrans(res.id());
+
+			for (int i = this.justiceNum()-1; i >=0 ; i--) {
+				BDD localJ = hasPrimedJ[i] ? this.ATLCantAvoidHasSuccessorsTo(agentList,
+						this.justiceAt(i), res) : this.justiceAt(i);
+
+				//new := [agentList] U (R, new and J)
+				res = ATLStarModelCheckAlg.ATLCantAvoidAllPred(agentList, this.trans(), res.and(localJ));
+				//R := R and new
+				this.restrictTrans(res.id());
+			}
+
+			for (int i = this.compassionNum()-1; i >=0 ; i--) {
+				BDD localCp = hasPrimedCp[i] ? this.ATLCantAvoidHasSuccessorsTo(agentList,
+						this.pCompassionAt(i), res) : this.pCompassionAt(i);
+				BDD localCq = hasPrimedCq[i] ? this.ATLCantAvoidHasSuccessorsTo(agentList,
+						this.qCompassionAt(i), res) : this.qCompassionAt(i);
+
+				//new := (new and !p) or [agentList] U (R, new and q)
+				res = res.and(localCp.not())
+						.or(ATLStarModelCheckAlg.ATLCantAvoidAllPred(agentList, this.trans(), res.and(localCq)));
+				//R := R and new
+				this.restrictTrans(res.id());
+			}
+		}
+
+		this.removeAllTransRestrictions();
+
+		this.restrictTrans(reachable);
+		//new := [agentList] U (R, new)
+		res = ATLStarModelCheckAlg.ATLCantAvoidAllPred(agentList, this.trans(), res);
+		this.removeAllTransRestrictions();
+
+		this.setAllTransRestrictions(oldTransRestriction);
+
+		//return [agentList] U (R, new)
+		return res;
+	}
+
+	/**
+	 *
+	 * @param agentList
+	 * @param scc
+	 * @return
+	 * @throws ModelCheckAlgException
+	 */
+	public BDD ATLCanEnforceSccChains(Vector<String> agentList, BDD scc) throws ModelCheckAlgException {
+		//fix(new := scc)
+		//	new := new and pre(new, trans)
+		//end fix
+		BDD res = scc.id();
+		for(FixPoint<BDD> point = new FixPoint<>(); point.advance(res);) {
+			res = res.and(ATLStarModelCheckAlg.ATLCanEnforcePred(agentList, this.trans(),
+					res, Env.globalPrimeVars()));
+		}
+
+		return res;
+	}
+
+	public BDD ATLCantAvoidSccChains(Vector<String> agentList, BDD scc) throws ModelCheckAlgException {
+		BDD res = scc.id();
+		for(FixPoint<BDD> point = new FixPoint<>(); point.advance(res);) {
+			res = res.and(ATLStarModelCheckAlg.ATLCantAvoidPred(agentList, this.trans(),
+					res, Env.globalPrimeVars()));
+		}
+
+		return res;
+	}
+
+	/**
+	 * 得到"state"的子集, 该子集拥有能够到达"to"的后继
+	 * @param agentList 一组智能体
+	 * @param state
+	 * @param to
+	 * @return "state"的子集
+	 * @throws ModelCheckAlgException 抛出异常
+	 */
+	public BDD ATLCanEnforceHasSuccessorsTo(Vector<String> agentList, BDD state, BDD to)
+		throws ModelCheckAlgException {
+		//<agentList> ATLPre(to) and state
+		return ATLStarModelCheckAlg.ATLCanEnforcePred(agentList, this.trans(), to,
+				Env.globalPrimeVars()).and(state);
+	}
+
+	public BDD ATLCantAvoidHasSuccessorsTo(Vector<String> agentList, BDD state, BDD to)
+			throws ModelCheckAlgException {
+		//[agentList] ATLPre(to) and state
+		return ATLStarModelCheckAlg.ATLCantAvoidPred(agentList, this.trans(), to,
+				Env.globalPrimeVars()).and(state);
+	}
+
+	//*******************************为ATLStarModelCheckAlg.java文件使用**********************************/
 }
