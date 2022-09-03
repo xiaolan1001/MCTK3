@@ -49,3 +49,5 @@ VAR
     Act : {snd, rec, SR, none};
     sender : Sender(Act, receiver.Act);
     receiver : Receiver(Act, sender.Act);
+RTCTL*SPEC A G((receiver.state=r0 | receiver.state=r1) -> A F sender.ack);;
+RTCTL*SPEC !E(G(receiver.state=r0 | receiver.state=r1) -> (F sender.ack));

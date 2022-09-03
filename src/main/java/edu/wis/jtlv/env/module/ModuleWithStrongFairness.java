@@ -619,7 +619,7 @@ public abstract class ModuleWithStrongFairness extends ModuleWithWeakFairness {
 		for(FixPoint<BDD> ires = new FixPoint<>(); ires.advance(res);) {
 			//从res中删除没有后继的状态
 			//new := new and pre(new, \rho), 最大不动点.
-			res = this.ATLCanEnforceSccChains(agentList, res);
+			res = this.ATLCanEnforceElimSuccChains(agentList, res);
 			//R := R and new
 			this.restrictTrans(res.id());
 
@@ -690,7 +690,7 @@ public abstract class ModuleWithStrongFairness extends ModuleWithWeakFairness {
 		for(FixPoint<BDD> ires = new FixPoint<>(); ires.advance(res);) {
 			//从res中删除没有后继的状态
 			//new := new and pre(new, \rho), 最大不动点.
-			res = this.ATLCantAvoidSccChains(agentList, res);
+			res = this.ATLCantAvoidElimSuccChains(agentList, res);
 			//R := R and new
 			this.restrictTrans(res.id());
 
@@ -738,7 +738,7 @@ public abstract class ModuleWithStrongFairness extends ModuleWithWeakFairness {
 	 * @return
 	 * @throws ModelCheckAlgException
 	 */
-	public BDD ATLCanEnforceSccChains(Vector<String> agentList, BDD scc) throws ModelCheckAlgException {
+	public BDD ATLCanEnforceElimSuccChains(Vector<String> agentList, BDD scc) throws ModelCheckAlgException {
 		//fix(new := scc)
 		//	new := new and pre(new, trans)
 		//end fix
@@ -751,7 +751,7 @@ public abstract class ModuleWithStrongFairness extends ModuleWithWeakFairness {
 		return res;
 	}
 
-	public BDD ATLCantAvoidSccChains(Vector<String> agentList, BDD scc) throws ModelCheckAlgException {
+	public BDD ATLCantAvoidElimSuccChains(Vector<String> agentList, BDD scc) throws ModelCheckAlgException {
 		BDD res = scc.id();
 		for(FixPoint<BDD> point = new FixPoint<>(); point.advance(res);) {
 			res = res.and(ATLStarModelCheckAlg.ATLCantAvoidPred(agentList, this.trans(),

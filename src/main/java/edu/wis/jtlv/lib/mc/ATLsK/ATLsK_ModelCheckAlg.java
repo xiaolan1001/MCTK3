@@ -184,7 +184,7 @@ public class ATLsK_ModelCheckAlg extends ModelCheckAlgI {
             c1 = sat(child[0], tester);
             SpecBDDMap.put(child[0], c1.not());
             SpecTesterMap.put(child[0], tester);
-            return c1;
+            return c1.not();
         }
         if (op == Operator.AND) { //学者注：逻辑连接词与
             c1 = sat(child[0], tester);

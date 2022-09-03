@@ -4,6 +4,7 @@ import edu.wis.jtlv.env.Env;
 import edu.wis.jtlv.env.core.spec.InternalSpecLanguage;
 import edu.wis.jtlv.env.module.SMVModule;
 import edu.wis.jtlv.env.spec.Spec;
+import edu.wis.jtlv.lib.mc.ATLsK.ATLsK_ModelCheckAlg;
 import edu.wis.jtlv.lib.mc.ATLstar.ATLStarModelCheckAlg;
 import edu.wis.jtlv.lib.mc.ATLstar.LoggerUtil;
 import org.junit.Test;
@@ -54,28 +55,40 @@ public class ATLStarModelCheckAlgTest {
         LoggerUtil.info("========= DONE Loading Modules ==========");
 
         String toParse = "";
-        //toParse += "RTCTL*SPEC !E(TRUE U  E X(start & close & heat & !error));";  //invalid  false
-        //toParse += "RTCTL*SPEC A(G((!close & start) -> A(G !heat | F !error)));"; //done true
-        //toParse += "RTCTL*SPEC ! E(X start);";                                    //invalid false
-        //toParse += "RTCTL*SPEC ! E(F start);";                                    //invalid false
-        //toParse += "RTCTL*SPEC A( G start);";                                     //invalid false
-        //toParse += "RTCTL*SPEC F start -> G heat;";                               //invalid false
-        //toParse += "RTCTL*SPEC !E( !start U E( TRUE U start));";                  //invalid false
-        //toParse += "RTCTL*SPEC !E( (X close) U start);";                          //invalid false
-        //toParse += "RTCTL*SPEC F!E((X start) R heat);";                           //done true
-        //toParse += "RTCTL*SPEC !E( X start U (F error));";                        //invalid false
-        //toParse += "RTCTL*SPEC !E( start U X error);";                            //invalid false
-        //toParse += "RTCTL*SPEC !E((E X !start) U error);";                        //invalid false
-        //toParse += "RTCTL*SPEC !E(TRUE U (F error));";                            //invalid false
-        //toParse += "RTCTL*SPEC A( (X start) U !(X error));";                      //done true
-        //toParse += "RTCTL*SPEC A start;";                                         //invalid false
-        toParse += "RTCTL*SPEC A(start U E(heat));";                              //invalid true
-        //toParse += "RTCTL*SPEC !E( X E(F heat) );";                               //invalid false
-        //toParse += "RTCTL*SPEC (X start) & (TRUE U X start);";                    //invalid false
+        //toParse += "RTCTL*SPEC !E(TRUE U  E X(start & close & heat & !error));";  //invalid  MCTK3:false
+        //toParse += "RTCTL*SPEC A(G((!close & start) -> A(G !heat | F !error)));"; //done MCTK3:true
+        //toParse += "RTCTL*SPEC ! E(X start);";                                    //invalid MCTK3:false
+        //toParse += "RTCTL*SPEC ! E(F start);";                                    //invalid MCTK3:false
+        //toParse += "RTCTL*SPEC A( G start);";                                     //invalid MCTK3:false
+        //toParse += "RTCTL*SPEC F start -> G heat;";                               //invalid MCTK3:false
+        //toParse += "RTCTL*SPEC !E( !start U E( TRUE U start));";                  //invalid MCTK3:false
+        //toParse += "RTCTL*SPEC !E( (X close) U start);";                          //invalid MCTK3:false
+        //toParse += "RTCTL*SPEC F!E((X start) R heat);";                           //done MCTK3:true
+        //toParse += "RTCTL*SPEC !E( X start U (F error));";                        //invalid MCTK3:false
+        //toParse += "RTCTL*SPEC !E( start U X error);";                            //invalid MCTK3:false
+        //toParse += "RTCTL*SPEC !E((E X !start) U error);";                        //invalid MCTK3:false
+        //toParse += "RTCTL*SPEC !E(TRUE U (F error));";                            //invalid MCTK3:false
+        //toParse += "RTCTL*SPEC A( (X start) U !(X error));";                      //done MCTK3:true
+        //toParse += "RTCTL*SPEC A start;";                                         //invalid MCTK3:false
+        //toParse += "RTCTL*SPEC A(start U E(heat));";                              //invalid MCTK3:true
+        //toParse += "RTCTL*SPEC A(start U E F(heat));";                            //done NuSMV:true
+        //toParse += "RTCTL*SPEC !E( X E(F heat) );";                               //invalid MCTK3:false
+        //toParse += "RTCTL*SPEC (X start) & (TRUE U X start);";                    //invalid MCTK3:false
 
-        //toParse += "RTCTL*SPEC A G(start -> A F heat);";                          //done true
-        //toParse += "RTCTL*SPEC start;";                                           //invalid false
-        //toParse += "RTCTL*SPEC TRUE;";                                            //done true
+        //toParse += "RTCTL*SPEC A G(start -> A F heat);";                          //done MCTK3:true
+        //toParse += "RTCTL*SPEC start;";                                           //invalid MCTK3:false
+        //toParse += "RTCTL*SPEC TRUE;";                                            //done MCTK3:true
+
+        //****************ATL*规约*****************/
+        //toParse += "RTCTL*SPEC <> start;"; //invalid 将策略量词替换为路径量词:invalid
+        //toParse += "RTCTL*SPEC <> G(start -> <> F heat);"; //done 将策略量词替换为路径量词:done
+
+        //toParse += "RTCTL*SPEC A F heat;"; //done NuSMV:true
+        //toParse += "RTCTL*SPEC <> F heat;"; //done
+
+        toParse += "RTCTL*SPEC A X!(start & close & heat & !error);"; //done NuSMV:true
+        //toParse += "RTCTL*SPEC <> X!(start & close & heat & !error);"; //done
+        //****************ATL*规约*****************/
 
         Spec[] allSpecs = Env.loadSpecString(toParse);
         LoggerUtil.info("========= DONE Loading Specs ============");
@@ -90,6 +103,14 @@ public class ATLStarModelCheckAlgTest {
                 checker.postAlgorithm();
             }
         }
+//        for (Spec spec : allSpecs) {
+//            if (spec.getLanguage() == InternalSpecLanguage.RTCTLs) {
+//                ATLsK_ModelCheckAlg checker = new ATLsK_ModelCheckAlg(main, spec);
+//                checker.preAlgorithm();
+//                LoggerUtil.info(checker.doAlgorithm().resultString());
+//                checker.postAlgorithm();
+//            }
+//        }
     }
 
     /**
@@ -105,8 +126,8 @@ public class ATLStarModelCheckAlgTest {
         main.setFullPrintingMode(true);
 
         String toParse = "";
-        //toParse += "RTCTL*SPEC A G((receiver.state=r0 | receiver.state=r1) -> A F sender.ack);"; //invalid
-        toParse += "RTCTL*SPEC !E(G(receiver.state=r0 | receiver.state=r1) -> (F sender.ack));"; //invalid
+        //toParse += "RTCTL*SPEC A G((receiver.state=r0 | receiver.state=r1) -> A F sender.ack);"; //invalid NuSMV:false
+        toParse += "RTCTL*SPEC !E(G(receiver.state=r0 | receiver.state=r1) -> (F sender.ack));"; //invalid MCTK3:false
 
         //加载规约
         Spec[] specs = Env.loadSpecString(toParse);
@@ -135,17 +156,36 @@ public class ATLStarModelCheckAlgTest {
         main.setFullPrintingMode(true);
 
         String toParse = "";
-        //toParse += "RTCTL*SPEC A G((r.state=r0 | r.state=r1) -> A F s.ack);"; //done
-        //toParse += "RTCTL*SPEC !E(G(r.state=r0 | r.state=r1) -> (F s.ack));"; //invalid
-        //toParse += "RTCTL*SPEC E F(E G((r.state=r0 | r.state=r1) & !s.ack));"; //invalid
+        //toParse += "RTCTL*SPEC A G((r.state=r0 | r.state=r1) -> A F s.ack);"; //done MCMAS:true
+        toParse += "RTCTL*SPEC <> G((r.state=r0 | r.state=r1) -> <> F s.ack);"; //invalid
 
-        //toParse += "RTCTL*SPEC A(F(s KNOW (r.state=r0 | r.state=r1)));"; //invalid
-        //toParse += "RTCTL*SPEC A F(s.ack -> (s KNOW (r.state=r0 | r.state=r1)));"; //done
-        //toParse += "RTCTL*SPEC !E(TRUE BU 10..15 ((s.bit=1 & s.ack) -> (s KNOW (r.state=r0))));"; //invalid
-        toParse += "RTCTL*SPEC A G((s.bit=1 & s.ack) -> (s KNOW (r.state=r0)));"; //done
+        //toParse += "RTCTL*SPEC !E(G(r.state=r0 | r.state=r1) -> (F s.ack));"; //invalid MCMAS:false
+        //toParse += "RTCTL*SPEC !<s, r, main>(G(r.state=r0 | r.state=r1) -> (F s.ack));"; //done
+        //toParse += "RTCTL*SPEC [s, r, main]!(G(r.state=r0 | r.state=r1) -> (F s.ack));"; //done
 
+        //toParse += "RTCTL*SPEC E F(E G((r.state=r0 | r.state=r1) & !s.ack));"; //invalid MCMAS:false
+
+        //************KNOW算子****************/
+        //toParse += "RTCTL*SPEC A(F(s KNOW (r.state=r0 | r.state=r1)));"; //invalid MCMAS:true
+        //toParse += "RTCTL*SPEC A F(s.ack -> (s KNOW (r.state=r0 | r.state=r1)));"; //done MCMAS:true
+        //toParse += "RTCTL*SPEC !E(TRUE BU 10..15 ((s.bit=1 & s.ack) -> (s KNOW (r.state=r0))));"; //invalid mcmas不能验证含有界算子公式
+        //toParse += "RTCTL*SPEC A G((s.bit=1 & s.ack) -> (s KNOW (r.state=r0)));"; //done MCMAS:false
+        //************KNOW算子****************/
+
+        //toParse += "RTCTL*SPEC  <s, r> G((r.state=r0 | r.state=r1) -> A F s.ack);"; //done MCMAS:true
+        //toParse += "RTCTL*SPEC  <s, r> ((r.state=r0 | r.state=r1) -> A F s.ack);"; //done MCMAS不能验证ATL*公式
+
+        //toParse += "RTCTL*SPEC  <s, r, main> ((r.state=r0 | r.state=r1) -> A F s.ack);"; //done
+        //toParse += "RTCTL*SPEC  E ((r.state=r0 | r.state=r1) -> A F s.ack);"; //done
+
+        //toParse += "RTCTL*SPEC  <> F((r.state=r0 | r.state=r1) -> A F s.ack);"; //done
+        //toParse += "RTCTL*SPEC  A F((r.state=r0 | r.state=r1) -> A F s.ack);"; //done MCMAS:true
+        //toParse += "RTCTL*SPEC  <> F((r.state=r0 | r.state=r1) -> <> F s.ack);"; //done
+
+        //************SKNOW算子****************/
         //toParse += "RTCTL*SPEC !E BG 10..15 ((s.bit=1 & s.ack) -> (s SKNOW (r.state=r0)));"; //error 暂时还未编写SKNOW算法
         //toParse += "RTCTL*SPEC A BG 10..15 (s SKNOW (r.state=r0));"; //error 暂时还未编写SKNOW算法
+        //************SKNOW算子****************/
 
         //加载规约
         Spec[] specs = Env.loadSpecString(toParse);
@@ -159,6 +199,14 @@ public class ATLStarModelCheckAlgTest {
                 checker.postAlgorithm();
             }
         }
+//        for (Spec spec : specs) {
+//            if (spec.getLanguage() == InternalSpecLanguage.RTCTLs) {
+//                ATLsK_ModelCheckAlg checker = new ATLsK_ModelCheckAlg(main, spec);
+//                checker.preAlgorithm();
+//                LoggerUtil.info(checker.doAlgorithm().resultString());
+//                checker.postAlgorithm();
+//            }
+//        }
     }
 
     /**

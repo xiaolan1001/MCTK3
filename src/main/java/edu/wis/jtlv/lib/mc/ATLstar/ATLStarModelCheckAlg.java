@@ -691,20 +691,20 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
 
         BDD primeTo = Env.prime(to);
         //forSome groupActions. forAll notInGroupActions. forAll V'. (trans(V*AllAgentActions, V')->to(V'))
-        //return trans.imp(primeTo)
-        //        .forAll(primeVars)
-        //        .forAll(notInGroupActions)
-        //        .exist(groupActions);
+        return trans.imp(primeTo)
+                .forAll(primeVars)
+                .forAll(notInGroupActions)
+                .exist(groupActions);
         //forSome groupActions. forSome notInGroupActions. forSome V'. (trans(V*AllAgentActions, V') and to(V'))
         //and (forSome groupActions. forAll notInGroupActions. forAll V'. (trans(V*AllAgentActions, V')->to(V')))
-        return (trans.and(primeTo)
-                .exist(primeVars)
-                .exist(notInGroupActions)
-                .exist(groupActions))
-                .and(trans.imp(primeTo)
-                        .forAll(primeVars)
-                        .forAll(notInGroupActions)
-                        .exist(groupActions));
+//        return (trans.and(primeTo)
+//                .exist(primeVars)
+//                .exist(notInGroupActions)
+//                .exist(groupActions))
+//                .and(trans.imp(primeTo)
+//                        .forAll(primeVars)
+//                        .forAll(notInGroupActions)
+//                        .exist(groupActions));
     }
 
     /**
@@ -747,7 +747,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
      */
     public static BDD ATLCantAvoidPred(Vector<String> agentList, BDD trans, BDD to, BDDVarSet primeVars)
             throws ModelCheckAlgException {
-        //[A]X to = !<A> !to
+        //[A]X to = !<A>X !to
         return ATLCanEnforcePred(agentList, trans, to.not(), primeVars).not();
     }
 
@@ -899,12 +899,12 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
 
         LoggerUtil.info("the NNF of property is: {}", this.checkProp);
 
-        SMVModule design = (SMVModule) getDesign();
-
-        visibleVars = this.getRelevantVars(design, checkProp);
+        visibleVars = this.getRelevantVars(getDesign(), checkProp);
 
         SMVModule checkPropTester = null;
         checkBDD = sat(checkProp, checkPropTester);
+
+        SMVModule design = (SMVModule) getDesign();
 
         //design.restrictIni(checkBDD); //不需要将checkBDD添加为初始状态
         BDD feasibleStates = design.feasible(); //feasibleStates = fair(D || T)
