@@ -127,7 +127,10 @@ public class ATLStarModelCheckAlgTest {
 
         String toParse = "";
         //toParse += "RTCTL*SPEC A G((receiver.state=r0 | receiver.state=r1) -> A F sender.ack);"; //invalid NuSMV:false
-        toParse += "RTCTL*SPEC !E(G(receiver.state=r0 | receiver.state=r1) -> (F sender.ack));"; //invalid MCTK3:false
+        //toParse += "RTCTL*SPEC <> G((receiver.state=r0 | receiver.state=r1) -> <> F sender.ack);"; //invalid
+
+        //toParse += "RTCTL*SPEC !E(G(receiver.state=r0 | receiver.state=r1) -> (F sender.ack));"; //invalid MCTK3:false
+        toParse += "RTCTL*SPEC <>!(G(receiver.state=r0 | receiver.state=r1) -> (F sender.ack));"; //invalid
 
         //加载规约
         Spec[] specs = Env.loadSpecString(toParse);
@@ -157,11 +160,19 @@ public class ATLStarModelCheckAlgTest {
 
         String toParse = "";
         //toParse += "RTCTL*SPEC A G((r.state=r0 | r.state=r1) -> A F s.ack);"; //done MCMAS:true
-        toParse += "RTCTL*SPEC <> G((r.state=r0 | r.state=r1) -> <> F s.ack);"; //invalid
+        //toParse += "RTCTL*SPEC <> G((r.state=r0 | r.state=r1) -> <> F s.ack);"; //invalid
 
         //toParse += "RTCTL*SPEC !E(G(r.state=r0 | r.state=r1) -> (F s.ack));"; //invalid MCMAS:false
         //toParse += "RTCTL*SPEC !<s, r, main>(G(r.state=r0 | r.state=r1) -> (F s.ack));"; //done
         //toParse += "RTCTL*SPEC [s, r, main]!(G(r.state=r0 | r.state=r1) -> (F s.ack));"; //done
+        //toParse += "RTCTL*SPEC <>!(G(r.state=r0 | r.state=r1) -> (F s.ack));"; //invalid
+        //toParse += "RTCTL*SPEC ![](G(r.state=r0 | r.state=r1) -> (F s.ack));"; //invalid
+
+        //toParse += "RTCTL*SPEC <s,r> (TRUE U s.ack);"; //done
+        toParse += "RTCTL*SPEC [s,r,main] F FALSE;"; //done
+        //toParse += "RTCTL*SPEC <> F FALSE;"; //invalid
+        //toParse += "RTCTL*SPEC [s,r,main] G FALSE"; //done
+        //toParse += "RTCTL*SPEC <> G FALSE;"; //invalid 将策略量词替换为路径量词:invalid
 
         //toParse += "RTCTL*SPEC E F(E G((r.state=r0 | r.state=r1) & !s.ack));"; //invalid MCMAS:false
 

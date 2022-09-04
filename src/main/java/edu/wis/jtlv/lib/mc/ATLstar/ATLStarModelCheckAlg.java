@@ -14,9 +14,11 @@ import edu.wis.jtlv.lib.mc.ModelCheckAlgI;
 import edu.wis.jtlv.old_lib.mc.ModelCheckException;
 import net.sf.javabdd.BDD;
 import net.sf.javabdd.BDDVarSet;
+import org.graphstream.graph.Node;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Vector;
 
 /**
@@ -579,7 +581,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             design.syncComposition(negC1Tester);
             BDD feasibleStates = design.feasible(); //feasibleStates = fair(D || T)
             BDDVarSet auxVars = testerGetAuxVars(negC1Tester);
-            //temp = forsome auxVars.(fair(D || T) & !c1)
+            //temp = forSome auxVars.(fair(D || T) & !c1)
             temp = feasibleStates.and(negC1).exist(auxVars);
         } else {
             temp = negC1.and(design.feasible()); //temp = (fair(D) & !c1)
@@ -594,7 +596,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         BDDVarSet visibleVars = agentInfo.getVisVars_BDDVarSet();
         BDDVarSet allInvisibleVars = Env.globalUnprimeVarsMinus(visibleVars);
 
-        // return ! forsome (Vars-O_i).temp
+        // return ! forSome (Vars-O_i).temp
         return temp.exist(allInvisibleVars).not();
     }
 
@@ -619,7 +621,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             design.syncComposition(c1Tester);
             BDD feasibleStates = design.feasible(); //feasibleStates = fair(D || T)
             BDDVarSet auxVars = testerGetAuxVars(c1Tester);
-            //temp = forsome auxVars.(fair(D || T) & c1)
+            //temp = forSome auxVars.(fair(D || T) & c1)
             temp = feasibleStates.and(c1).exist(auxVars);
             design.decompose(c1Tester);
         } else {
@@ -670,12 +672,12 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
 
     /**
      * ATLPre(&lt;&lt;A&gt;&gt; X f)
-     * @param agentList
-     * @param trans
-     * @param to
-     * @param primeVars
-     * @return
-     * @throws ModelCheckAlgException
+     * @param agentList 一组智能体
+     * @param trans 迁移关系
+     * @param to 目标状态
+     * @param primeVars 加点变量
+     * @return pre
+     * @throws ModelCheckAlgException 将异常向上抛出
      */
     public static BDD ATLCanEnforcePred(Vector<String> agentList, BDD trans, BDD to, BDDVarSet primeVars)
             throws ModelCheckAlgException {
@@ -738,12 +740,12 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
 
     /**
      * ATLPre([[A]] X f)
-     * @param agentList
-     * @param trans
-     * @param to
-     * @param primeVars
-     * @return
-     * @throws ModelCheckAlgException
+     * @param agentList 一组智能体
+     * @param trans 迁移关系
+     * @param to 目标状态
+     * @param primeVars 加点变量
+     * @return pre
+     * @throws ModelCheckAlgException 向上抛出异常
      */
     public static BDD ATLCantAvoidPred(Vector<String> agentList, BDD trans, BDD to, BDDVarSet primeVars)
             throws ModelCheckAlgException {
@@ -834,8 +836,8 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
     /**
      * actions(Ag) - actions(agentList)
      * @param minusAgentList 一组智能体
-     * @return
-     * @throws ModelCheckAlgException
+     * @return 动作变量集合
+     * @throws ModelCheckAlgException 向上抛出异常
      */
     private static BDDVarSet ATLGetAllAgentActionVarsMinus(Vector<String> minusAgentList) throws ModelCheckAlgException {
         BDDVarSet actionVars = Env.getEmptySet();
@@ -859,6 +861,40 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         }
 
         return actionVars;
+    }
+
+    /**
+     * 解释一个图的节点
+     * @param graph
+     * @param nodeID 节点ID
+     * @return
+     * @throws ModelCheckAlgException
+     * @throws ModelCheckException
+     * @throws SpecException
+     * @throws SMVParseException
+     * @throws ModuleException
+     */
+    @SuppressWarnings("unused")
+    public boolean explainOneGraphNode(GraphExplainATLStar graph, String nodeID)
+            throws ModelCheckAlgException, ModelCheckException, SpecException, SMVParseException, ModuleException {
+        Node node = graph.getNode(nodeID);
+        if(node == null) return false;
+
+        Queue<Spec> queue = node.getAttribute("mapSatSpecs");
+        if(queue == null) return false;
+
+        int pathNo = node.getAttribute("stateNo");
+        int stateNo = node.getAttribute("stateNo");
+        boolean ret = true;
+        while(!queue.isEmpty()) {
+            Spec spec = queue.poll();
+            if(spec != null) {
+                //ret = ExplainPath(spec, graph, createdPathNumber, stateNo);
+            }
+            ret = ret && ret;
+        }
+
+        return ret;
     }
 
     @Override
