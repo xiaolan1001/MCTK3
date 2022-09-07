@@ -36,9 +36,9 @@ public class ModelCheckingTest {
 */
 		//Check_test();
 		Env.resetEnv();
-		rtctlCheck();
+		//rtctlCheck();
 		//ltlCheck();
-		//rtctlkCheck();
+		rtctlkCheck();
 		//CTLCounterExample();
 		System.out.println("DONE");
 	}

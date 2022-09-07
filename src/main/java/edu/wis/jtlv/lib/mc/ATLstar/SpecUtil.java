@@ -525,9 +525,9 @@ public class SpecUtil {
     /**
      * 简化公式, 若公式有main智能体(环境)时勿使用
      * @param spec 规约
-     * @param delTrue
-     * @return
-     * @throws SpecException
+     * @param delTrue 是否将TRUE替换
+     * @return 简化后的规约字符串
+     * @throws SpecException 异常处理
      */
     public static String simplifySpecString(Spec spec, boolean delTrue) throws SpecException {
         if(spec==null) return "";
@@ -537,7 +537,11 @@ public class SpecUtil {
         }else
             res=spec.toString();
 
-        res = res.replaceAll("main.", "");
+        //使用给定的 replacement 替换此字符串所有匹配给定的正则表达式 regex 的子字符串.
+        //'.'在这是通配符(匹配除换行符外的任意字符), 若公式有main智能体(环境)时勿使用.
+        //res = res.replaceAll("main.", "");
+        //返回一个新的字符串，它是通过用 newChar 替换此字符串中出现的所有 oldChar 得到的.
+        res = res.replace("main.", "");
         if (delTrue) {
             res = res.replace("#[TRUE], \n", "");
             res = res.replace("#[TRUE]", "");
@@ -549,14 +553,18 @@ public class SpecUtil {
 
     /**
      * 简化公式, 若公式有main智能体(环境)时勿使用
-     * @param specStr
-     * @param delTrue
-     * @return
-     * @throws SpecException
+     * @param specStr 需要简化的规约字符串
+     * @param delTrue 是否将TRUE替换
+     * @return 简化后的规约字符串
+     * @throws SpecException 异常处理
      */
     public static String simplifySpecString(String specStr, boolean delTrue) throws SpecException {
         if(specStr == null) return "";
-        String res = specStr.replaceAll("main.", "");
+        //使用给定的 replacement 替换此字符串所有匹配给定的正则表达式 regex 的子字符串.
+        //'.'在这是通配符(匹配除换行符外的任意字符), 若公式有main智能体(环境)时勿使用.
+        //String res = specStr.replaceAll("main.", "");
+        //返回一个新的字符串，它是通过用 newChar 替换此字符串中出现的所有 oldChar 得到的.
+        String res = specStr.replace("main.", "");
         if (delTrue) {
             res = res.replace("#[TRUE], \n", "");
             res = res.replace("#[TRUE]", "");

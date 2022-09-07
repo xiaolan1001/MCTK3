@@ -6,14 +6,35 @@ import edu.wis.jtlv.env.spec.SpecException;
 import edu.wis.jtlv.lib.mc.ModelCheckAlgException;
 import edu.wis.jtlv.old_lib.mc.ModelCheckException;
 import org.graphstream.graph.Node;
+import org.graphstream.ui.swingViewer.ViewPanel;
 import org.graphstream.ui.view.Viewer;
 import org.graphstream.ui.view.ViewerListener;
 import org.graphstream.ui.view.ViewerPipe;
 
-public class ViewerExplainATLStar implements ViewerListener {
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+
+import static java.lang.Double.parseDouble;
+
+public class ViewerExplainATLStar implements ViewerListener, ActionListener, MouseMotionListener {
     protected boolean loop = true;
 
-    private final GraphExplainATLStar graph;
+    private GraphExplainATLStar graph;
+    private ViewPanel graphPanel;
+    private JTextField viewPercentTextField, mouseXTextField, mouseYTextField;
+    private JButton viewCenterButton;
+
+    //Getter和Setter方法
+    public GraphExplainATLStar getGraph() {
+        return graph;
+    }
+
+    public void setGraph(GraphExplainATLStar graph) {
+        this.graph = graph;
+    }
 
     public ViewerExplainATLStar(GraphExplainATLStar graph) {
         System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
@@ -53,24 +74,46 @@ public class ViewerExplainATLStar implements ViewerListener {
 
     @Override
     public void buttonPushed(String s) {
-        System.out.println("-------- State "+s+" --------");
-        String str = graph.getNodeSatSpec(s);
-        if(str!=null && !str.equals(""))
-            System.out.println("[satisfies " + str + "]");
-        System.out.println( graph.getNodeStateDetails(s));
-        try {
-            try {
-                graph.getChecker().explainOneGraphNode(graph,s);
-            } catch (ModelCheckException | SpecException | SMVParseException | ModuleException e) {
-                e.printStackTrace();
-            }
-        } catch (ModelCheckAlgException e) {
-            e.printStackTrace();
-        }
+//        String str = graph.getNodeSatSpec(s);
+//        if(str!=null && !str.equals(""))
+//            System.out.println("[satisfies " + str + "]");
+//        System.out.println( graph.getNodeStateDetails(s));
+//        try {
+//            try {
+//                graph.getChecker().explainOneGraphNode(graph,s);
+//            } catch (ModelCheckException | SpecException | SMVParseException | ModuleException e) {
+//                e.printStackTrace();
+//            }
+//        } catch (ModelCheckAlgException e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override
     public void buttonReleased(String s) {
+
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if(e.getSource() == viewPercentTextField) {
+            graphPanel
+                    .getCamera()
+                    .setViewPercent(parseDouble(viewPercentTextField.getText()));
+        } else if(e.getSource() == viewCenterButton) {
+            graphPanel
+                    .getCamera()
+                    .setViewCenter(parseDouble(mouseXTextField.getText()), parseDouble(mouseYTextField.getText()), 0);
+        }
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
 
     }
 }

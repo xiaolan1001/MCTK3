@@ -63,3 +63,6 @@ RTCTL*SPEC A G(start -> A F heat);
 RTCTL*SPEC start;
 RTCTL*SPEC TRUE;
 RTCTL*SPEC E start;
+RTCTL*SPEC !E(TRUE BU 3..12 E X(start & close & heat & !error));
+RTCTL*SPEC E BG  3..16 ( A G(!start & !close & !heat & !error) |  E X(start & !close & !heat & error) | (start & close & !heat & error) );
+RTCTL*SPEC A BG 13..18 (start -> A F heat);

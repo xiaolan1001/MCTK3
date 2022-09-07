@@ -27,6 +27,7 @@ import java.util.Vector;
 public class ATLStarModelCheckAlg extends ModelCheckAlgI {
     private Spec property;  //待验证的规约
     private BDDVarSet visibleVars; //可观察变量
+    private BDDVarSet stateVarSet; //初始模型的状态变量集合
 
     private static HashMap<Spec, BDD> specBDDMap = new HashMap<>();
     private static HashMap<Spec, SMVModule> specTesterMap = new HashMap<>();
@@ -37,6 +38,11 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
 
     private Spec checkProp; //实际验证的规约
     private BDD checkBDD; //检测checkProp获得的BDD
+
+    private GraphExplainATLStar graph; //用于展示证据图
+    private int createdPathNumber = 0; //当前创建路径的数量
+    private final Vector<NodePath> trunkNodePaths = new Vector<>();
+    private BDD feasibleStatesForWitnessE = null;
 
     //无参构造
     public ATLStarModelCheckAlg() {
@@ -56,6 +62,14 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
 
     public void setProperty(Spec property) {
         this.property = property;
+    }
+
+    public GraphExplainATLStar getGraph() {
+        return graph;
+    }
+
+    public void setGraph(GraphExplainATLStar graph) {
+        this.graph = graph;
     }
 
     /**
@@ -863,10 +877,14 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         return actionVars;
     }
 
+    //********************************证据生成********************************/
     /**
-     * 解释一个图的节点
-     * @param graph
-     * @param nodeID 节点ID
+     * <p>
+     *     前提：node满足spec, 且spec是一个状态公式<br/>
+     *     从节点node生成spec的证据
+     * </p>
+     * @param spec 规约
+     * @param node 节点
      * @return
      * @throws ModelCheckAlgException
      * @throws ModelCheckException
@@ -874,28 +892,685 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
      * @throws SMVParseException
      * @throws ModuleException
      */
-    @SuppressWarnings("unused")
-    public boolean explainOneGraphNode(GraphExplainATLStar graph, String nodeID)
+    public boolean witness(Spec spec, Node node)
             throws ModelCheckAlgException, ModelCheckException, SpecException, SMVParseException, ModuleException {
-        Node node = graph.getNode(nodeID);
         if(node == null) return false;
+        BDD state = node.getAttribute("BDD");
 
-        Queue<Spec> queue = node.getAttribute("mapSatSpecs");
-        if(queue == null) return false;
+        if(!needExpE(spec)) {
+            //规约是一个由!, and ,or和AA组成的状态公式, 且!严格限制在断言之前
+            graph.nodeAddSpec(node.getId(), spec);
+        } else {
+            //规约是一个由!, and, or, AA, EE组成的状态公式
+            SpecExp specExp = (SpecExp) spec;
+            Operator op = specExp.getOperator();
+            Spec[] children = specExp.getChildren();
 
-        int pathNo = node.getAttribute("stateNo");
-        int stateNo = node.getAttribute("stateNo");
-        boolean ret = true;
-        while(!queue.isEmpty()) {
-            Spec spec = queue.poll();
-            if(spec != null) {
-                //ret = ExplainPath(spec, graph, createdPathNumber, stateNo);
+            if(op == Operator.AND) {
+                witness(children[0], node);
+                witness(children[1], node);
+            } else if(op == Operator.OR) {
+                BDD f = specBDDMap.get(children[0]);
+                if(f == null) return false;
+                BDD g = specBDDMap.get(children[1]);
+                if(g == null) return false;
+
+                if(!state.and(f).isZero() && !needExpE(children[0]))
+                    witness(children[0], node);
+                else if(!state.and(g).isZero() && !needExpE(children[1]))
+                    witness(children[1], node);
+                else if(!state.and(f).isZero())
+                    witness(children[0], node);
+                else witness(children[1], node);
+            } else if(op == Operator.EE) {
+                //spec=Ef 将会通过点击节点node解释
+                graph.nodeAddSpec(node.getId(), spec);
             }
-            ret = ret && ret;
+            return true;
+        }
+        return true;
+    }
+
+    /**
+     * <p>
+     *     前提：spec必须是NNF公式, 公式的逻辑连接词仅为!, and, or, 并且!在断言之前
+     * </p>
+     * @param spec 规约
+     * @return 如果规约由EE和其他连接词and或者or组成, 返回true; 否则返回false
+     */
+    public static boolean needExpE(Spec spec) {
+        if(spec instanceof SpecBDD) return false;
+        SpecExp specExp = (SpecExp) spec;
+        Operator op = specExp.getOperator();
+        Spec[] children = specExp.getChildren();
+
+        //需要被解释的算子
+        if(op == Operator.EE) return true;
+
+        if(op==Operator.AND || op==Operator.OR) {
+            return needExpE(children[0]) || needExpE(children[1]);
+        } else if(op==Operator.NOT || op==Operator.AA) {
+            return false;
+        } else {
+            //op是时态算子
+            return false;
+        }
+    }
+
+    /**
+     * <p>
+     *     前提：spec必须是NNF公式, 公式的逻辑连接词仅为!, and, or, 并且!在断言之前
+     * </p>
+     * @param spec 规约
+     * @return 如果规约由时态算子和其他连接词and或者or组成, 返回true; 否则返回false
+     */
+    public static boolean needExpT(Spec spec) {
+        if(spec instanceof SpecBDD) return false;
+        SpecExp specExp = (SpecExp) spec;
+        Operator op = specExp.getOperator();
+        Spec[] children = specExp.getChildren();
+
+        //需要被解释的算子
+        if(op.isTemporalOp()) return true;
+
+        if(op==Operator.AND || op==Operator.OR) {
+            return needExpT(children[0]) || needExpT(children[1]);
+        } else if(op==Operator.NOT || op==Operator.AA || op==Operator.EE) {
+            return false;
+        } else {
+            //op是其他算子
+            return false;
+        }
+    }
+
+    public boolean witnessE(Spec spec, Node node)
+            throws SpecException, ModelCheckException, ModelCheckAlgException, SMVParseException, ModuleException {
+        if(node == null)return false;
+
+        BDD state = node.getAttribute("BDD");
+        int pathNo = node.getAttribute("pathNo");
+        int stateNo = node.getAttribute("stateNo");
+        if(state==null || state.isZero()) return false;
+
+        SpecExp specExp = (SpecExp) spec;
+        Operator op = specExp.getOperator();
+        Spec[] children = specExp.getChildren();
+
+        if(!needExpE(spec) && !needExpT(spec)) {
+            graph.nodeAddSpec(node.getId(), spec);
+        } else if(needExpE(spec)) {
+            if(op == Operator.AND) {
+                witnessE(children[0], node);
+                witnessE(children[1], node);
+            } else if(op == Operator.OR) {
+                BDD f = specBDDMap.get(children[0]);
+                if(f == null) return false;
+                BDD g = specBDDMap.get(children[1]);
+                if(g == null) return false;
+
+                if(!state.and(f).isZero() && !needExpE(children[0]) && !needExpT(children[0]))
+                    witnessE(children[0], node);
+                else if(!state.and(g).isZero() && !needExpE(children[1]) && !needExpE(children[1]))
+                    witnessE(children[1], node);
+                else if(!state.and(f).isZero())
+                    witnessE(children[0], node);
+                else
+                    witnessE(children[1], node);
+            } else {
+                //spec = E f
+                graph.nodeAddSpec(node.getId(), spec);
+            }
+        } else {
+            //!needExpE(spec) && needExpT(spec)
+            if(needCrtPath(spec, node))
+                lassoPath(spec, node);
+            else
+                witnessEonNode(spec, node);
         }
 
-        return ret;
+        return true;
     }
+
+    /**
+     * <p>
+     *     前提：初始时, 规约spec满足!needExpE and needExpT; path^pos 满足 spec<br/>
+     *     结果：将必要的可满足的规约spec的子公式依附至后缀路径path^pos的一些节点上
+     * </p>
+     * @param spec 需要被解释的规约
+     * @param path 节点路径
+     * @param pos spec被解释在path^pos上, 即开始于逻辑位置pos的路径后缀
+     * @return boolean
+     * @throws ModelCheckException 模型检测异常
+     * @throws SpecException 规约异常
+     * @throws ModelCheckAlgException 模型检测算法异常
+     * @throws SMVParseException SMV解析异常
+     * @throws ModuleException 模型异常
+     */
+    public boolean explainPath(Spec spec, NodePath path, int pos)
+        throws ModelCheckException, SpecException, ModelCheckAlgException, SMVParseException, ModuleException {
+        if(path == null) return false;
+
+        int startIDx = path.at(pos);
+        String startNID = path.get(startIDx);
+        BDD startState = graph.nodeGetBDD(startNID);
+
+        //规约spec的测试器
+        SMVModule tester = specTesterMap.get(spec);
+
+        if(spec.isStateSpec()) {
+            //规约为状态公式
+            graph.nodeAddSpec(startNID, spec);
+        } else {
+            //规约不是状态公式
+            SpecExp specExp = (SpecExp) spec;
+            Operator op = specExp.getOperator();
+            Spec[] children = specExp.getChildren();
+
+            if(op == Operator.AND) {
+                boolean b1 = explainPath(children[0], path, pos);
+                return b1 && explainPath(children[1], path, pos);
+            } else if(op == Operator.OR) {
+                boolean fNeedExplain = needExpE(children[0]) || needExpT(children[0]);
+                Spec p, q;
+
+                if(!fNeedExplain) {
+                    p = children[0];
+                    q = children[1];
+                } else {
+                    p = children[1];
+                    q = children[0];
+                }
+                BDD pBDD = specBDDMap.get(p);
+                if(pBDD == null) return false;
+                if(!startState.and(pBDD).isZero())
+                    return explainPath(p, path, pos);
+                else
+                    return explainPath(q, path, pos);
+            } else {
+                //规约spec是一个主时态公式 spec = Xf, fUg, fRg, f U a..b g, f R a..b g
+                //根据规约在path^pos的语义解释spec.
+                if(op == Operator.NEXT) {
+                    BDD X = specBDDMap.get(spec);
+                    if(X == null) return false;
+                    if(startState.and(X).isZero()) return false;
+
+                    int ni = path.at(pos+1);
+                    BDD nextState = graph.nodeGetBDD(path.get(ni));
+                    BDD Xf = specBDDMap.get(children[0]);
+                    if(Xf==null || nextState.and(Xf).isZero()) return false;
+
+                    String firstEdgeID = startNID + "->" +path.get(ni);
+                    graph.edgeAddSpec(firstEdgeID, spec, path, pos, true);
+
+                    String eid = path.get(path.at(pos+1)) + "->" + path.get(path.at(pos+2));
+                    if(children[0].isStateSpec())
+                        graph.nodeAddSpec(path.get(ni), children[0]);
+                    else
+                        graph.edgeAddSpec(eid, children[0], path, pos+1, false);
+                } else if(op == Operator.UNTIL) {
+                    BDD X = specBDDMap.get(spec);
+                    if(X == null) return false;
+                    BDD Xf = specBDDMap.get(children[0]);
+                    if(Xf == null) return false;
+                    BDD Xg = specBDDMap.get(children[1]);
+                    if(Xg == null) return false;
+                    if(startState.and(X).isZero())
+                        return false;
+
+                    graph.edgeAddSpec(path.get(path.at(pos)) + "->" + path.get(path.at(pos+1)),
+                            spec, path, pos, true);
+
+                    String currentNid;
+                    //exp = false 则停止解释 f
+                    boolean exp = true;
+                    for(int p=pos; ; p++) {
+                        currentNid = path.get(path.at(p));
+                        BDD currentState = graph.nodeGetBDD(currentNid);
+                        if(currentState == null) return false;
+                        String eid = path.get(path.at(p)) + "->" + path.get(path.at(p+1));
+                        if(!currentState.and(Xg).isZero()) {
+                            //满足g
+                            if(children[1].isStateSpec())
+                                graph.nodeAddSpec(path.get(path.at(p)), children[1]);
+                            else
+                                graph.edgeAddSpec(eid, children[1], path, p, false);
+                            return true;
+                        } else if(exp && !currentState.and(Xf).isZero()) {
+                            //满足f
+                            if(children[0].isStateSpec())
+                                graph.nodeAddSpec(path.get(path.at(p)), children[0]);
+                            else
+                                graph.edgeAddSpec(eid, children[0], path, p, false);
+                            exp = path.needExplainNextPosition(pos, p);
+                        }
+                    }
+                } else if(op == Operator.RELEASES) {
+                    BDD X = specBDDMap.get(spec);
+                    if(X == null) return false;
+                    BDD Xf = specBDDMap.get(children[0]);
+                    if(Xf == null) return false;
+                    BDD Xg = specBDDMap.get(children[1]);
+                    if(Xg == null) return false;
+                    if(startState.and(X).isZero()) return false;
+
+                    String firstEdgeID = startNID + "->" + path.get(path.at(pos+1));
+                    graph.edgeAddSpec(firstEdgeID, spec, path, pos, true);
+
+                    String currentNid, nextNid;
+                    //exp = false 停止解释f
+                    boolean exp = true;
+                    for(int p = pos; ; p++) {
+                        currentNid = path.get(path.at(p));
+                        nextNid=path.get(path.at(p+1));
+                        BDD currentState = graph.nodeGetBDD(currentNid);
+                        if(currentState == null) return false;
+                        String eid = currentNid + "->" + nextNid;
+                        if(!currentState.and(Xf.and(Xg)).isZero()) {
+                            //满足f and g
+                            if(children[0].isStateSpec())
+                                graph.nodeAddSpec(path.get(path.at(p)), children[0]);
+                            else
+                                graph.edgeAddSpec(eid, children[0], path, p, false);
+                            if(children[1].isStateSpec())
+                                graph.nodeAddSpec(path.get(path.at(p)), children[1]);
+                            else
+                                graph.edgeAddSpec(eid, children[1], path, p, false);
+                            return true;
+                        } else if(!currentState.and(Xf).isZero()) {
+                            //满足g
+                            if(children[1].isStateSpec())
+                                graph.nodeAddSpec(path.get(path.at(p)), children[1]);
+                            else
+                                graph.edgeAddSpec(eid, children[1], path, p, false);
+                            exp = path.needExplainNextPosition(pos, p);
+                        }
+                        //如果!exp, 意味着f and g不在路径所有节点上满足, 那么停止解释g
+                        if(!exp) return true;
+                    }
+
+                } else if(op == Operator.B_UNTIL) {
+                    SpecRange range = (SpecRange) children[1];
+                    int a = range.getFrom(), b = range.getTo();
+                    if(a < 0)
+                        throw new ModelCheckException("The lower bound of " + spec + "cannot be less than 0.");
+                    if(b < 0)
+                        throw new ModelCheckException("The upper bound of " + spec + "cannot be less than 0.");
+                    if(a > b)
+                        throw new ModelCheckException("The lower bound of " + spec + "cannot be larger than the upper bound.");
+
+                    BDD X= specBDDMap.get(spec);
+                    if(X == null || startState.and(X).isZero()) return false;
+                    BDD Xf= specBDDMap.get(children[0]);
+                    if(Xf==null) return false;
+                    BDD Xg= specBDDMap.get(children[2]);
+                    if(Xg==null) return false;
+
+                    graph.edgeAddSpec(path.get(path.at(pos))+"->"+path.get(path.at(pos+1)),
+                            spec,path,pos,true);
+
+                    String currentNid, nextNid;
+                    boolean exp=true;
+                    for(int p=pos; p < pos+a && exp; p++){
+                        currentNid = path.get(path.at(p));
+                        nextNid = path.get(path.at(p+1));
+                        BDD currentState = graph.nodeGetBDD(currentNid);
+                        if(currentState.and(Xf).isZero()) return false;
+                        if(children[0].isStateSpec())
+                            graph.nodeAddSpec(currentNid, children[0]);
+                        else
+                            graph.edgeAddSpec(currentNid+"->"+nextNid, children[0], path, p, false);
+                        exp = path.needExplainNextPosition(pos, p);
+                    }
+
+                    //展示规约spec的上界和下界
+                    graph.nodeAddAnnotation(path.get(path.at(pos+a)),
+                            "lower bound "+a+" of "+SpecUtil.simplifySpecString(spec,false));
+                    graph.nodeAddAnnotation(path.get(path.at(pos+b)),
+                            "upper bound "+b+" of "+SpecUtil.simplifySpecString(spec,false));
+
+                    exp=true;
+                    for(int p=pos+a; p <= pos+b; p++){
+                        currentNid = path.get(path.at(p));
+                        nextNid = path.get(path.at(p+1));
+                        BDD curState = graph.nodeGetBDD(currentNid);
+
+                        if(!curState.and(Xg).isZero()){
+                            //解释 g
+                            if(children[2].isStateSpec())
+                                graph.nodeAddSpec(currentNid, children[2]);
+                            else
+                                graph.edgeAddSpec(currentNid+"->"+nextNid, children[2], path, p, false);
+                            return true;
+                        }else if(exp && !curState.and(Xf).isZero()){
+                            //解释 f
+                            if (children[0].isStateSpec())
+                                graph.nodeAddSpec(currentNid, children[0]);
+                            else
+                                graph.edgeAddSpec(currentNid + "->" + nextNid, children[0], path, p, false);
+                            exp = path.needExplainNextPosition(pos, p);
+                        }
+                    }
+                    return true;
+                } else if(op == Operator.B_RELEASES) {
+                    SpecRange range = (SpecRange) children[1];
+                    int a = range.getFrom(), b = range.getTo();
+                    if(a < 0)
+                        throw new ModelCheckException("The lower bound of " + spec + "cannot be less than 0.");
+                    if(b < 0)
+                        throw new ModelCheckException("The upper bound of " + spec + "cannot be less than 0.");
+                    if(a > b)
+                        throw new ModelCheckException("The lower bound of " + spec + "cannot be larger than the upper bound.");
+
+                    BDD X = specBDDMap.get(spec);
+                    if(X == null || startState.and(X).isZero()) return false;
+                    BDD Xf = specBDDMap.get(children[0]);
+                    if(Xf==null) return false;
+                    BDD Xg = specBDDMap.get(children[2]);
+                    if(Xg==null) return false;
+
+                    graph.edgeAddSpec(path.get(path.at(pos))+"->"+path.get(path.at(pos+1)),
+                            spec, path, pos, true);
+
+                    //查找 f
+                    String currentNid, nextNid;
+                    int fPos = -1;
+                    boolean exp = true;
+                    for(int p=pos; p < pos+a && fPos==-1 && exp; p++){
+                        currentNid = path.get(path.at(p));
+                        BDD currentState = graph.nodeGetBDD(currentNid);
+                        if(!currentState.and(Xf).isZero())
+                            fPos = p;
+                        exp = path.needExplainNextPosition(pos, p);
+                    }
+                    if(fPos != -1){
+                        //在[0,a-1]间找到 f 并且解释
+                        currentNid = path.get(path.at(fPos));
+                        nextNid = path.get(path.at(fPos+1));
+                        if(children[0].isStateSpec())
+                            graph.nodeAddSpec(currentNid, children[0]);
+                        else
+                            graph.edgeAddSpec(currentNid+"->"+nextNid, children[0], path, fPos, false);
+                        return true;
+                    }
+
+                    //f在[0,a-1]间总为false
+                    //neg_f = !f
+                    Spec neg_f = SpecUtil.NNF(new SpecExp(Operator.NOT, children[0]));
+                    SMVModule design = (SMVModule)getDesign();
+                    int oldDesignVariablesNum = design.getAll_couples().size();
+                    SMVModule negTester = null;
+                    BDD neg_f_bdd = sat(neg_f, negTester);
+                    if(design.getAll_couples().size()>oldDesignVariablesNum){
+                        //neg_f的测试器非空, 刷新可行状态集合
+                        feasibleStatesForWitnessE = design.feasible();
+                    }else {
+                        //neg_f的测试器为空
+                        if (feasibleStatesForWitnessE == null) feasibleStatesForWitnessE = design.feasible();
+                    }
+                    neg_f_bdd = neg_f_bdd.and(feasibleStatesForWitnessE);
+
+                    //在[0,a-1]间的所有位置解释!f
+                    exp = true;
+                    for(int p=pos; p<pos+a && exp; p++){
+                        currentNid = path.get(path.at(p));
+                        nextNid = path.get(path.at(p+1));
+                        BDD currentState = graph.nodeGetBDD(currentNid);
+                        if(currentState.and(neg_f_bdd).isZero()) return false;
+                        if(neg_f.isStateSpec())
+                            graph.nodeAddSpec(currentNid, neg_f);
+                        else
+                            graph.edgeAddSpec(currentNid+"->"+nextNid, neg_f, path,p, false);
+                        exp = path.needExplainNextPosition(pos, p);
+                    }
+
+                    //展示规约spec的上界和下界
+                    graph.nodeAddAnnotation(path.get(path.at(pos+a)),
+                            "lower bound "+a+" of "+SpecUtil.simplifySpecString(spec,false));
+                    graph.nodeAddAnnotation(path.get(path.at(pos+b)),
+                            "upper bound "+b+" of "+SpecUtil.simplifySpecString(spec,false));
+
+                    exp=true;
+                    for(int p=pos+a; p <= pos+b; p++){
+                        currentNid = path.get(path.at(p));
+                        nextNid = path.get(path.at(p+1));
+                        BDD currentState = graph.nodeGetBDD(currentNid);
+                        if(!currentState.and(Xf).isZero() && !currentState.and(Xg).isZero()){
+                            //解释 f and g
+                            if(children[0].isStateSpec())
+                                graph.nodeAddSpec(currentNid,children[0]);
+                            else
+                                graph.edgeAddSpec(currentNid+"->"+nextNid, children[0], path, p, false);
+                            if(children[2].isStateSpec())
+                                graph.nodeAddSpec(currentNid,children[2]);
+                            else
+                                graph.edgeAddSpec(currentNid+"->"+nextNid, children[2], path, p, false);
+                            return true;
+                        }else if(exp && !currentState.and(Xg).isZero()){
+                            //解释 g
+                            if (children[2].isStateSpec())
+                                graph.nodeAddSpec(currentNid, children[2]);
+                            else
+                                graph.edgeAddSpec(currentNid + "->" + nextNid, children[2], path, p, false);
+                            exp = path.needExplainNextPosition(pos,p);
+                        }
+                    }
+                    return true;
+                } else
+                    return true;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * <p>
+     *     前提：node满足E spec<br/>
+     *     结果：如果有必要创建一个新的套索路径以解释公式spec则返回true;<br/>
+     *     如果在节点node上已经足够解释spec则返回false.<br/>
+     *     needCrtPath() 被 witnessE() 调用
+     * </p>
+     * @param spec 规约
+     * @param node 节点
+     * @return boolean
+     */
+    private boolean needCrtPath(Spec spec, Node node) {
+        if(!needExpE(spec) && !needExpT(spec))
+            return false;
+
+        //ExpE、ExpT
+        BDD state = graph.nodeGetBDD(node.getId());
+        if(state == null) return false;
+
+        SpecExp specExp = (SpecExp) spec;
+        Operator op = specExp.getOperator();
+        Spec[] children = specExp.getChildren();
+
+        if(op == Operator.AND) {
+            return needCrtPath(children[0], node) || needCrtPath(children[1], node);
+        } else if(op == Operator.OR) {
+            BDD f = specBDDMap.get(children[0]);
+            if(f == null) return false;
+            BDD g = specBDDMap.get(children[1]);
+            if(g == null) return false;
+
+            if(!state.and(f).isZero() && state.and(g).isZero())
+                return needCrtPath(children[0], node);
+            else if(state.and(f).isZero() && !state.and(g).isZero())
+                return needCrtPath(children[1], node);
+            else if(!needCrtPath(children[0], node))
+                return false;
+            else return needCrtPath(children[1], node);
+        } else if(op.isTemporalOp()) {
+            if(op == Operator.UNTIL) {
+                BDD g = specBDDMap.get(children[1]);
+                if(!state.and(g).isZero()) {
+                    return needCrtPath(children[1], node);
+                } else
+                    return true;
+            } else if(op == Operator.RELEASES) {
+                BDD f = specBDDMap.get(children[0]);
+                BDD g = specBDDMap.get(children[1]);
+
+                if(!state.and(f.and(g)).isZero())
+                    return needCrtPath(children[0], node) || needCrtPath(children[1], node);
+                else return true;
+            } else if(op == Operator.B_UNTIL) {
+                SpecRange range = (SpecRange) children[1];
+                int a = range.getFrom();
+                BDD g = specBDDMap.get(children[2]);
+
+                if(a==0 && !state.and(g).isZero())
+                    return needCrtPath(children[2], node);
+                else return true;
+            } else if(op == Operator.B_RELEASES) {
+                SpecRange range = (SpecRange) children[1];
+                int a = range.getFrom();
+                int b = range.getTo();
+                BDD f = specBDDMap.get(children[0]);
+                BDD g = specBDDMap.get(children[2]);
+
+                if(a==0 && b==0 && !state.and(g).isZero())
+                    return needCrtPath(children[2], node);
+                else if(a==0 && b>0 && !state.and(f.and(g)).isZero())
+                    return needCrtPath(children[0], node) || needCrtPath(children[2], node);
+                else
+                    return true;
+            }else {
+                //op = X
+                return true;
+            }
+        } else {
+            //op = EE
+            return needCrtPath(spec, node);
+        }
+    }
+
+    /**
+     * <p>
+     *     前提：node满足E spec; !needCrtPath(spec, node).<br/>
+     *     结果：如果有必要创建一个新的套索路径以解释公式spec则返回true;
+     *     如果在节点node上已经足够解释spec则返回false.
+     * </p>
+     * @param spec 规约
+     * @param node 节点
+     * @throws SpecException 向上抛出异常
+     */
+    private void witnessEonNode(Spec spec, Node node) throws SpecException {
+        if(!needExpE(spec) && !needExpT(spec)) {
+            graph.nodeAddSpec(node.getId(), spec);
+            return;
+        }
+
+        //ExpE、ExpT
+        BDD state = graph.nodeGetBDD(node.getId());
+        if(state == null) return;
+
+        SpecExp specExp = (SpecExp) spec;
+        Operator op = specExp.getOperator();
+        Spec[] children = specExp.getChildren();
+
+        if(op == Operator.AND) {
+            witnessEonNode(children[0], node);
+            witnessEonNode(children[1], node);
+        } else if(op == Operator.OR) {
+            BDD f = specBDDMap.get(children[0]);
+            if(f == null) return;
+            BDD g = specBDDMap.get(children[1]);
+            if(g == null) return;
+
+            if(!state.and(f).isZero() && state.and(g).isZero())
+                witnessEonNode(children[0], node);
+            else if(state.and(f).isZero() && !state.and(g).isZero())
+                witnessEonNode(children[1], node);
+            else if(!needCrtPath(children[0], node))
+                witnessEonNode(children[0], node);
+            else
+                witnessEonNode(children[1], node);
+        } else if(op.isTemporalOp()) {
+            if(op == Operator.UNTIL) {
+                BDD g = specBDDMap.get(children[1]);
+                if(!state.and(g).isZero())
+                    witnessEonNode(children[1], node);
+            } else if(op == Operator.RELEASES) {
+                BDD f = specBDDMap.get(children[0]);
+                BDD g = specBDDMap.get(children[1]);
+
+                if(!state.and(f.and(g)).isZero()) {
+                    witnessEonNode(children[0], node);
+                    witnessEonNode(children[1], node);
+                }
+            } else if(op == Operator.B_UNTIL) {
+                SpecRange range = (SpecRange) children[1];
+                int a = range.getFrom();
+                BDD g = specBDDMap.get(children[2]);
+
+                if(a==0 && !state.and(g).isZero())
+                    witnessEonNode(children[2], node);
+            } else if(op == Operator.B_RELEASES) {
+                SpecRange range = (SpecRange) children[1];
+                int a = range.getFrom();
+                int b = range.getTo();
+                BDD f = specBDDMap.get(children[0]);
+                BDD g = specBDDMap.get(children[2]);
+
+                if(a==0 && b==0 && !state.and(g).isZero())
+                    witnessEonNode(children[2], node);
+                else if(a==0 && b>0 && !state.and(f.and(g)).isZero()) {
+                    witnessEonNode(children[0], node);
+                    witnessEonNode(children[2], node);
+                }
+            }
+        } else {
+            //op = EE
+            witnessEonNode(children[0], node);
+        }
+    }
+
+    /**
+     * <p>
+     *     前提：n.s 满足 E spec<br/>
+     *     构造一条套索路径r, 使得r满足于spec;<br/>
+     *     r的前缀是最短的, 且r的loop是在具有最少状态数量的SCC内.
+     * </p>
+     * @param spec
+     * @param node
+     * @return
+     * @throws SpecException
+     * @throws ModelCheckException
+     * @throws ModelCheckAlgException
+     * @throws SMVParseException
+     * @throws ModuleException
+     */
+    private boolean lassoPath(Spec spec, Node node)
+        throws SpecException, ModelCheckException, ModelCheckAlgException, SMVParseException, ModuleException {
+        if(node == null) return false;
+
+        //起始节点
+        BDD fromState = node.getAttribute("BDD");
+        int pathNo = node.getAttribute("pathNo");
+        int stateNo = node.getAttribute("stateNo");
+        String fromNodeID = pathNo+"."+stateNo;
+        if(fromState==null || fromState.isZero())
+            return false;
+
+        BDDVarSet auxBDDVarSet = Env.globalUnprimeVarsMinus(stateVarSet);
+        // D_fromState is the D-state of the starting node
+        BDD D_fromState = fromState.exist(auxBDDVarSet);
+
+        SpecExp specExp = (SpecExp) spec;
+        Operator op = specExp.getOperator();
+
+        //(1)构造design = D || T_spec
+        SMVModule DT = (SMVModule) getDesign();
+        ModuleWithWeakFairness weakDT = null;
+        if(DT != null) weakDT = DT;
+
+        BDDVarSet specAuxBDDVarSet = Env.getEmptySet();
+
+        //待完成
+        return true;
+    }
+    //********************************证据生成********************************/
 
     @Override
     public AlgResultI preAlgorithm() throws AlgExceptionI, SMVParseException, ModelCheckException, ModuleException {
