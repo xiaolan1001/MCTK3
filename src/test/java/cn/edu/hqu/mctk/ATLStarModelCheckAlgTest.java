@@ -164,7 +164,7 @@ public class ATLStarModelCheckAlgTest {
         LoggerUtil.info("========= DONE Loading Modules ==========");
 
         String toParse = "";
-        //toParse += "RTCTL*SPEC !E(TRUE U  E X(start & close & heat & !error));";  //invalid  MCTK3:false
+        toParse += "RTCTL*SPEC !E(TRUE U  E X(start & close & heat & !error));";  //invalid  MCTK3:false
         //toParse += "RTCTL*SPEC A(G((!close & start) -> A(G !heat | F !error)));"; //done MCTK3:true
         //toParse += "RTCTL*SPEC ! E(X start);";                                    //invalid MCTK3:false
         //toParse += "RTCTL*SPEC ! E(F start);";                                    //invalid MCTK3:false
