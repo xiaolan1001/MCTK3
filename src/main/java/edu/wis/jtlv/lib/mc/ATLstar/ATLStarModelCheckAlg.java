@@ -14,12 +14,11 @@ import edu.wis.jtlv.lib.mc.ModelCheckAlgI;
 import edu.wis.jtlv.old_lib.mc.ModelCheckException;
 import net.sf.javabdd.BDD;
 import net.sf.javabdd.BDDVarSet;
+import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
+import org.graphstream.ui.spriteManager.Sprite;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * ATL*模型检测算法
@@ -53,6 +52,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         super(design);
         this.property = property;
         this.visibleVars = design.moduleUnprimeVars();
+        this.stateVarSet = design.moduleUnprimeVars();
     }
 
     //Getter和Setter方法
@@ -1563,11 +1563,19 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             trunkNodePath.add(cur_nid);
 
             String edgeId = pred_nid + "->" + cur_nid;
+            graph.addArc(edgeId, pred_nid, cur_nid, true);
             if(first_created_edgeId == null) {
                 first_created_edgeId = edgeId;
             }
             pred_nid = cur_nid;
         }
+
+        String to_nodeId=null;
+        if(loopNodeIdx == 0)
+            to_nodeId = fromNodeID;
+        else
+            to_nodeId=createdPathNumber+"."+loopNodeIdx;
+        graph.addArc(pred_nid+"->"+to_nodeId, pred_nid, to_nodeId, true);
 
         //恢复旧的迁移限制
         while(DT.getTransRestrictionsSize()>oldTransRestrictionsSize) {
@@ -1598,6 +1606,76 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             DT.decompose(tester);
 
         return b;
+    }
+
+    /**
+     * 解释在该节点上的所有状态规约, 所有时态规约采用该节点作为路径的第一个节点
+     * @param nodeID 节点ID
+     * @return boolean
+     * @throws ModelCheckAlgException 模型检测算法异常
+     * @throws ModelCheckException 模型检测异常
+     * @throws SpecException 规约异常
+     * @throws SMVParseException SMV解析异常
+     * @throws ModuleException 模块异常
+     */
+    public boolean explainOneNode(String nodeID)
+        throws ModelCheckAlgException, ModelCheckException, SpecException, SMVParseException, ModuleException {
+        Node node = graph.getNode(nodeID);
+        if(node == null) return false;
+
+        //解释该节点上的所有状态规约
+        //specNum是n.A中状态公式的数量
+        int specNum = node.getAttribute("spriteSpecNumber");
+        for(int i=1; i <= specNum; i++){
+            Sprite sprite = node.getAttribute("spriteSpec"+i);
+            if(sprite == null) return false;
+            boolean needExplained = sprite.getAttribute("needExplained");
+            boolean explained = sprite.getAttribute("explained");
+            if(needExplained && !explained){
+                Spec spec = sprite.getAttribute("spec");
+                SpecExp se = (SpecExp)spec;
+                Operator op = se.getOperator();
+                Spec[] child = se.getChildren();
+
+                if(op == Operator.EE)
+                    witnessE(child[0], node);
+                else if(op == Operator.AND){
+                    witness(child[0], node);
+                    witness(child[1], node);
+                }else if(op == Operator.OR){
+                    BDD lc = specBDDMap.get(child[0]);
+                    if(lc == null) return false;
+                    BDD state = graph.nodeGetBDD(nodeID);
+                    if (!state.and(lc).isZero())
+                        witness(child[0], node);
+                    else
+                        witness(child[1], node);
+                }
+
+                sprite.setAttribute("explained",true);
+            }
+        }
+
+        //解释将此节点作为第一个节点的后缀路径上的所有时态公式
+        for (Edge edge : node.getEachLeavingEdge()) {
+            specNum = edge.getAttribute("spriteSpecNumber");
+            for (int i=1; i <= specNum; i++) {
+                Sprite sprite = edge.getAttribute("spriteSpec" + i);
+                if (sprite == null) return false;
+                boolean needExplained = sprite.getAttribute("needExplained");
+                boolean explained = sprite.getAttribute("explained");
+
+                if (needExplained && !explained) {
+                    Spec spec = sprite.getAttribute("spec");
+                    NodePath path = sprite.getAttribute("path");
+                    int pos = sprite.getAttribute("pos");
+                    explainPath(spec, path, pos);
+                    sprite.setAttribute("explained", true);
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -2013,8 +2091,30 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             }
             design.feasible().free();
 
+            graph = new GraphExplainATLStar(this.property, this.checkProp, this);
+            graph.addAttribute("ui.title", graph.getId());
+
+            BDD initial = result.satOne(design.moduleUnprimeVars(), false);
+            Node node = graph.addStateNode(1, 0, initial);
+            node.setAttribute("ui.class", "initialState");
+
+            boolean ok = witness(this.checkProp, node);
+
             String returnMsg = "";
             returnMsg = "*** Property is NOT VALID ***\n ";
+
+            if(ok) {
+                new ViewerExplainATLStar(graph);
+            }
+
+//            new Thread(() -> {
+//                try {
+//                    new ViewerExplainATLStar(graph);
+//                } catch (SpecException e) {
+//                    e.printStackTrace();
+//                }
+//            }).start();
+
             return new AlgResultString(false, returnMsg);
         }
     }

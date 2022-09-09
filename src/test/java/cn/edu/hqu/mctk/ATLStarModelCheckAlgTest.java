@@ -195,7 +195,7 @@ public class ATLStarModelCheckAlgTest {
         //toParse += "RTCTL*SPEC A F heat;"; //done NuSMV:true
         //toParse += "RTCTL*SPEC <> F heat;"; //done
 
-        toParse += "RTCTL*SPEC A X!(start & close & heat & !error);"; //done NuSMV:true
+        //toParse += "RTCTL*SPEC A X!(start & close & heat & !error);"; //done NuSMV:true
         //toParse += "RTCTL*SPEC <> X!(start & close & heat & !error);"; //done
         //****************ATL*规约*****************/
 
