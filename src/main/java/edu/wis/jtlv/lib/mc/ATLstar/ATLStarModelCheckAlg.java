@@ -1267,7 +1267,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
     }
 
     /**
-     * <i>lassoPath(&psi;,n)</i>
+     * <i>lassoPath(&psi;,n)</i>, 套索路径&pi; = prefix*period<sup>&omega;</sup>
      * <p>
      *     输入：&psi;是一个CTL* NNF路径公式且n是一个节点, 使得(D<sup>T</sup>, n.s) &#8872; E&psi;.
      * </p>
@@ -1276,14 +1276,14 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
      *     构造一条套索路径r, 使得r满足于spec;<br/>
      *     r的前缀是最短的, 且r的loop是在具有最少状态数量的SCC内.
      * </p>
-     * @param spec
-     * @param node
-     * @return
-     * @throws SpecException
-     * @throws ModelCheckException
-     * @throws ModelCheckAlgException
-     * @throws SMVParseException
-     * @throws ModuleException
+     * @param spec 需要创建套索路径的规约
+     * @param node 套索路径的起始节点
+     * @return boolean
+     * @throws SpecException 规约异常
+     * @throws ModelCheckException 模型检测异常
+     * @throws ModelCheckAlgException 模型检测算法异常
+     * @throws SMVParseException SMV解析异常
+     * @throws ModuleException 模块异常
      */
     public boolean lassoPath(Spec spec, Node node)
         throws SpecException, ModelCheckException, ModelCheckAlgException, SMVParseException, ModuleException {
@@ -1298,13 +1298,13 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             return false;
 
         BDDVarSet auxBDDVarSet = Env.globalUnprimeVarsMinus(stateVarSet);
-        // D_fromState is the D-state of the starting node
+        //D_fromState是起始节点的D-state
         BDD D_fromState = fromState.exist(auxBDDVarSet);
 
         SpecExp specExp = (SpecExp) spec;
         Operator op = specExp.getOperator();
 
-        //(1)构造design = D || T_spec
+        //构造design = D || T_spec
         SMVModule DT = (SMVModule) getDesign();
         ModuleWithWeakFairness weakDT = null;
         if(DT != null) weakDT = DT;
@@ -1332,194 +1332,195 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         DT.restrictTrans(DT_feasible.and(Env.prime(DT_feasible)));
         int oldTransRestrictionsSize = DT.getTransRestrictionsSize();
 
+        //条件一: 公平环路(cycle)在公平SCC内, SCC自n.s可达且最接近n.s;
+        //条件二: 公平SCC拥有最少数量的状态, 状态来自在从n.s可达且最接近n.s的候选SCC之内;
+        //条件三: 前缀(prefix)是从n.s至公平SCC的最短路径;
+        //条件四: 公平环路(cycle)是建立在前缀(prefix)最后一个状态上的.
         //----------------------------------------------------------------------------------
-        // Step S1
+        // S1(Step 1): 计算D^T状态的集合Z, 这里的D^T状态仅包含所有n.s-可达的公平SCCs和在这些SCCs之间路径上的状态.
         //----------------------------------------------------------------------------------
-        // (1) Z' := n.s
-        BDD Zp=DT_fromStates;
-        // (2) Z := n.s ◦ R*
-        BDD Z=DT.allSucc(DT_fromStates);  // now Z is the set of reachable states from n.s
-        // (3) T := R ∧ (Z × Z);
+        //1) Z' := n.s
+        BDD Zp = DT_fromStates;
+        //2) Z := n.s ◦ R*
+        BDD Z = DT.allSucc(DT_fromStates);  //Z是从n.s开始的可达状态集合
+        //3) 限制迁移关系 T := R ∧ (Z × Z);
         DT.restrictTrans(Z.id().and(Env.prime(Z)));
-        boolean c=!Z.equals(Zp);
-        while(c){
-            Zp=Z;
-            c=false;
+        //4) c用于记录新集合Z是否等价于旧集合Z′ c := (Z != Z')
+        boolean c = !Z.equals(Zp);
+        while(c) {
+            Zp = Z; //储存前一次的结果 Z' := Z
+            c = false; //c := ⊥
             BDD Y;
-            while(true){
-                Y=Z.and(DT.succ(Z));
+            //7-9) 连续去除集合Z中没有后继的状态
+            while(true) {
+                //8) Y := Z ∧ (Z ◦ T)
+                Y = Z.and(DT.succ(Z));
+                //9) 如果Y = Z, 则跳出(break); 否则Z = Y.
                 if(Y.equals(Z)) break; else Z=Y;
             }
-            if(!Z.equals(Zp)){ DT.restrictTrans(Z.id().and(Env.prime(Z))); Zp=Z; c=true; }
+            //10-11) 一旦新集合Z不等于旧集合Z'时, 将迁移关系T限制在集合 Z×Z 内.
+            //如果Z != Z', T := T ∧ (Z × Z); Z′ := Z; c := ⊤;
+            if(!Z.equals(Zp)) {
+                DT.restrictTrans(Z.id().and(Env.prime(Z)));
+                Zp = Z;
+                c = true;
+            }
 
-            if (weakDT!=null) {
-                for (int i = 0; i < weakDT.justiceNum(); i++) {
-                    Z=DT.allSucc(Z.id().and(weakDT.justiceAt(i)));
-                    if(!Z.equals(Zp)){ DT.restrictTrans(Z.id().and(Env.prime(Z))); Zp=Z; c=true; }
+            //12-15) 去除集合Z中所有不可达J-状态的状态
+            for (int i = 0; i < weakDT.justiceNum(); i++) {
+                //Z := (Z ∧ J) ◦ T∗;
+                Z = DT.allSucc(Z.id().and(weakDT.justiceAt(i)));
+                //14-15) 同10-11), 一旦新集合Z不等于旧集合Z'时, 将迁移关系T限制在集合 Z×Z 内.
+                //如果Z != Z', T := T ∧ (Z × Z); Z′ := Z; c := ⊤;
+                if(!Z.equals(Zp)) {
+                    DT.restrictTrans(Z.id().and(Env.prime(Z)));
+                    Zp = Z;
+                    c = true;
                 }
             }
         }
         //----------------------------------------------------------------------------------
-        // now Z is the set of D||T_spec states containing all fair SCCs which are reachable from and closest to DT_fromStates
-        // Step S2
+        // S2(Step 2): 在Z中选择一个公平的SCC scc, scc包含最少数量的状态且最接近n.s.
+        // Z是 D||T_spec状态集合, 包含所有可以自DT_fromStates到达和最接近DT_fromStates的公平SCC.
         //----------------------------------------------------------------------------------
 
-        // restore old trans restrictions
-        Vector<BDD> addedTransRestrictions=new Vector<BDD>();
-        while(DT.getTransRestrictionsSize()>oldTransRestrictionsSize) {
+        //恢复所有旧的迁移限制
+        Vector<BDD> addedTransRestrictions = new Vector<>();
+        while(DT.getTransRestrictionsSize() > oldTransRestrictionsSize) {
             addedTransRestrictions.add(DT.getTransRestriction(oldTransRestrictionsSize));
             DT.removeTransRestriction(oldTransRestrictionsSize);
         }
-        // (16)
-        Zp=DT_fromStates;
-        BDD reach=DT_fromStates, glue; // "glue" is the set of states that glues the prefix and the loop together
-        glue=Zp.and(Z);
-        while (glue.isZero()) { // (17)
-            Zp=DT.succ(Zp.id()).and(reach.not()); // (18) Y is the set of new successors that have never visited before
-            reach=reach.id().or(Zp); // (19) "reach" is the set of states visited before
-            glue=Zp.and(Z);
+        //16-20) 广度有限搜索自n.s可达且最接近n.s的状态
+        Zp = DT_fromStates; //Y := n.s
+        //reach := n.s
+        BDD reach = DT_fromStates, glue; //"glue"是将前缀(prefix)和循环(loop/period)连接在一起的一组状态
+        glue = Zp.and(Z); //Y ∧ Z = ⊥
+        while (glue.isZero()) {
+            //18) Y是之前没有访问过的新的后继集合 Y := (Y ◦ R) ∧ ¬reach;
+            Zp = DT.succ(Zp.id()).and(reach.not());
+            //19) "reach"是之前已经访问过的状态集合 reach := reach ∨ Y ;
+            reach = reach.id().or(Zp);
+            glue = Zp.and(Z);
         }
-        // now "glue" is the set of states that glues the prefix and the loop together
+        //现在"glue"是将前缀(prefix)和循环(loop/period)连接在一起的状态集合
 
-        // restore new trans restrictions
-        for(int i=0; i<addedTransRestrictions.size(); i++) { DT.restrictTrans(addedTransRestrictions.get(i).id()); }
+        //恢复新的迁移限制
+        for (BDD addedTransRestriction : addedTransRestrictions) {
+            DT.restrictTrans(addedTransRestriction.id());
+        }
 
-        // (20)
-        BDD scc=Env.FALSE(), scc2, t=Env.FALSE(), t2;
-        while (!glue.isZero()) { // (21)
-            // (22)
-            t2=glue.satOne(specAllBDDVarSet, false);
-            glue=glue.id().and(t2.not()); // glue = glue - {t2}
-            // (23)
-            scc2=DT.allPred(t2); // DT.allSucc(t2).and(DT.allPred(t2));
-            // (24)
+        //Z := Y ∧ Z; scc := ⊥; t := ⊥;
+        BDD scc = Env.FALSE(), scc2, t = Env.FALSE(), t2;
+        //21-24) 选择一个公平SCC scc, 该scc包含了Z中的t状态且拥有最少数量的状态
+        while (!glue.isZero()) {
+            //22) t′ := choose(Z); Z := Z ∧ ¬t′;
+            t2 = glue.satOne(specAllBDDVarSet, false);
+            //scc′ := T∗ ◦ t′;
+            glue = glue.id().and(t2.not()); // glue = glue - {t2}
+            //23)
+            scc2 = DT.allPred(t2); //DT.allSucc(t2).and(DT.allPred(t2));
+            //24) 如果 scc = ⊥ 或者 |scc′| < |scc|, 则scc := scc′; t := t′;
             if(scc.isZero() || scc2.satCount(specAllBDDVarSet)<scc.satCount(specAllBDDVarSet)) {
-                scc=scc2; t=t2;
+                //使用scc存储在当前获得的SCCs中拥有最少数量状态的SCC, 用t存储scc中最接近n.s的状态
+                scc = scc2; t = t2;
             }
         }
 
         //----------------------------------------------------------------------------------
-        // (1) scc is a fair SCC within Z that contains minimal number of states, from all fair SCCs within Z which are reachable from and closest to DT_fromStates
-        // (2) t is a state in scc that is closest to DT_fromStates
-        // Step S3
+        // 前提: i.scc是集合Z内的公平SCC, 包含最少数量的状态, 可从DT_fromStates到达并最接近DT_fromStates;
+        //      ii.t是scc中最接近DT_fromStates的状态.
+        // S3(Step 3):
         //----------------------------------------------------------------------------------
 
-        // (25-26)
-        // restore old trans restrictions
+        //恢复旧的迁移限制
         while(DT.getTransRestrictionsSize()>oldTransRestrictionsSize) { DT.removeTransRestriction(oldTransRestrictionsSize); }
-        Vector<BDD> prefix = new Vector<BDD>();
+
+        //25) 生成从n.s至t的最短路径, t是scc中最接近n.s的状态. prefix := path(n.s, t,R);
+        Vector<BDD> prefix = new Vector<>();
+        //广度优先算法基于OBDD的实现
         BDD[] path = DT.shortestPath(DT_fromStates, t);
-        for (int i = 0; i < path.length-1; i++) // abandon the last state of "path" because it is the first state of the glued loop
+        //26) 放弃"path"的最后一个状态, 因为它是"glued loop"的第一个状态 prefix := prefix − (last(prefix));
+        for (int i = 0; i < path.length-1; i++)
             prefix.add(path[i]);
 
         //----------------------------------------------------------------------------------
-        // "prefix" is the shortest path from DT_fromStates to t
-        // Step S4: construct a fair cycle path "period" within scc from t
+        // 前提: "prefix"是从DT_fromStates 至t的最短路径.
+        // S4(Step 4): 在scc内从t开始构建一个公平回环路径"period".
         //----------------------------------------------------------------------------------
-        // (27)
+        //27) 将迁移关系T限制为D在scc的状态空间内的原始迁移关系R. T := R ∧ (scc × scc);
         DT.restrictTrans(scc.id().and(Env.prime(scc)));
 
-        // (28)
+        //28) period := (t);
         Vector<BDD> period = new Vector<BDD>();
         period.add(t);
 
-        // LXY: cache the labels of justices and strong fairnesses
-        Vector<Integer> vector_period_idx = new Vector<Integer>();
-        Vector<String> vector_fairness = new Vector<String>();  // for justice and strong fairness
-
+        //29-31) 确保period对于每一条公平性约束包含一个公平状态
         BDD fulfill;
-        if (weakDT!=null) {
-            for (int i = 0; i < weakDT.justiceNum(); i++) {
-                // Line 12, check if j[i] already satisfied
+        for (int i=0; i < weakDT.justiceNum(); i++) {
+            // Line 12, check if j[i] already satisfied
+            //if J ∧ s = ⊥ for all s in period
+            fulfill = Env.FALSE();
+            for (int j = 0; j < period.size(); j++) {
+                fulfill = period.elementAt(j).and(weakDT.justiceAt(i))
+                        .satOne(specAllBDDVarSet, false);
+                if (!fulfill.isZero())
+                    break;
+            }
+            if (fulfill.isZero()) {
+                BDD from = period.lastElement();
+                BDD to = scc.and(weakDT.justiceAt(i));
+                path = weakDT.shortestPath(from, to);
+                //消除边, 因为"from"已经在周期中
+                for (int j = 1; j < path.length; j++)
+                    period.add(path[j]);
+            }
+        }
+
+        ModuleWithStrongFairness strongDT = (ModuleWithStrongFairness) DT;
+        for (int i = 0; i < strongDT.compassionNum(); i++) {
+            if (!scc.and(strongDT.pCompassionAt(i)).isZero()) {
+                //检查 C (强公平约束)要求 i 是否已经满足
                 fulfill = Env.FALSE();
                 for (int j = 0; j < period.size(); j++) {
-                    fulfill = period.elementAt(j).and(weakDT.justiceAt(i))
+                    fulfill = period.elementAt(j)
+                            .and(strongDT.qCompassionAt(i))
                             .satOne(specAllBDDVarSet, false);
-                    if (!fulfill.isZero())
+                    if (!fulfill.isZero()) {
                         break;
+                    }
                 }
+
                 if (fulfill.isZero()) {
                     BDD from = period.lastElement();
-                    BDD to = scc.and(weakDT.justiceAt(i));
-                    path = weakDT.shortestPath(from, to);
-                    // eliminate the edge since from is already in period
+                    BDD to = scc.and(strongDT.qCompassionAt(i));
+                    path = strongDT.shortestPath(from, to);
+                    //消除边, 因为"from"已经在周期中
                     for (int j = 1; j < path.length; j++)
                         period.add(path[j]);
-
-                    //LXY
-                    //vector_period_idx.add((Integer) period.size()-1);
-                    //vector_fairness.add("Justice"+(i+1));
-                }
-            }
-        }
-        // Lines 14-16
-        if (DT instanceof ModuleWithStrongFairness) {
-            ModuleWithStrongFairness strongDT = (ModuleWithStrongFairness) DT;
-            for (int i = 0; i < strongDT.compassionNum(); i++) {
-                if (!scc.and(strongDT.pCompassionAt(i)).isZero()) {
-                    // check if C requirement i is already satisfied
-                    fulfill = Env.FALSE();
-                    for (int j = 0; j < period.size(); j++) {
-                        fulfill = period.elementAt(j).and(
-                                strongDT.qCompassionAt(i)).satOne(
-                                specAllBDDVarSet, false);
-                        // fulfill =
-                        // period.elementAt(j).and(design.qCompassionAt(i)).satOne();
-                        if (!fulfill.isZero()) {
-                            //LXY
-                            //vector_period_idx.add((Integer)j);
-                            //vector_fairness.add("Compassion.q"+(i+1));
-                            break;
-                        }
-                    }
-
-                    if (fulfill.isZero()) {
-                        BDD from = period.lastElement();
-                        BDD to = scc.and(strongDT.qCompassionAt(i));
-                        path = strongDT.shortestPath(from, to);
-                        // eliminate the edge since from is already in period
-                        for (int j = 1; j < path.length; j++)
-                            period.add(path[j]);
-
-                        //LXY
-                        //vector_period_idx.add((Integer)period.size()-1);
-                        //vector_fairness.add("Compassion.q"+(i+1));
-                    }
                 }
             }
         }
 
-        //
-        // Close cycle
-        //
-        // A period of length 1 may be fair, but it might be the case that
-        // period[1] is not a successor of itself. The routine path
-        // will add nothing. To solve this
-        // case we add another state to _period, now it will be OK since
-        // period[1] and period[n] will not be equal.
+        //闭环
+        //长度为1的周期可能是公平的, 但period[1]可能不是其自身的后继.常规路径不会添加任何内容.
+        //为了解决这种情况, 我们向 _period 添加另一个状态, 现在可以了, 因为period[1]和period[n]不相等.
 
-        // Line 17, but modified
         if (!period.firstElement().and(period.lastElement()).isZero()) {
-            // The first and last states are already equal, so we do not
-            // need to extend them to complete a cycle, unless period is
-            // a degenerate case of length = 1, which is not a successor of
-            // self.
+            //第一个和最后一个状态已经相等, 所以我们不需要扩展它们来完成一个循环,
+            //除非 period 是长度 = 1 的退化(degenerate)情况, 它不是自身的后继.
             if (period.size() == 1) {
-                // Check if _period[1] is a successor of itself.
+                //检查_period[1]是否是它自身的后继
                 if (period.firstElement().and(
                         DT.succ(period.firstElement())).isZero()) {
-                    // period[1] is not a successor of itself: Add state to
-                    // period.
+                    //period[1]不是它自身的后继: 增加状态至周期(period)
                     period.add(DT.succ(period.firstElement()).satOne(
-                            specAllBDDVarSet, false));    // DT.moduleUnprimeVars()
-                    // period.add(design.succ(period.firstElement()).satOne());
+                            specAllBDDVarSet, false));
 
-                    // Close cycle.
+                    //闭环
                     BDD from = period.lastElement();
                     BDD to = period.firstElement();
                     path = DT.shortestPath(from, to);
-                    // eliminate the edges since from and to are already in
-                    // period
+                    //消除由于 from 和 to 已经在周期中的边
                     for (int i = 1; i < path.length - 1; i++) {
                         period.add(path[i]);
                     }
@@ -1529,73 +1530,72 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             BDD from = period.lastElement();
             BDD to = period.firstElement();
             path = DT.shortestPath(from, to);
-            // eliminate the edges since from and to are already in period
+            //消除由于 from 和 to 已经在周期中的边
             for (int i = 1; i < path.length - 1; i++) {
                 period.add(path[i]);
             }
         }
 
-        // LXY: Now prefix and period are prepared, and there is a transition from the last element of period
-        // to the first element (its index is loopNodeIdx) of period
-
-        int loopNodeIdx=prefix.size();  // the index of the first node of period
+        //----------------------------------------------------------------------------------
+        // 前提: 现在prefix和period都准备好了, 从period的最后一个元素到period的第一个元素(它的索引是loopNodeIdx)有一条迁移.
+        // S5(Step 5): 构造节点路径\pi代表公平路径prefix * (period - {last(period)})^\omega
+        //----------------------------------------------------------------------------------
+        //ls := prefix ∗ (period − last(period));
+        int loopNodeIdx = prefix.size();  //period的第一个节点的索引
 
         prefix.addAll(period);
-        // now prefix is the composition of prefix and period, and the first element of prefix is state n.s
+        //现在prefix是prefix和period的组合, 并且prefix的第一个元素是状态n.s
 
-        String first_created_edgeId=null;
-        createdPathNumber++; // create a new path no matter the size of path
+        String first_created_edgeId = null;
+        //34) 无论路径大小, 都创建一条新路径 pathNum := pathNum + 1;
+        createdPathNumber++;
 
         String pred_nid, cur_nid;
         pred_nid = fromNodeID;
-        //graph.addNodeSatSpec(fromNodeId, spec, true);
 
-        Vector<String> trunkNodePath=new Vector<String>();   // the trunk node path will be created
+        Vector<String> trunkNodePath = new Vector<>(); //将创建树干(trunk)节点路径
         trunkNodePath.add(fromNodeID);
 
-        for (int i = 1; i < prefix.size(); i++) {
+        for (int i=1; i < prefix.size(); i++) {
             graph.addStateNode(createdPathNumber, i, prefix.get(i));
             cur_nid = createdPathNumber + "." + i;
 
             trunkNodePath.add(cur_nid);
 
-            String edgeId=pred_nid + "->" + cur_nid;
-            if(first_created_edgeId==null) {
-                first_created_edgeId=edgeId;
-//                        graph.edgeAddAnnotation(edgeId,
-//                                "Path" + createdPathNumber + "|=" + simplifySpecString(spec.toString(), false));
+            String edgeId = pred_nid + "->" + cur_nid;
+            if(first_created_edgeId == null) {
+                first_created_edgeId = edgeId;
             }
             pred_nid = cur_nid;
         }
 
-        // append the fairness annotations to the nodes of this path
-        for(int i=0; i<vector_period_idx.size(); i++){
-            int idx=(int)vector_period_idx.get(i);
-            String ann=vector_fairness.get(i);
-            if(idx==0){
-                graph.nodeAddAnnotation(fromNodeID, ann);
-            }else{//idx>0
-                graph.nodeAddAnnotation(createdPathNumber+"."+idx, ann);
-            }
+        //恢复旧的迁移限制
+        while(DT.getTransRestrictionsSize()>oldTransRestrictionsSize) {
+            DT.removeTransRestriction(oldTransRestrictionsSize);
         }
 
-        // restore old trans restrictions
-        while(DT.getTransRestrictionsSize()>oldTransRestrictionsSize) { DT.removeTransRestriction(oldTransRestrictionsSize); }
 
         NodePath nodePath = new NodePath(trunkNodePaths.size(), trunkNodePath, loopNodeIdx, path[0]);
         trunkNodePaths.add(nodePath);
 
+        //36) 注解\pi的第一条边, 元组(\psi,0)
         if(!op.isTemporalOp()){
-            // if spec is NOT a principally temporal subformula, it need to be show before calling explainPath(spec...)
+            //如果规约spec不是主时态子公式, 则需要在调用explainPath(spec...)之前展示
             graph.edgeAddSpec(first_created_edgeId, spec, nodePath, 0, true);
         }
 
         //-------------------------------------------------------------------------------------
-        boolean b= explainPath(spec, nodePath, 0);
+        // S6(Step 6): 根据\psi的语义通过将\psi的不可缺少的算子依附于\pi上,
+        // 调用explainPath()方法解释(D^T, \pi) \vDash(满足符) \psi.
         //-------------------------------------------------------------------------------------
 
-        DT.setAllTransRestrictions(oldTransRestrictions);;
-        DT.decompose(tester);
+        //37) 调用explainPath(\psi, \pi, 0);
+        boolean b= explainPath(spec, nodePath, 0);
+
+        //恢复原来的迁移关系限制
+        DT.setAllTransRestrictions(oldTransRestrictions);
+        if(!testerIsEmpty(tester))
+            DT.decompose(tester);
 
         return b;
     }
@@ -1629,7 +1629,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         BDD startState = graph.nodeGetBDD(startNID);
 
         //规约spec的测试器
-        SMVModule tester = specTesterMap.get(spec);
+        //SMVModule tester = specTesterMap.get(spec);
 
         if(spec.isStateSpec()) {
             //如果规约spec为状态公式, 则\pi[j].F = \pi[j].F ∪ {spec}
