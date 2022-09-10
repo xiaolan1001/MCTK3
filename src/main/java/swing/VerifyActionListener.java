@@ -20,9 +20,9 @@ import static swing.MCTKFrame.editorPanel;
 
 
 public class VerifyActionListener implements ActionListener {
-    public static int buttonFontSize = 13;
-    public static int inputFontSize = 13;
-    public static int outputFontSize = 13;
+    public static int buttonFontSize = 18;
+    public static int inputFontSize = 18;
+    public static int outputFontSize = 18;
 
     public static int specInputLineHeight =40;
 

@@ -1,6 +1,7 @@
 package edu.wis.jtlv.lib.mc.ATLstar;
 
 import edu.wis.jtlv.env.Env;
+import edu.wis.jtlv.env.module.SMVModule;
 import edu.wis.jtlv.env.spec.Spec;
 import edu.wis.jtlv.env.spec.SpecException;
 import net.sf.javabdd.BDD;
@@ -10,6 +11,8 @@ import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants;
 import org.graphstream.ui.spriteManager.Sprite;
 import org.graphstream.ui.spriteManager.SpriteManager;
+
+import java.util.HashMap;
 
 /**
  * <p>
@@ -23,14 +26,17 @@ public class GraphExplainATLStar extends MultiGraph {
 
     public Spec spec=null, negSpec=null;
 
+    public HashMap<Spec, SMVModule> specTesterMap;
+
     //有参构造
-    public GraphExplainATLStar(Spec spec, Spec negSpec, ATLStarModelCheckAlg checker) throws SpecException {
+    public GraphExplainATLStar(Spec spec, Spec negSpec, HashMap<Spec, SMVModule> specTesterMap, ATLStarModelCheckAlg checker) throws SpecException {
         //Creates an empty graph with strict checking and without auto-creation.
         super("A counterexample of " + SpecUtil.simplifySpecString(spec, false));
 
         this.checker = checker;
         this.spec = spec;
         this.negSpec = negSpec;
+        this.specTesterMap = specTesterMap;
         //为精灵创建一个新的管理者(器), 并且将其绑定至给定的图.
         spriteManager = new SpriteManager(this);
     }

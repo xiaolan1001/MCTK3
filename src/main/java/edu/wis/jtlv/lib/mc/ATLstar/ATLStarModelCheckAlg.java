@@ -2091,7 +2091,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             }
             design.feasible().free();
 
-            graph = new GraphExplainATLStar(this.property, this.checkProp, this);
+            graph = new GraphExplainATLStar(this.property, this.checkProp, specTesterMap,this);
             graph.addAttribute("ui.title", graph.getId());
 
             BDD initial = result.satOne(design.moduleUnprimeVars(), false);
