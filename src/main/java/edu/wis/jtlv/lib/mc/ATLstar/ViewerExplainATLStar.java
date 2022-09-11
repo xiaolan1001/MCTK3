@@ -83,7 +83,8 @@ public class ViewerExplainATLStar implements ViewerListener, ActionListener, Mou
 
         //为了将viewer整合进自己的Swing GUI中, 需要自行创建viewer.
         //创建一个新的viewer, 将其链接为来自graph的图形事件的接收器(a sink);
-        viewer = new Viewer(this.graph, Viewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
+        viewer = new Viewer(this.graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
+        //viewer = new Viewer(this.graph, Viewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
         //viewer因此会接收到每一个发生在graph上的改变.
         //注意: "Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD"常量, viewer活动在另一个线程中.
 
@@ -99,13 +100,17 @@ public class ViewerExplainATLStar implements ViewerListener, ActionListener, Mou
 
         //关闭view时的默认动作是退出程序
         viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.HIDE_ONLY);
+        //viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.EXIT);
 
         //将viewer连接回graph, graph成为viewer的接收器, 并且为viewer安装监听器以拦截图形事件.
         //仿真(simulations)
         //返回ViewerPipe管道对象, 该对象作为viewer的事件源
         ViewerPipe viewerPipe = viewer.newViewerPipe();
         viewerPipe.addViewerListener(this);
-        viewerPipe.addSink(this.graph);
+        //每次重新启用布局时, 会将图的所有事件发送回原始图, 该原始图本身已经拥有这些节点和边, 因此会引发IdAlreadyInUseException
+        //viewerPipe.addSink(this.graph); //在此实例中, 不应使用该方法, 或者viewer应在graph增加节点之前创建实例
+        //仅接收与属性相关的事件
+        viewerPipe.addAttributeSink(this.graph);
 
         //然后我们需要一个循环来完成我们的工作并等待事件.
         //在这个循环中, 我们需要在每次使用graph之前调用pump()方法来复制回(copy back)线程内viewer线程中已经发生的事件.

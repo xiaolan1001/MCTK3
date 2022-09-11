@@ -2081,6 +2081,13 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             return new AlgResultString(true, "*** Property is TRUE ***");
         } else {
             //否则D不满足\phi
+            //暂时只有RTCTL*公式有证据生成
+            if(checkProp.hasATLsPathOperators() || checkProp.hasObsEpistemicOperators()
+                    || checkProp.hasSynEpistemicOperators()) {
+                String returnMsg = "";
+                returnMsg = "*** Property is NOT VALID ***\n ";
+                return new AlgResultString(false, returnMsg);
+            }
             //通过Map.entrySet遍历value(容量大时推荐使用)
             for(Map.Entry<Spec, SMVModule> entry : specTesterMap.entrySet()) {
                 //当上条规约为某一断言f时, sat(!f), 遇NOT算子会将null的测试器添加至specTesterMap
@@ -2101,19 +2108,29 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             boolean ok = witness(this.checkProp, node);
 
             String returnMsg = "";
-            returnMsg = "*** Property is NOT VALID ***\n ";
+            returnMsg = "*** Property is false ***\n ";
 
             if(ok) {
                 new ViewerExplainATLStar(graph);
             }
 
-//            new Thread(() -> {
+            //能够实现主线程等待子线程结束效果, 但关闭窗口后主线程代码没有继续往下执行
+//            final Thread thread = new Thread(() -> {
 //                try {
 //                    new ViewerExplainATLStar(graph);
 //                } catch (SpecException e) {
 //                    e.printStackTrace();
 //                }
-//            }).start();
+//            });
+//
+//            thread.start();
+//
+//            //等待子线程结束
+//            try {
+//                thread.join();
+//            }catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
 
             return new AlgResultString(false, returnMsg);
         }
