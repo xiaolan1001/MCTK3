@@ -22,6 +22,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.*;
+import java.text.DecimalFormat;
 import java.util.Map;
 
 import static java.lang.Double.parseDouble;
@@ -33,20 +34,22 @@ import static swing.VerifyActionListener.outputFontSize;
  *    ViewerPipe可以注册类型ViewerListener的监听器, 并在更改某些事件属性时通过调用监听器的方法来发送事件.
  * </p>
  */
-public class ViewerExplainATLStar implements ViewerListener, ActionListener, MouseMotionListener, ChangeListener {
+public class ViewerExplainATLStar implements ViewerListener, ActionListener, MouseMotionListener, MouseWheelListener {
     protected boolean loop = true;
 
     private GraphExplainATLStar graph;
-    JFrame ceFrame;
+    JFrame ceJFrame; //counterexample JFrame
     Viewer viewer; //用于接收graph图形事件的viewer
-    ViewPanel graphPanel;
+    ViewPanel graphJPanel;
     JToggleButton layoutTogBtn; //自动布局切换按钮
     JTextField viewPercentText;
     JLabel viewPercentLabel;
     JLabel negSpecLabel;
-    JSplitPane splitPane_graph_rightPane, splitPane_testers_output;
+    JSplitPane centerJSplitPane, infoJSplitPane;
 
     public static JTextPane testerTextPane, outputTextPane;
+
+    private Toast toast;
 
     //Getter和Setter方法
     public GraphExplainATLStar getGraph() {
@@ -89,7 +92,8 @@ public class ViewerExplainATLStar implements ViewerListener, ActionListener, Mou
         viewer.enableAutoLayout();
 
 
-        graphPanel = viewer.addDefaultView(false); //false表示"非JFrame"
+        graphJPanel = viewer.addDefaultView(false); //false表示"非JFrame"
+        graphJPanel.addMouseWheelListener(this);
 
         initialize();
 
@@ -155,16 +159,19 @@ public class ViewerExplainATLStar implements ViewerListener, ActionListener, Mou
     }
 
     private void initialize() throws SpecException {
-        //创建窗口实例
-        ceFrame = new JFrame(this.graph.getId());
+        //创建窗口实例, 同时设置标题
+        ceJFrame = new JFrame(this.graph.getId());
         //设置窗体自动调节大小
-        ceFrame.pack();
+        //ceJFrame.pack();
 
         //设置窗口高宽
-        ceFrame.setSize(1280, 800);
+        ceJFrame.setSize(1280, 800);
 
-        //设置窗体布局
-        ceFrame.setLayout(new BorderLayout());
+        //设置界面居中
+        ceJFrame.setLocationRelativeTo(null);
+
+        //设置窗体布局为边界布局(JFrame和JDialog默认布局为BorderLayout, JPanel和Applet默认布局为FlowLayout)
+        ceJFrame.setLayout(new BorderLayout()); //默认为水平间距0, 垂直间距0
 
         //设置窗体标题
         //ceFrame.setTitle("ViewerExplainATLStar");
@@ -174,11 +181,19 @@ public class ViewerExplainATLStar implements ViewerListener, ActionListener, Mou
 
         //设置窗体图标
         Image logoIcon = new ImageIcon(this.getClass().getResource("/Icons/logo.png")).getImage();
-        ceFrame.setIconImage(logoIcon);
+        ceJFrame.setIconImage(logoIcon);
 
         //设置窗体默认关闭方式, 点击窗口关闭按钮, 执行销毁窗口操作(如果设置为 EXIT_ON_CLOSE, 则点击新窗口关闭按钮后, 整个进程将结束)
-        ceFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        ceJFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
+        UIManager.put("Label.font", new Font("Default", Font.PLAIN, 18));
+        UIManager.put("ToggleButton.font", new Font("Default", Font.PLAIN, 18));
+        UIManager.put("TitledBorder.font", new Font("Default", Font.PLAIN, 18));
+
+        //用于测试Ctrl+滚轮
+        //ceJFrame.addMouseWheelListener(this);
+
+        //********************北方向的控制面板********************/
         //设置开关按钮的文本
         layoutTogBtn=new JToggleButton("Auto Layout");
         //设置开关按钮为选中状态
@@ -194,31 +209,44 @@ public class ViewerExplainATLStar implements ViewerListener, ActionListener, Mou
                 }
         });
 
-        //创建面板
-        JPanel controlPanel = new JPanel();
-        controlPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        //创建上方控制面板
+        JPanel ctrlJPanel = new JPanel();
+        //设置控制面板布局为流式布局, 默认组件是居中对齐
+        ctrlJPanel.setLayout(new FlowLayout(FlowLayout.LEFT)); //指定对齐方式为左对齐
 
+        //创建一个标签并制定文本内容, 默认左对齐
         viewPercentLabel=new JLabel("View Percent:");
+        //JTextField文本框, 用来编辑单行的文本
+        //参数说明-text: 默认显示的文本; columns: 用来计算首选宽度的列数, 如果列设置为0, 则首选宽度将是组件实现的自然结果.
         viewPercentText = new JTextField("1",4);
+        //为百分比文本框绑定监听
         viewPercentText.addActionListener(this);
+        //创建一个标签用于展示规约的否定范式
         negSpecLabel = new JLabel("The following is a witness of " + SpecUtil.simplifySpecString(this.graph.negSpec,false));
+        //注册要在工具提示中显示的文本, 当光标停留在组件上时显示文本.
         negSpecLabel.setToolTipText(SpecUtil.simplifySpecString(this.graph.negSpec,false));
 
-        //添加面板
-        controlPanel.add(layoutTogBtn);
-        controlPanel.add(viewPercentLabel);
-        controlPanel.add(viewPercentText);
-        controlPanel.add(negSpecLabel);
+        //面板添加组件, 流式布局, 左对齐
+        ctrlJPanel.add(layoutTogBtn);
+        ctrlJPanel.add(viewPercentLabel);
+        ctrlJPanel.add(viewPercentText);
+        ctrlJPanel.add(negSpecLabel);
+        //********************************************************/
 
+        //*************************中间面板*************************/
         testerTextPane = new JTextPane();
+        //创建滚动面板, 设置滚动显示的视图内容组件为testerTextPane
         JScrollPane testerScrollPane = new JScrollPane(testerTextPane);
         testerScrollPane.setBorder(
                 BorderFactory.createCompoundBorder(
                         BorderFactory.createCompoundBorder(
                                 BorderFactory.createTitledBorder("Tester Information"),
-                                BorderFactory.createEmptyBorder(0,0,0,0)),
-                        BorderFactory.createEmptyBorder(0,0,0,0)));
-        //此处待补充输出testers信息代码
+                                BorderFactory.createEmptyBorder(0,0,0,0)
+                        ),
+                        BorderFactory.createEmptyBorder(0,0,0,0)
+                )
+        );
+        //此处待完善输出testers信息代码
         for(Map.Entry<Spec, SMVModule> entry : this.graph.specTesterMap.entrySet()) {
             if(entry.getValue() != null) {
                 this.consoleOutput(testerTextPane, "emph", entry.getValue().getName());
@@ -229,29 +257,43 @@ public class ViewerExplainATLStar implements ViewerListener, ActionListener, Mou
         }
 
         outputTextPane = new JTextPane();
+        //创建滚动面板, 设置滚动显示的视图内容组件为outputTextPane
         JScrollPane outputScrollPane = new JScrollPane(outputTextPane);
         outputScrollPane.setBorder(
                 BorderFactory.createCompoundBorder(
                         BorderFactory.createCompoundBorder(
                                 BorderFactory.createTitledBorder("Counterexample Information"),
-                                BorderFactory.createEmptyBorder(0,0,0,0)),
-                        BorderFactory.createEmptyBorder(0,0,0,0)));
+                                BorderFactory.createEmptyBorder(0,0,0,0)
+                        ),
+                        BorderFactory.createEmptyBorder(0,0,0,0)
+                )
+        );
 
 
-        splitPane_testers_output = new JSplitPane(JSplitPane.VERTICAL_SPLIT,testerScrollPane,outputScrollPane);
-        splitPane_testers_output.setDividerLocation(150);
-        splitPane_testers_output.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+        //创建分割面板, JSplitPane.VERTICAL_SPLIT垂直分割: 使两个组件从上到下排列
+        //将"Tester Information"和"Counterexample Information"分隔开来
+        infoJSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,testerScrollPane,outputScrollPane);
+        //设置分隔条的位置
+        infoJSplitPane.setDividerLocation(150);
+        infoJSplitPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
 
-        splitPane_graph_rightPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, graphPanel, splitPane_testers_output);
-        splitPane_graph_rightPane.setDividerLocation(ceFrame.getWidth()-350);
-        splitPane_graph_rightPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+        //创建分割面板, JSplitPane.VERTICAL_SPLIT水平分割: 使两个组件从左到右排列
+        //将information面板与graph分隔开来
+        centerJSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, graphJPanel, infoJSplitPane);
+        centerJSplitPane.setDividerLocation(ceJFrame.getWidth()-350);
+        centerJSplitPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+        //**********************************************************/
 
         //添加面板
-        ceFrame.add("North", controlPanel);
-        ceFrame.add("Center", splitPane_graph_rightPane);
+        //ceJFrame.add("North", ctrlJPanel);
+        //ceJFrame.add("Center", splitPane_graph_rightPane);
+        ceJFrame.add(ctrlJPanel, BorderLayout.NORTH);
+        ceJFrame.add(centerJSplitPane, BorderLayout.CENTER);
 
-        //设置窗体可见
-        ceFrame.setVisible(true);
+        //设置窗体可见, 建议写在最后
+        ceJFrame.setVisible(true);
+
+        toast  = new Toast(ceJFrame, "Toast是很好用的", 5000, Toast.success);
     }
 
     @Override
@@ -291,7 +333,7 @@ public class ViewerExplainATLStar implements ViewerListener, ActionListener, Mou
         //默认情况下, view是在适应graph大小以始终显示整个graph的模式下, 因此view的中心位于graph的中心。
         if(e.getSource() == viewPercentText) {
             //放大缩小
-            graphPanel
+            graphJPanel
                     .getCamera()
                     .setViewPercent(parseDouble(viewPercentText.getText()));
         }
@@ -308,7 +350,27 @@ public class ViewerExplainATLStar implements ViewerListener, ActionListener, Mou
     }
 
     @Override
-    public void stateChanged(ChangeEvent e) {
-
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        double percent = parseDouble(viewPercentText.getText());
+        //如果鼠标滚轮向上/远离用户旋转, 则为负值; 如果鼠标滚轮朝向用户向下旋转, 则为正值
+        if(e.getWheelRotation() == 1 && e.isControlDown()) {
+            //LoggerUtil.info("缩小{}", e.getWheelRotation());
+            percent += 0.02;
+            graphJPanel
+                    .getCamera()
+                    .setViewPercent(percent);
+        } else if(e.getWheelRotation() == -1 && e.isControlDown()) {
+            //LoggerUtil.info("放大{}", e.getWheelRotation());
+            percent -= 0.02;
+            graphJPanel
+                    .getCamera()
+                    .setViewPercent(percent);
+        } else {
+            //Toast使用
+            toast.setMessage("Ctrl键+鼠标滚轮缩放");
+        }
+        //viewPercentText.setText(String.valueOf(percent)); //需要保留两位小数
+        DecimalFormat format = new DecimalFormat("#0.00");
+        viewPercentText.setText(format.format(percent));
     }
 }
