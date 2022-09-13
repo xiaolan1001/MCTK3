@@ -221,13 +221,15 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         specTesterMap.put(children[children.length-1], negC1Tester);
         if(testerIsEmpty(negC1Tester)) {
             //specBDD = !(feasibleStates & !c1)
-            specBDD = negC1.and(design.ATLCanEnforceFeasible(agentList)).not();
+            //specBDD = negC1.and(design.ATLCanEnforceFeasible(agentList)).not();
+            specBDD = negC1.and(design.ATLCantAvoidFeasible(agentList)).not();
 
         } else {
             //specBDD = ! forsome auxVars.(feasibleNegC1 & !c1)
             design.syncComposition(negC1Tester); //同步并行组合
             //feasibleNegC1 = 一组智能体(agentList)强制使得!c1成立的可行状态(feasible states)
-            BDD feasibleNegC1 = design.ATLCanEnforceFeasible(agentList);
+            //BDD feasibleNegC1 = design.ATLCanEnforceFeasible(agentList);
+            BDD feasibleNegC1 = design.ATLCantAvoidFeasible(agentList);
             BDDVarSet auxVars = testerGetAuxVars(negC1Tester);
             specBDD = feasibleNegC1.and(negC1).exist(auxVars).not();
         }

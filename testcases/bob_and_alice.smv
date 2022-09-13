@@ -1,0 +1,21 @@
+AGENT main
+VAR
+    alice : Agent;
+    bob : Agent;
+
+AGENT Agent
+VAR
+    count : 0..10;
+ACTION : {Inc, Wait};
+INIT
+    count = 0;
+PROTOCOL
+	1 : {Inc, Wait};
+	--(count>=0 & count<10) : {Inc, Wait};
+END
+
+ASSIGN
+next(count) := case
+            (ACT=Inc & count<10) : count+1;
+            1 : count;
+esac;

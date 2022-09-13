@@ -1423,6 +1423,7 @@ public class ATLsK_ModelCheckAlg extends ModelCheckAlgI {
             Edge e;
             boolean NotYetCreateEdge = true;
             createdPathNumber++;
+            //path数组有可能为null
             if (path.length >= 1) prefix.add(path[0]);
             if (path.length <= 1) { // only include one state: fromState
                 G.addNodeSatSpec(stateID, spec, true);

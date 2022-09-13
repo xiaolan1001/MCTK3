@@ -1,0 +1,17 @@
+MODULE main
+VAR
+    alice : Agent();
+    bob : Agent();
+
+MODULE Agent
+VAR
+    count : 0..10;
+    Act : {Inc, Wait};
+INIT
+    count = 0;
+TRANS count>=0 & count<10 -> Act={Inc,Wait};
+ASSIGN
+next(count) := case
+            (Act=Inc & count<10) : count+1;
+            1 : count;
+esac;
