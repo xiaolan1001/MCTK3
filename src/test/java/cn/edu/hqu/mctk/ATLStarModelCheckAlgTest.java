@@ -415,7 +415,7 @@ public class ATLStarModelCheckAlgTest {
         String toParse = "";
         //本单元测试是与bob_and_alice.smv模型作比较, 使用的模型bob_alice_noact.smv没有动作
         //验证结果均与MCMAS一致
-        toParse += "RTCTL*SPEC E F(bob.count=10);";                   //done MCMAS:true
+        //toParse += "RTCTL*SPEC E F(bob.count=10);";                   //done MCMAS:true
         //toParse += "RTCTL*SPEC A F(bob.count=10);";                   //invalid MCAMS:false
         //toParse += "RTCTL*SPEC E G(alice.count=10);";                 //invalid MCMAS:false
         //toParse += "RTCTL*SPEC E F(alice.count=10 & bob.count=10);";  //true MCMAS:true
@@ -554,8 +554,9 @@ public class ATLStarModelCheckAlgTest {
         main.setFullPrintingMode(true);
 
         String toParse = "";
-        toParse += "RTCTL*SPEC  A F(win=TRUE);";         // MCMAS:false
-        //toParse += "RTCTL*SPEC  <player1> F(win=TRUE);"; // MCMAS:true
+        //toParse += "RTCTL*SPEC  A F(win=TRUE);";         //invalid MCMAS:false
+        toParse += "RTCTL*SPEC  <> F(win=TRUE);";         //invalid
+        //toParse += "RTCTL*SPEC  <player1> F(win=TRUE);"; //true MCMAS:true
         //toParse += "RTCTL*SPEC <main> F(win=TRUE);";
         //toParse += "RTCTL*SPEC  F(win=TRUE);";
         //toParse += "RTCTL*SPEC  FALSE;";

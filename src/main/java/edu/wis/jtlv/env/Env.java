@@ -10,7 +10,9 @@ import edu.wis.jtlv.env.core.smv.schema.SMVAgentInfo;
 import edu.wis.jtlv.env.core.spec.*;
 import edu.wis.jtlv.env.module.*;
 import edu.wis.jtlv.env.spec.*;
+import edu.wis.jtlv.lib.mc.ATLstar.ATLStarModelCheckAlg;
 import edu.wis.jtlv.lib.mc.MCTKANTLRFileStream;
+import edu.wis.jtlv.lib.mc.ModelCheckAlgException;
 import net.sf.javabdd.*;
 import net.sf.javabdd.BDD.BDDToString;
 import org.antlr.runtime.*;
@@ -1915,7 +1917,17 @@ public final class Env {
      */
     private static BDD pred(BDD trans, BDD to, BDDVarSet primeVars) {
         BDD prime_to = Env.prime(to);
-        return prime_to.and(trans).exist(primeVars);
+        try {
+            BDDVarSet actionVars = ATLStarModelCheckAlg.ATLGetAllAgentActionVars();
+            if(actionVars!=null && !actionVars.isEmpty())
+                return prime_to.and(trans).exist(primeVars).exist(actionVars);
+            else
+                return prime_to.and(trans).exist(primeVars);
+        } catch (ModelCheckAlgException e) {
+            e.printStackTrace();
+            return prime_to.and(trans).exist(primeVars);
+        }
+        //return prime_to.and(trans).exist(primeVars);
     }
 
     /**

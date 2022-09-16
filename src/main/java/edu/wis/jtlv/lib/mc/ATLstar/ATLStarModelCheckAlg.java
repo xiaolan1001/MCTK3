@@ -952,6 +952,22 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         return actionVars;
     }
 
+    public static BDDVarSet ATLGetAllAgentActionVars() throws ModelCheckAlgException {
+        BDDVarSet actionVars = Env.getEmptySet();
+
+        for (String agentFullName : Env.getAll_agent_modules().keySet()) {
+            SMVAgentInfo agentInfo = getAgentInfo(agentFullName);
+            if(agentInfo == null)
+                throw new ModelCheckAlgException("Cannot find the information of agent " + agentFullName + ".");
+            ModuleBDDField actionFiled = agentInfo.getActionVar();
+            if(actionFiled != null)
+                actionVars = actionVars.id().union(actionFiled.support());
+
+        }
+
+        return actionVars;
+    }
+
     //********************************证据生成********************************/
     /**
      * <i>witness(&phi;, n)</i>
