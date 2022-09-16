@@ -1,4 +1,4 @@
-MODULE main
+AGENT main
 VAR
   coin1 : boolean;
   coin2 : boolean;
@@ -13,7 +13,7 @@ TRANS next(coin1)=coin1 &
       next(coin2)=coin2 &
       next(coin3)=coin3;
 
-MODULE DC(coin_self, coin_left, said1, said2)
+AGENT DC(coin_self, coin_left, said1, said2)
 VAR
   paid : boolean;
   said : boolean;

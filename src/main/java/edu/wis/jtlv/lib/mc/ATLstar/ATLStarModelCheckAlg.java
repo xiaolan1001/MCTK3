@@ -236,6 +236,41 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         return specBDD;
     }
 
+//    private BDD satCanEnforce(Spec spec) throws ModelCheckException, SMVParseException,
+//            ModuleException, ModelCheckAlgException, SpecException {
+//        SMVModule design = (SMVModule) this.getDesign();
+//        SpecExp specExp = (SpecExp) spec;
+//        Operator op = specExp.getOperator();
+//        Spec[] children = specExp.getChildren();
+//        BDD c1, specBDD = null;
+//
+//        if (op != Operator.CAN_ENFORCE) return null;
+//
+//        //获取智能体列表
+//        Vector<String> agentList = new Vector<>();
+//        for (int i = 0; i < children.length - 1; i++) {
+//            SpecAgentIdentifier agentId = (SpecAgentIdentifier) children[i];
+//            agentList.add(agentId.getAgentName());
+//        }
+//
+//        SMVModule c1Tester = new SMVModule("Tester" + (++testerID));
+//        c1 = sat(children[children.length-1], c1Tester);
+//        specBDDMap.put(children[children.length-1], c1);
+//        specTesterMap.put(children[children.length-1], c1Tester);
+//        if(testerIsEmpty(c1Tester)) {
+//            //specBDD = (feasibleStates & c1)
+//            specBDD = c1.and(design.ATLCanEnforceFeasible(agentList));
+//        } else {
+//            design.syncComposition(c1Tester);
+//            // feasibleStates = fair(D||T)
+//            BDD feasibleC1 = design.ATLCanEnforceFeasible(agentList);
+//            BDDVarSet auxVars = testerGetAuxVars(c1Tester);
+//            //specBDD = forsome auxVars.(feasibleStates & c1)
+//            specBDD = feasibleC1.and(c1).exist(auxVars);
+//        }
+//        return specBDD;
+//    }
+
     private BDD satCantAvoid(Spec spec) throws ModelCheckException, SMVParseException,
             ModuleException, ModelCheckAlgException, SpecException {
         SMVModule design = (SMVModule) this.getDesign();
@@ -270,6 +305,44 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
         }
         return specBDD;
     }
+
+//    private BDD satCantAvoid(Spec spec) throws ModelCheckException, SMVParseException,
+//            ModuleException, ModelCheckAlgException, SpecException {
+//        SMVModule design = (SMVModule) this.getDesign();
+//        SpecExp specExp = (SpecExp) spec;
+//        Operator op = specExp.getOperator();
+//        Spec[] children = specExp.getChildren();
+//        BDD negC1, specBDD = null;
+//
+//        if (op != Operator.CANNOT_AVOID) return null;
+//
+//        //获得智能体列表
+//        Vector<String> agentList = new Vector<>();
+//        for (int i = 0; i < children.length - 1; i++) {
+//            SpecAgentIdentifier agentId = (SpecAgentIdentifier) children[i];
+//            agentList.add(agentId.getAgentName());
+//        }
+//
+//        SMVModule negC1Tester = new SMVModule("Tester" + (++testerID));
+//        negC1 = sat(SpecUtil.NNF(new SpecExp(Operator.NOT, children[children.length-1])), negC1Tester);
+//        specBDDMap.put(children[children.length-1], negC1.not());
+//        specTesterMap.put(children[children.length-1], negC1Tester);
+//        if(testerIsEmpty(negC1Tester)) {
+//            //specBDD = !(feasibleStates & !c1)
+//            specBDD = negC1.and(design.ATLCanEnforceFeasible(agentList)).not();
+//            //specBDD = negC1.and(design.ATLCantAvoidFeasible(agentList)).not();
+//
+//        } else {
+//            //specBDD = ! forsome auxVars.(feasibleNegC1 & !c1)
+//            design.syncComposition(negC1Tester); //同步并行组合
+//            //feasibleNegC1 = 一组智能体(agentList)强制使得!c1成立的可行状态(feasible states)
+//            BDD feasibleNegC1 = design.ATLCanEnforceFeasible(agentList);
+//            //BDD feasibleNegC1 = design.ATLCantAvoidFeasible(agentList);
+//            BDDVarSet auxVars = testerGetAuxVars(negC1Tester);
+//            specBDD = feasibleNegC1.and(negC1).exist(auxVars).not();
+//        }
+//        return specBDD;
+//    }
 
     private BDD satE(Spec spec)
         throws ModelCheckException, ModuleException, SMVParseException, ModelCheckAlgException, SpecException {

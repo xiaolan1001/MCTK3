@@ -969,6 +969,12 @@ public class Initiator {
 			BDD toAdd = single_val.toBDD(); // toAdd is the BDD representing the protocol
 
 			// 1. check prime variables
+//			//尝试做以下更改
+//			String module_fullname;
+//			if(this.module_pool[i].getName().equals("main")) {
+//				module_fullname = this.module_pool[i].getName();
+//			} else
+//				module_fullname = this.module_pool[i].getPath()+"."+this.module_pool[i].getName();
 			String module_fullname = this.module_pool[i].getPath()+"."+this.module_pool[i].getName();
 			if (Env.containPrimeVars(toAdd)) {
 				throw new SMVParseException("The protocol of "+ module_fullname

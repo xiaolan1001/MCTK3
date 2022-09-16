@@ -8,8 +8,10 @@ ACTION : {none};
 PROTOCOL
 	1 : {none};
 END
-INIT cards=null & win=FALSE;
+--INIT cards=null & win=FALSE;
 ASSIGN
+init(cards) := null;
+init(win) := FALSE;
 next(cards) := case
             (cards=ka & player1.ACT=swap) : ak;
             (cards=ak & player1.ACT=swap) : ka;
@@ -25,7 +27,7 @@ next(win) := case
             (player1.ACT=distribute) & (cards=ak | cards=kq | cards=qa):TRUE;
 esac;
 
-AGENT Agent(win)
+AGENT Agent(innerwin)
 VAR
     step : {s1, s2, s3, s4};
 ACTION : {keep, swap, distribute, check, reset};
@@ -35,11 +37,12 @@ PROTOCOL
     step=s3: {check};
     step=s4: {reset};
 END
-INIT step=s1;
+--INIT step=s1;
 ASSIGN
+    init(step) := s1;
     next(step) := case
                 step=s1 : s2;
                 step=s2 : s3;
                 step=s3 : s4;
-                step=s4 & win=FALSE : s1;
+                step=s4 & innerwin=FALSE : s1;
 esac;
