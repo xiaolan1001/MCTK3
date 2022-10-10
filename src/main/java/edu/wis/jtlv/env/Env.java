@@ -1983,6 +1983,20 @@ public final class Env {
      * @see edu.wis.jtlv.env.Env#kDeltaSucc(BDD, BDD, int)
      */
     private static BDD succ(BDD from, BDD trans, BDDVarSet unprimeVars) {
+//        try {
+//            BDDVarSet actionVars = ATLStarModelCheckAlg.ATLGetAllAgentActionVars();
+//            if(actionVars!=null && !actionVars.isEmpty()) {
+//                BDD prime_to = from.and(trans).exist(unprimeVars).exist(actionVars);
+//                return Env.unprime(prime_to);
+//            } else {
+//                BDD prime_to = from.and(trans).exist(unprimeVars);
+//                return Env.unprime(prime_to);
+//            }
+//        } catch (ModelCheckAlgException e) {
+//            e.printStackTrace();
+//            BDD prime_to = from.and(trans).exist(unprimeVars);
+//            return Env.unprime(prime_to);
+//        }
         BDD prime_to = from.and(trans).exist(unprimeVars);
         return Env.unprime(prime_to);
     }

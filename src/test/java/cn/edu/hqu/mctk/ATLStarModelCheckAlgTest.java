@@ -269,38 +269,38 @@ public class ATLStarModelCheckAlgTest {
 
         //bit_transmission_actions.smv没有添加公平性约束, 与MCMAS例子不同
         String toParse = "";
-        //toParse += "RTCTL*SPEC A G((r.state=r0 | r.state=r1) -> A F s.ack);";                   //done MCMAS:true
-        //toParse += "RTCTL*SPEC <> G((r.state=r0 | r.state=r1) -> <> F s.ack);";                 //invalid----有问题
-        //toParse += "RTCTL*SPEC [s,r,main] G((r.state=r0 | r.state=r1) -> [s,r,main] F s.ack);"; //invalid
-        //toParse += "RTCTL*SPEC [s,r] G((r.state=r0 | r.state=r1) -> [s,r] F s.ack);";           //invalid MCMAS:false
-        //toParse += "RTCTL*SPEC !<s,r> F!((r.state=r0 | r.state=r1) -> !<s,r> G !s.ack);";       //invalid MCMAS:true
+        //toParse += "RTCTL*SPEC A G((r.state=r0 | r.state=r1) -> A F s.ack);";                   //invalid false MCMAS:true
+        //toParse += "RTCTL*SPEC <> G((r.state=r0 | r.state=r1) -> <> F s.ack);";                 //invalid false
+        //toParse += "RTCTL*SPEC [s,r,main] G((r.state=r0 | r.state=r1) -> [s,r,main] F s.ack);"; //invalid false
+        //toParse += "RTCTL*SPEC [s,r] G((r.state=r0 | r.state=r1) -> [s,r] F s.ack);";           //done    false MCMAS:false
+        //toParse += "RTCTL*SPEC !<s,r> F!((r.state=r0 | r.state=r1) -> !<s,r> G !s.ack);";       //done    false MCMAS:true
 
 
-        //toParse += "RTCTL*SPEC !E(G(r.state=r0 | r.state=r1) -> (F s.ack));";            //invalid MCMAS:false
-        //toParse += "RTCTL*SPEC !<s, r, main>(G(r.state=r0 | r.state=r1) -> (F s.ack));"; //invalid
-        //toParse += "RTCTL*SPEC !<s, r>(G(r.state=r0 | r.state=r1) -> (F s.ack));";       //invalid
-        //toParse += "RTCTL*SPEC [s, r, main]!(G(r.state=r0 | r.state=r1) -> (F s.ack));"; //invalid
-        //toParse += "RTCTL*SPEC [s, r]!(G(r.state=r0 | r.state=r1) -> (F s.ack));";       //invalid
-        //toParse += "RTCTL*SPEC <>!(G(r.state=r0 | r.state=r1) -> (F s.ack));";           //invalid
-        //toParse += "RTCTL*SPEC ![](G(r.state=r0 | r.state=r1) -> (F s.ack));";           //invalid
+        //toParse += "RTCTL*SPEC !E(G(r.state=r0 | r.state=r1) -> (F s.ack));";            //invalid false MCMAS:false
+        //toParse += "RTCTL*SPEC !<s, r, main>(G(r.state=r0 | r.state=r1) -> (F s.ack));"; //done    false
+        //toParse += "RTCTL*SPEC !<s, r>(G(r.state=r0 | r.state=r1) -> (F s.ack));";       //done    false
+        //toParse += "RTCTL*SPEC [s, r, main]!(G(r.state=r0 | r.state=r1) -> (F s.ack));"; //done    false
+        //toParse += "RTCTL*SPEC [s, r]!(G(r.state=r0 | r.state=r1) -> (F s.ack));";       //done    false
+        //toParse += "RTCTL*SPEC <>!(G(r.state=r0 | r.state=r1) -> (F s.ack));";           //invalid false
+        //toParse += "RTCTL*SPEC ![](G(r.state=r0 | r.state=r1) -> (F s.ack));";           //invalid false
 
-        //toParse += "RTCTL*SPEC <s,r> (TRUE U s.ack);";      //done MCMAS:true
-        //toParse += "RTCTL*SPEC <s,r,main> (TRUE U s.ack);"; //done MCMAS:true
-        //toParse += "RTCTL*SPEC E (TRUE U s.ack);";          //invalid MCMAS:true----有问题
-        //toParse += "RTCTL*SPEC [main] (TRUE U s.ack);";     //invalid MCMAS:false
-        //toParse += "RTCTL*SPEC [] (TRUE U s.ack);";         //done
+        //toParse += "RTCTL*SPEC <s,r> (TRUE U s.ack);";      //invalid true MCMAS:true
+        //toParse += "RTCTL*SPEC <s,r,main> (TRUE U s.ack);"; //done    true MCMAS:true
+        //toParse += "RTCTL*SPEC E (TRUE U s.ack);";          //done    true MCMAS:true
+        //toParse += "RTCTL*SPEC [main] (TRUE U s.ack);";     //invalid false MCMAS:false
+        //toParse += "RTCTL*SPEC [] (TRUE U s.ack);";         //done    true
 
-        //toParse += "RTCTL*SPEC [s,r,main] F FALSE;";        //invalid
-        //toParse += "RTCTL*SPEC [s,r] F FALSE;";             //invalid
-        //toParse += "RTCTL*SPEC <> F FALSE;";                //invalid
-        //toParse += "RTCTL*SPEC A F FALSE;";                 //invalid
+        //toParse += "RTCTL*SPEC [s,r,main] F FALSE;";        //invalid false
+        //toParse += "RTCTL*SPEC [s,r] F FALSE;";             //invalid false
+        //toParse += "RTCTL*SPEC <> F FALSE;";                //invalid false
+        //toParse += "RTCTL*SPEC A F FALSE;";                 //invalid false
 
-        //toParse += "RTCTL*SPEC [s,r,main] G FALSE";         //invalid
-        //toParse += "RTCTL*SPEC [s,r] G FALSE";              //invalid MCMAS:false
-        //toParse += "RTCTL*SPEC <> G FALSE;";                //invalid
-        //toParse += "RTCTL*SPEC A G FALSE;";                 //invalid
+        //toParse += "RTCTL*SPEC [s,r,main] G FALSE";         //invalid false
+        //toParse += "RTCTL*SPEC [s,r] G FALSE";              //invalid false MCMAS:false
+        //toParse += "RTCTL*SPEC <> G FALSE;";                //invalid false
+        //toParse += "RTCTL*SPEC A G FALSE;";                 //invalid false
 
-        //toParse += "RTCTL*SPEC E F(E G((r.state=r0 | r.state=r1) & !s.ack));"; //invalid MCMAS:false
+        //toParse += "RTCTL*SPEC E F(E G((r.state=r0 | r.state=r1) & !s.ack));"; //done true MCMAS:false
 
         //************KNOW算子****************/
         //toParse += "RTCTL*SPEC s KNOW (r.state=r0 | r.state=r1);";                 //invalid MCMAS:false
@@ -310,20 +310,20 @@ public class ATLStarModelCheckAlgTest {
         //toParse += "RTCTL*SPEC A G((s.bit=1 & s.ack) -> (s KNOW (r.state=r0)));";  //done MCMAS:false
         //************KNOW算子****************/
 
-        //toParse += "RTCTL*SPEC  <s, r> G((r.state=r0 | r.state=r1) -> A F s.ack);";       //done MCMAS:true
-        //toParse += "RTCTL*SPEC  <s, r, main> G((r.state=r0 | r.state=r1) -> A F s.ack);"; //done
+        //toParse += "RTCTL*SPEC  <s, r> G((r.state=r0 | r.state=r1) -> A F s.ack);";       //invalid true MCMAS:true
+        //toParse += "RTCTL*SPEC  <s, r, main> G((r.state=r0 | r.state=r1) -> A F s.ack);"; //done    true
 
-        //toParse += "RTCTL*SPEC  <s, r> ((r.state=r0 | r.state=r1) -> A F s.ack);";        //done MCMAS不能验证ATL*公式
+        //toParse += "RTCTL*SPEC  <s, r> ((r.state=r0 | r.state=r1) -> A F s.ack);";        //invalid true MCMAS不能验证ATL*公式
 
-        //toParse += "RTCTL*SPEC  <s, r, main> ((r.state=r0 | r.state=r1) -> A F s.ack);";  //done
-        //toParse += "RTCTL*SPEC  <s, r> ((r.state=r0 | r.state=r1) -> A F s.ack);";        //done
-        //toParse += "RTCTL*SPEC  [main] ((r.state=r0 | r.state=r1) -> A F s.ack);";        //invalid
-        //toParse += "RTCTL*SPEC  [] ((r.state=r0 | r.state=r1) -> A F s.ack);";            //done
-        //toParse += "RTCTL*SPEC  E ((r.state=r0 | r.state=r1) -> A F s.ack);";             //done
+        //toParse += "RTCTL*SPEC  <s, r, main> ((r.state=r0 | r.state=r1) -> A F s.ack);";  //done    true
+        //toParse += "RTCTL*SPEC  <s, r> ((r.state=r0 | r.state=r1) -> A F s.ack);";        //invalid true
+        //toParse += "RTCTL*SPEC  [main] ((r.state=r0 | r.state=r1) -> A F s.ack);";        //done    false
+        //toParse += "RTCTL*SPEC  [] ((r.state=r0 | r.state=r1) -> A F s.ack);";            //done    true
+        //toParse += "RTCTL*SPEC  E ((r.state=r0 | r.state=r1) -> A F s.ack);";             //done    true
 
-        //toParse += "RTCTL*SPEC  <> F((r.state=r0 | r.state=r1) -> A F s.ack);";           //done
-        //toParse += "RTCTL*SPEC  A F((r.state=r0 | r.state=r1) -> A F s.ack);";            //done MCMAS:true
-        //toParse += "RTCTL*SPEC  <> F((r.state=r0 | r.state=r1) -> <> F s.ack);";          //done
+        //toParse += "RTCTL*SPEC  <> F((r.state=r0 | r.state=r1) -> A F s.ack);";           //invalid true
+        //toParse += "RTCTL*SPEC  A F((r.state=r0 | r.state=r1) -> A F s.ack);";            //done    true MCMAS:true
+        //toParse += "RTCTL*SPEC  <> F((r.state=r0 | r.state=r1) -> <> F s.ack);";          //invalid true
 
         //************SKNOW算子****************/
         //toParse += "RTCTL*SPEC !E BG 10..15 ((s.bit=1 & s.ack) -> (s SKNOW (r.state=r0)));"; //error 暂时还未编写SKNOW算法
@@ -418,7 +418,7 @@ public class ATLStarModelCheckAlgTest {
         //toParse += "RTCTL*SPEC E F(bob.count=10);";                   //done MCMAS:true
         //toParse += "RTCTL*SPEC A F(bob.count=10);";                   //invalid MCAMS:false
         //toParse += "RTCTL*SPEC E G(alice.count=10);";                 //invalid MCMAS:false
-        //toParse += "RTCTL*SPEC E F(alice.count=10 & bob.count=10);";  //true MCMAS:true
+        //toParse += "RTCTL*SPEC E F(alice.count=10 & bob.count=10);";  //done MCMAS:true
         //toParse += "RTCTL*SPEC E X(bob.count=10);";                   //invalid MCMAS:false
         //toParse += "RTCTL*SPEC A X(bob.count=10);";                   //invalid MCMAS:false
 
@@ -444,7 +444,7 @@ public class ATLStarModelCheckAlgTest {
         main.setFullPrintingMode(true);
 
         String toParse = "";
-        toParse += "RTCTL*SPEC  A F(win=TRUE);"; //invalid
+        //toParse += "RTCTL*SPEC  A F(win=TRUE);"; //invalid
         //toParse += "RTCTL*SPEC  E F(win=TRUE);"; //true
         //toParse += "RTCTL*SPEC  F(win=TRUE);";   //invalid
         //toParse += "RTCTL*SPEC  FALSE;";         //invalid
@@ -477,55 +477,56 @@ public class ATLStarModelCheckAlgTest {
         String toParse = "";
         //本单元测试中带有路径量词的验证存在异常, 初步怀疑是建模问题, 在testRTCTLsCheck4()中,
         //采用原来建模语言, 验证结果均正常准确.
-        //toParse += "RTCTL*SPEC  <bob, alice> F(bob.count=10);";                    //done MCMAS:true
-        //toParse += "RTCTL*SPEC  [main] F(bob.count=10);";                          //done
-        //toParse += "RTCTL*SPEC  [] F(bob.count=10);";                              //done
-        //toParse += "RTCTL*SPEC  <bob, alice, main> F(bob.count=10);";              //done
-        //toParse += "RTCTL*SPEC  E F(bob.count=10);";                               //invalid MCMAS:true----有问题
+        //toParse += "RTCTL*SPEC  <bob, alice> F(bob.count=10);";                    //done true MCMAS:true
+        //toParse += "RTCTL*SPEC  [main] F(bob.count=10);";                          //done true
+        //toParse += "RTCTL*SPEC  [] F(bob.count=10);";                              //done true
+        //toParse += "RTCTL*SPEC  <bob, alice, main> F(bob.count=10);";              //done true
+        //toParse += "RTCTL*SPEC  E F(bob.count=10);";                               //done true MCMAS:true
 
-        //toParse += "RTCTL*SPEC  A F(bob.count=10);";                               //invalid MCAMS:false
-        //toParse += "RTCTL*SPEC  <> F(bob.count=10);";                              //invalid
-        //toParse += "RTCTL*SPEC  [bob,alice,main] F(bob.count=10);";                //invalid
-        //toParse += "RTCTL*SPEC  [bob,alice] F(bob.count=10);";                     //invalid
+        //toParse += "RTCTL*SPEC  A F(bob.count=10);";                               //invalid false MCAMS:false
+        //toParse += "RTCTL*SPEC  <> F(bob.count=10);";                              //invalid false
+        //toParse += "RTCTL*SPEC  [bob,alice,main] F(bob.count=10);";                //invalid false
+        //toParse += "RTCTL*SPEC  [bob,alice] F(bob.count=10);";                     //invalid false
 
-        //toParse += "RTCTL*SPEC  <bob, alice> G(alice.count=10);";                  //invalid MCAMAS:false
-        //toParse += "RTCTL*SPEC  [main] G(alice.count=10);";                        //invalid
-        //toParse += "RTCTL*SPEC  [] G(alice.count=10);";                            //invalid
-        //toParse += "RTCTL*SPEC  E G(alice.count=10);";                             //invalid MCMAS:false
+        //toParse += "RTCTL*SPEC  <bob, alice> G(alice.count=10);";                  //invalid false MCAMAS:false
+        //toParse += "RTCTL*SPEC  <bob,alice,main> G(alice.count=10);";              //invalid false
+        //toParse += "RTCTL*SPEC  [main] G(alice.count=10);";                        //done    false
+        //toParse += "RTCTL*SPEC  [] G(alice.count=10);";                            //done    false
+        //toParse += "RTCTL*SPEC  E G(alice.count=10);";                             //invalid false MCMAS:false
 
-        //toParse += "RTCTL*SPEC  <bob, alice> F(alice.count=10 & bob.count=10);";   //done MCMAS:true
-        //toParse += "RTCTL*SPEC  [main] F(alice.count=10 & bob.count=10);";         //done
-        //toParse += "RTCTL*SPEC  [] F(alice.count=10 & bob.count=10);";             //done
-        //toParse += "RTCTL*SPEC  <bob,alice,main> F(alice.count=10 & bob.count=10);"; //done
-        //toParse += "RTCTL*SPEC  E F(alice.count=10 & bob.count=10);";              //invalid MCMAS:true----有问题
+        //toParse += "RTCTL*SPEC  <bob, alice> F(alice.count=10 & bob.count=10);";   //done true MCMAS:true
+        //toParse += "RTCTL*SPEC  [main] F(alice.count=10 & bob.count=10);";         //done true
+        //toParse += "RTCTL*SPEC  [] F(alice.count=10 & bob.count=10);";             //done true
+        //toParse += "RTCTL*SPEC  <bob,alice,main> F(alice.count=10 & bob.count=10);"; //done true
+        //toParse += "RTCTL*SPEC  E F(alice.count=10 & bob.count=10);";              //done true MCMAS:true
 
-        //toParse += "RTCTL*SPEC  <bob, alice> X(bob.count=10);";                    //invalid MCMAS:false
-        //toParse += "RTCTL*SPEC  [main] X(bob.count=10);";                          //invalid
-        //toParse += "RTCTL*SPEC  [] X(bob.count=10);";                              //invalid
-        //toParse += "RTCTL*SPEC  <bob,alice,main> X(bob.count=10);";                //invalid
-        //toParse += "RTCTL*SPEC  E X(bob.count=10);";                               //invalid MCMAS:false
+        //toParse += "RTCTL*SPEC  <bob, alice> X(bob.count=10);";                    //invalid false MCMAS:false
+        //toParse += "RTCTL*SPEC  [main] X(bob.count=10);";                          //done    false
+        //toParse += "RTCTL*SPEC  [] X(bob.count=10);";                              //done    false
+        //toParse += "RTCTL*SPEC  <bob,alice,main> X(bob.count=10);";                //invalid false
+        //toParse += "RTCTL*SPEC  E X(bob.count=10);";                               //invalid false MCMAS:false
 
-        //toParse += "RTCTL*SPEC  [bob, alice] X(bob.count=10);";                    //invalid MCMAS:false
-        //toParse += "RTCTL*SPEC  <main> X(bob.count=10);";                          //invalid
-        //toParse += "RTCTL*SPEC  <> X(bob.count=10);";                              //invalid
-        //toParse += "RTCTL*SPEC  A X(bob.count=10);";                               //invalid MCMAS:false
+        //toParse += "RTCTL*SPEC  [bob, alice] X(bob.count=10);";                    //invalid false MCMAS:false
+        //toParse += "RTCTL*SPEC  <main> X(bob.count=10);";                          //invalid false
+        //toParse += "RTCTL*SPEC  <> X(bob.count=10);";                              //invalid false
+        //toParse += "RTCTL*SPEC  A X(bob.count=10);";                               //invalid false MCMAS:false
 
-        //toParse += "RTCTL*SPEC  <bob, alice> F(bob.count!=10 & alice.count!=10);"; //done MCMAS:true
-        //toParse += "RTCTL*SPEC  [main] F(bob.count!=10 & alice.count!=10);";       //done
-        //toParse += "RTCTL*SPEC  [] F(bob.count!=10 & alice.count!=10);";           //done
-        //toParse += "RTCTL*SPEC  <bob,alice,main> F(bob.count!=10 & alice.count!=10);"; //done
-        //toParse += "RTCTL*SPEC  E F(bob.count!=10 & alice.count!=10);";            //done MCMAS:true
+        //toParse += "RTCTL*SPEC  <bob, alice> F(bob.count!=10 & alice.count!=10);"; //done true MCMAS:true
+        //toParse += "RTCTL*SPEC  [main] F(bob.count!=10 & alice.count!=10);";       //done true
+        //toParse += "RTCTL*SPEC  [] F(bob.count!=10 & alice.count!=10);";           //done true
+        //toParse += "RTCTL*SPEC  <bob,alice,main> F(bob.count!=10 & alice.count!=10);"; //done true
+        //toParse += "RTCTL*SPEC  E F(bob.count!=10 & alice.count!=10);";            //done true MCMAS:true
 
-        //toParse += "RTCTL*SPEC  [bob, alice] F(bob.count=10);";                    //invalid MCMAS:false
-        //toParse += "RTCTL*SPEC  <main> F(bob.count=10);";                          //invalid
-        //toParse += "RTCTL*SPEC  <> F(bob.count=10);";                              //invalid
-        //toParse += "RTCTL*SPEC  [bob,alice,main] F(bob.count=10);";                //invalid
-        //toParse += "RTCTL*SPEC  A F(bob.count=10);";                               //invalid MCMAS:false
+        //toParse += "RTCTL*SPEC  [bob, alice] F(bob.count=10);";                    //invalid false MCMAS:false
+        //toParse += "RTCTL*SPEC  <main> F(bob.count=10);";                          //invalid false
+        //toParse += "RTCTL*SPEC  <> F(bob.count=10);";                              //invalid false
+        //toParse += "RTCTL*SPEC  [bob,alice,main] F(bob.count=10);";                //invalid false
+        //toParse += "RTCTL*SPEC  A F(bob.count=10);";                               //invalid false MCMAS:false
 
-        //toParse += "RTCTL*SPEC  [bob, alice] G(bob.count=11);";                    //invalid
-        //toParse += "RTCTL*SPEC  <bob, alice> G(bob.count=11);";                    //invalid
+        //toParse += "RTCTL*SPEC  [bob, alice] G(bob.count=11);";                    //invalid false
+        //toParse += "RTCTL*SPEC  <bob, alice> G(bob.count=11);";                    //invalid false
 
-        //toParse += "RTCTL*SPEC  [bob, alice] (bob.count=11);";                     //invalid
+        //toParse += "RTCTL*SPEC  [bob, alice] (bob.count=11);";                     //invalid false
 
         //**********************************认知算子**********************************/
         //toParse += "RTCTL*SPEC  <bob, alice> (bob K bob.count=9);";
@@ -554,12 +555,25 @@ public class ATLStarModelCheckAlgTest {
         main.setFullPrintingMode(true);
 
         String toParse = "";
-        //toParse += "RTCTL*SPEC  A F(win=TRUE);";         //invalid MCMAS:false
-        toParse += "RTCTL*SPEC  <> F(win=TRUE);";         //invalid
-        //toParse += "RTCTL*SPEC  <player1> F(win=TRUE);"; //true MCMAS:true
-        //toParse += "RTCTL*SPEC <main> F(win=TRUE);";
-        //toParse += "RTCTL*SPEC  F(win=TRUE);";
-        //toParse += "RTCTL*SPEC  FALSE;";
+        //toParse += "RTCTL*SPEC  A F(win=TRUE);";              //invalid false MCMAS:false
+        //toParse += "RTCTL*SPEC  <> F(win=TRUE);";             //invalid false
+        //toParse += "RTCTL*SPEC  F(win=TRUE);";                //invalid false
+        //toParse += "RTCTL*SPEC  [player1,main] F(win=TRUE);"; //done    false MCMAS:false
+        //toParse += "RTCTL*SPEC  [player1] F(win=TRUE);";      //done    false MCMAS:false
+        //toParse += "RTCTL*SPEC <main> F(win=TRUE);";          //invalid true  MCMAS:false
+
+        //toParse += "RTCTL*SPEC  <player1> F(win=TRUE);";      //invalid true  MCMAS:true
+        //toParse += "RTCTL*SPEC  [main] F(win=TRUE);";         //done    false MCMAS:true
+        //toParse += "RTCTL*SPEC  !<main> G!(win=TRUE);";       //done    false MCMAS:true
+        //toParse += "RTCTL*SPEC  <player1,main> F(win=TRUE);"; //invalid true  MCMAS:true
+        //toParse += "RTCTL*SPEC  [] F(win=TRUE);";             //done    true
+        //toParse += "RTCTL*SPEC  E F(win=TRUE);";              //done    true
+
+        //toParse += "RTCTL*SPEC  [player1] G(win=FALSE);";          //done false MCMAS:false
+        //toParse += "RTCTL*SPEC  !<player1> F(win=TRUE);";          //done false MCMAS:false
+
+
+        //toParse += "RTCTL*SPEC  FALSE;";                      //invalid false
 
         Spec[] specs = Env.loadSpecString(toParse);
 

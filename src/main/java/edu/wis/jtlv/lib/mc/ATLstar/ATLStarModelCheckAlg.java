@@ -787,15 +787,15 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
                 .forAll(notInGroupActions)
                 .exist(groupActions);
         //forSome groupActions. forSome notInGroupActions. forSome V'. (trans(V*AllAgentActions, V') and to(V'))
-        //and (forSome groupActions. forAll notInGroupActions. forAll V'. (trans(V*AllAgentActions, V')->to(V')))
-//        return (trans.and(primeTo)
+        //and (forSome groupActions. forAll notInGroupActions. forAll V'. (trans(V*AllAgentActions, V')->to(!V')))
+//        return ((trans.and(primeTo)
 //                .exist(primeVars)
-//                .exist(notInGroupActions)
-//                .exist(groupActions))
-//                .and(trans.imp(primeTo)
-//                        .forAll(primeVars)
-//                        .forAll(notInGroupActions)
-//                        .exist(groupActions));
+//                .exist(notInGroupActions))
+//                .and
+//                (trans.imp(primeTo)
+//                .forAll(primeVars)
+//                .forAll(notInGroupActions)))
+//                .exist(groupActions);
     }
 
     /**

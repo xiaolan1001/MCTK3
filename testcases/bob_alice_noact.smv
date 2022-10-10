@@ -15,3 +15,4 @@ next(count) := case
             (Act=Inc & count<10) : count+1;
             1 : count;
 esac;
+RTCTL*SPEC E F(bob.count=10);;
