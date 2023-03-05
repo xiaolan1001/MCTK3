@@ -1,0 +1,68 @@
+MODULE main
+VAR
+    start : boolean;
+    close : boolean;
+    heat : boolean;
+    error : boolean;
+DEFINE
+    s1 := !start & !close & !heat & !error;
+    s2 := start & !close & !heat & error;
+    s3 := !start & close & !heat & !error;
+    s4 := !start & close & heat & !error;
+    s5 := start & close & !heat & error;
+    s6 := start & close & !heat & !error;
+    s7 := start & close & heat & !error;
+
+INIT s1;
+
+TRANS
+    (s1 & next(s2)) |
+    (s1 & next(s3)) |
+    (s2 & next(s5)) |
+    (s3 & next(s1)) |
+    (s3 & next(s6)) |
+    (s4 & next(s1)) |
+    (s4 & next(s3)) |
+    (s4 & next(s4)) |
+    (s5 & next(s2)) |
+    (s5 & next(s3)) |
+    (s6 & next(s7)) |
+    (s7 & next(s4))
+    ;
+
+JUSTICE start & close & !error;
+
+----------ATL*--ATL*--ATL*--END
+RTCTL*SPEC !E[TRUE U (start & close & heat & !error)];
+SPEC !EG ( (!start & !close & !heat & !error) |  (start & !close & !heat & error) | (start & close & !heat & error) );
+LTLSPEC !G !heat;
+SPEC (!EG ( (!start & !close & !heat & !error) |  (start & !close & !heat & error) | (start & close & !heat & error) )) | !EG !heat;
+RTCTL*SPEC A G(start -> A F heat);
+SPEC ! E F(!close & start & E((F heat) & (G error)));
+SPEC A G( (!close & start) -> A((G !heat) | (F !error)) );
+RTCTL*SPEC E G TRUE;
+RTCTL*SPEC !E(TRUE U  E X(start & close & heat & !error));
+RTCTL*SPEC A(G((!close & start) -> A(G !heat | F !error)));
+RTCTL*SPEC ! E(X start);
+RTCTL*SPEC ! E(F start);
+RTCTL*SPEC A( G start);
+RTCTL*SPEC F start -> G heat;
+RTCTL*SPEC !E( !start U E( TRUE U start));
+RTCTL*SPEC !E( (X close) U start);
+RTCTL*SPEC F!E((X start) R heat);
+RTCTL*SPEC !E( X start U (F error));
+RTCTL*SPEC !E( start U X error);
+RTCTL*SPEC !E((E X !start) U error);
+RTCTL*SPEC !E(TRUE U (F error));
+RTCTL*SPEC A( (X start) U !(X error));
+RTCTL*SPEC A start;
+RTCTL*SPEC A(start U E(heat));
+RTCTL*SPEC !E( X E(F heat) );
+RTCTL*SPEC (X start) & (TRUE U X start);
+RTCTL*SPEC A G(start -> A F heat);
+RTCTL*SPEC start;
+RTCTL*SPEC TRUE;
+RTCTL*SPEC E start;
+RTCTL*SPEC !E(TRUE BU 3..12 E X(start & close & heat & !error));
+RTCTL*SPEC E BG  3..16 ( A G(!start & !close & !heat & !error) |  E X(start & !close & !heat & error) | (start & close & !heat & error) );
+RTCTL*SPEC A BG 13..18 (start -> A F heat);

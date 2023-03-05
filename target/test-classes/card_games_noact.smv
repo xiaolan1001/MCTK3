@@ -1,0 +1,41 @@
+MODULE main
+VAR
+    win : boolean;
+    player1 : Agent(win);
+    cards : {null, ak, aq, ka, kq, qa, qk};
+    Act : {none};
+TRANS 1 -> Act=none;
+ASSIGN
+init(cards) := null;
+init(win) := FALSE;
+next(cards) := case
+            (cards=ka & player1.Act=swap) : ak;
+            (cards=ak & player1.Act=swap) : ka;
+            (cards=qa & player1.Act=swap) : aq;
+            (cards=aq & player1.Act=swap) : qa;
+            (cards=qk & player1.Act=swap) : kq;
+            (cards=kq & player1.Act=swap) : qk;
+            (player1.Act=reset) : null;
+            (player1.Act=check) : {ak,ka,aq,qa,kq,qk};
+esac;
+next(win) := case
+            (player1.Act=reset) : FALSE;
+            (player1.Act=distribute) & (cards=ak | cards=kq | cards=qa):TRUE;
+esac;
+
+MODULE Agent(innerwin)
+VAR
+    step : {s1, s2, s3, s4};
+    Act : {keep, swap, distribute, check, reset};
+TRANS step=s1 -> Act=distribute;
+TRANS step=s2 -> Act={keep,swap};
+TRANS step=s3 -> Act=check;
+TRANS step=s4 -> Act=reset;
+ASSIGN
+    init(step) := s1;
+    next(step) := case
+                step=s1 : s2;
+                step=s2 : s3;
+                step=s3 : s4;
+                step=s4 & innerwin=FALSE : s1;
+esac;

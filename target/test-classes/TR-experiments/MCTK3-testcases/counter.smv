@@ -1,0 +1,41 @@
+--MODULE Nil
+--VAR foo : {a, b};
+--VAR act : {a, b};
+
+--ASSIGN
+--  next(foo):=
+--     case
+--        act = a : a;
+--        act = b : b;
+--     esac;
+
+--TRANS (foo = a) -> (act = a);
+--TRANS (foo = b) -> (act = b);
+
+MODULE main
+VAR state : 1..50;
+
+ASSIGN
+ init(state) := {2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50};
+ 
+--next(state) :=
+--  case
+--   state=1 : state + 1;
+--   state=50 : state - 1;
+--    1 : {state + 1, state - 1};
+--  esac;
+
+TRANS 
+  (state=1 & (next(state)=state+1)) |
+  (state=50 & (next(state)=state - 1)) |
+  (state>1 & state<50 & (next(state)=state+1)) |
+  (state>1 & state<50 & (next(state)=state - 1)) 
+;
+
+
+DEFINE
+   even := (state = 2) | (state = 4) | (state = 6) | (state = 8) | (state = 10) | (state = 12) | (state = 14) | (state = 16) | (state = 18) | (state = 20) | (state = 22) | (state = 24) | (state = 26) | (state = 28) | (state = 30) | (state = 32) | (state = 34) | (state = 36) | (state = 38) | (state = 40) | (state = 42) | (state = 44) | (state = 46) | (state = 48) | (state = 50);
+RTCDL*SPEC (TRUE, TRUE)[*] := even;
+RTCDL*SPEC tt,((tt,tt)[*]) := !even;
+RTCDL*SPEC (tt,tt,tt,tt)[*] := even;
+RTCDL*SPEC (TRUE, TRUE, TRUE, TRUE) := even;

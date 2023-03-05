@@ -1,0 +1,106 @@
+-- A counter.
+
+Agent Environment
+  Vars:
+    state : 1..50;
+  end Vars
+  Actions = {up, down};
+  Protocol:
+    state=1: {up};
+    state=50: {down};
+    state<>1 and state<>50: {up, down};
+  end Protocol
+  Evolution:
+    state=state+1 if Action=up;
+    state=state-1 if Action=down;
+  end Evolution
+end Agent
+
+Agent Nil
+  Vars:
+    foo: {a, b};
+  end Vars
+  Actions = {a, b};
+  Protocol:
+    foo=a: {a};
+    foo=b: {b};
+  end Protocol
+  Evolution:
+    foo=a if (Action=a);
+    foo=b if (Action=b);
+  end Evolution 
+end Agent
+
+Evaluation
+  tt if ( Environment.state=1 ) or !( Environment.state = 1);
+  even if ( Environment.state = 2 )
+       or ( Environment.state = 4 )
+       or ( Environment.state = 6 )
+       or ( Environment.state = 8 )
+       or ( Environment.state = 10 )
+       or ( Environment.state = 12 )
+       or ( Environment.state = 14 )
+       or ( Environment.state = 16 )
+       or ( Environment.state = 18 )
+       or ( Environment.state = 20 )
+       or ( Environment.state = 22 )
+       or ( Environment.state = 24 )
+       or ( Environment.state = 26 )
+       or ( Environment.state = 28 )
+       or ( Environment.state = 30 )
+       or ( Environment.state = 32 )
+       or ( Environment.state = 34 )
+       or ( Environment.state = 36 )
+       or ( Environment.state = 38 )
+       or ( Environment.state = 40 )
+       or ( Environment.state = 42 )
+       or ( Environment.state = 44 )
+       or ( Environment.state = 46 )
+       or ( Environment.state = 48 )
+       or ( Environment.state = 50 )
+  ;
+end Evaluation
+
+InitStates
+  (Environment.state = 2)
+    or ( Environment.state = 4 )
+    or ( Environment.state = 6 )
+    or ( Environment.state = 8 )
+    or ( Environment.state = 10 )
+    or ( Environment.state = 12 )
+    or ( Environment.state = 14 )
+    or ( Environment.state = 16 )
+    or ( Environment.state = 18 )
+    or ( Environment.state = 20 )
+    or ( Environment.state = 22 )
+    or ( Environment.state = 24 )
+    or ( Environment.state = 26 )
+    or ( Environment.state = 28 )
+    or ( Environment.state = 30 )
+    or ( Environment.state = 32 )
+    or ( Environment.state = 34 )
+    or ( Environment.state = 36 )
+    or ( Environment.state = 38 )
+    or ( Environment.state = 40 )
+    or ( Environment.state = 42 )
+    or ( Environment.state = 44 )
+    or ( Environment.state = 46 )
+    or ( Environment.state = 48 )
+    or ( Environment.state = 50 )
+  ;
+end InitStates
+
+--Groups
+--  g1 = {Sender,Receiver};
+--end Groups
+
+Fairness
+  --onethree;
+  --twothree;
+end Fairness
+
+Formulae
+  LDL [(tt;tt)*] even;
+  LDL [tt;(tt;tt)*] !even;
+  LDL [(tt;tt;tt;tt)*] even;
+end Formulae

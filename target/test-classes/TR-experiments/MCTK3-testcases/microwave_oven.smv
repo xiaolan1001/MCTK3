@@ -1,0 +1,36 @@
+MODULE main
+VAR
+  l : 1..7;
+  start: boolean;
+  over: boolean;
+  heat: boolean;
+  error: boolean;
+
+JUSTICE start;
+JUSTICE over;
+JUSTICE error;
+
+INIT l=1;
+
+TRANS l=1 -> (!start & !over & !heat & !error);
+TRANS l=2 -> (start & !over & !heat & error);
+TRANS l=3 -> (!start & over & !heat & !error);
+TRANS l=4 -> (!start & over & heat & !error);
+TRANS l=5 -> (start & over & !heat & error);
+TRANS l=6 -> (start & over & !heat & !error);
+TRANS l=7 -> (start & over & heat & !error);
+
+TRANS 
+(l=1 & next(l)=2) |
+(l=1 & next(l)=3) |
+(l=2 & next(l)=5) |
+(l=3 & next(l)=1) |
+(l=3 & next(l)=6) |
+(l=4 & next(l)=1) |
+(l=4 & next(l)=3) |
+(l=4 & next(l)=4) |
+(l=5 & next(l)=2) |
+(l=5 & next(l)=3) |
+(l=6 & next(l)=7) |
+(l=7 & next(l)=4);
+RTCTL*SPEC A G (start -> A F heat);

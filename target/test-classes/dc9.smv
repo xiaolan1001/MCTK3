@@ -1,0 +1,43 @@
+AGENT main
+VAR
+  number: boolean;
+  coin1 : boolean;
+  coin2 : boolean;
+  coin3 : boolean;
+  coin4 : boolean;
+  coin5 : boolean;
+  coin6 : boolean;
+  coin7 : boolean;
+  coin8 : boolean;
+  coin9 : boolean;
+  dc1 : DC(coin1, coin2, dc2.said, dc3.said, dc4.said, dc5.said, dc6.said, dc7.said, dc8.said, dc9.said);
+  dc2 : DC(coin2, coin3, dc1.said, dc3.said, dc4.said, dc5.said, dc6.said, dc7.said, dc8.said, dc9.said);
+  dc3 : DC(coin3, coin4, dc1.said, dc2.said, dc4.said, dc5.said, dc6.said, dc7.said, dc8.said, dc9.said);
+  dc4 : DC(coin4, coin5, dc1.said, dc2.said, dc3.said, dc5.said, dc6.said, dc7.said, dc8.said, dc9.said);
+  dc5 : DC(coin5, coin6, dc1.said, dc2.said, dc3.said, dc4.said, dc6.said, dc7.said, dc8.said, dc9.said);
+  dc6 : DC(coin6, coin7, dc1.said, dc2.said, dc3.said, dc4.said, dc5.said, dc7.said, dc8.said, dc9.said);
+  dc7 : DC(coin7, coin8, dc1.said, dc2.said, dc3.said, dc4.said, dc5.said, dc6.said, dc8.said, dc9.said);
+  dc8 : DC(coin8, coin9, dc1.said, dc2.said, dc3.said, dc4.said, dc5.said, dc6.said, dc7.said, dc9.said);
+  dc9 : DC(coin9, coin1, dc1.said, dc2.said, dc3.said, dc4.said, dc5.said, dc6.said, dc7.said, dc8.said);
+
+INIT (dc1.paid + dc2.paid + dc3.paid+dc4.paid+dc5.paid+dc6.paid+dc7.paid+dc8.paid+dc9.paid)<=1 & number = 1;
+
+TRANS next(coin1)=coin1 &
+      next(coin2)=coin2 &
+      next(coin3)=coin3 &
+      next(coin4)=coin4 &
+      next(coin5)=coin5 &
+      next(coin6)=coin6 &
+      next(coin7)=coin7 &
+      next(coin8)=coin8 &
+      next(coin9)=coin9 &
+      next(number)=dc1.said xnor dc2.said xnor dc3.said xnor dc4.said xnor dc5.said xnor dc6.said xnor dc7.said xnor dc8.said xnor dc9.said;
+
+AGENT DC(coin_self, coin_left, said1, said2, said3,said4,said5,said6,said7,said8)
+VAR
+  paid : boolean;
+  said : boolean;
+ASSIGN
+  init(said) := paid xor (coin_self xor coin_left);
+  next(said) := said;
+  next(paid) := paid;

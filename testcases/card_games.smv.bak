@@ -1,0 +1,48 @@
+AGENT main
+VAR
+    win : boolean;
+    player1 : Agent(win);
+INVISIBLEVAR
+    cards : {null, ak, aq, ka, kq, qa, qk};
+ACTION : {none};
+PROTOCOL
+	1 : {none};
+END
+--INIT cards=null & win=FALSE;
+ASSIGN
+init(cards) := null;
+init(win) := FALSE;
+next(cards) := case
+            (cards=ka & player1.ACT=swap) : ak;
+            (cards=ak & player1.ACT=swap) : ka;
+            (cards=qa & player1.ACT=swap) : aq;
+            (cards=aq & player1.ACT=swap) : qa;
+            (cards=qk & player1.ACT=swap) : kq;
+            (cards=kq & player1.ACT=swap) : qk;
+            (player1.ACT=reset) : null;
+            (player1.ACT=distribute) : {ak,ka,aq,qa,kq,qk};
+esac;
+next(win) := case
+            (player1.ACT=reset) : FALSE;
+            (player1.ACT=check) & (cards=ak | cards=kq | cards=qa):TRUE;
+esac;
+
+AGENT Agent(innerwin)
+VAR
+    step : {s1, s2, s3, s4};
+ACTION : {keep, swap, distribute, check, reset};
+PROTOCOL
+	step=s1: {distribute};
+    step=s2: {keep,swap};
+    step=s3: {check};
+    step=s4: {reset};
+END
+--INIT step=s1;
+ASSIGN
+    init(step) := s1;
+    next(step) := case
+                step=s1 : s2;
+                step=s2 : s3;
+                step=s3 : s4;
+                step=s4 & innerwin=FALSE : s1;
+esac;

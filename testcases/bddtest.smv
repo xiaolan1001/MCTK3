@@ -1,0 +1,10 @@
+MODULE main
+
+VAR
+a:boolean;
+INIT !a;
+TRANS
+(!a & next(a)) |
+(a & next(a)) |
+(a & next(!a));
+RTCTL*SPEC F a=1;

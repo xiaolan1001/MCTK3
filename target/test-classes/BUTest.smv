@@ -1,0 +1,39 @@
+MODULE main
+VAR
+   rangeValue :0..20;
+    a:1..4;
+ASSIGN
+   init(rangeValue):=0;
+   next(rangeValue):=case
+                rangeValue<=14:rangeValue+1;
+                rangeValue=15 :10;
+                TRUE : rangeValue;
+             esac;
+
+             next(a):= case
+                rangeValue<=5:1;
+                rangeValue<=10:2;
+                rangeValue<15:3;
+                TRUE : 4;
+            esac;
+
+    --   --   --   --   --
+CTLSPEC AF a=2;
+CTLSPEC ABG 0..10 a=20;
+CTLSPEC ABF 0..6 a=10;
+CTLSPEC A [a=2 BU 6..12 a=2 ];
+CTLSPEC E [a=1 U a=2];
+RTCTL*SPEC E (a=1 BU 2..10 a=200);
+RTCTL*SPEC A BF 3..8 a=3;
+RTCTL*SPEC E BF 6..10 a=4;
+RTCTL*SPEC A BG 6..10 a=1;
+RTCTL*SPEC A F a=30;
+RTCTL*SPEC A F a=3;
+RTCTL*SPEC E (a=1 U a=2);
+RTCTL*SPEC A (a=10 BU 3..12 a=3);
+RTCTL*SPEC A X a=2;
+RTCTL*SPEC A F a=2;
+RTCTL*SPEC A (a=1 BU 6..13 a=3);
+RTCTL*SPEC A BG 3..10 a=3;
+RTCTL*SPEC a=2 -> E BF 6..10 a=20;
+RTCTL*SPEC a=1 -> A BF 6..10 a=2;
