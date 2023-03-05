@@ -20,11 +20,11 @@ next(cards) := case
             (cards=qk & player1.ACT=swap) : kq;
             (cards=kq & player1.ACT=swap) : qk;
             (player1.ACT=reset) : null;
-            (player1.ACT=check) : {ak,ka,aq,qa,kq,qk};
+            (player1.ACT=distribute) : {ak,ka,aq,qa,kq,qk};
 esac;
 next(win) := case
             (player1.ACT=reset) : FALSE;
-            (player1.ACT=distribute) & (cards=ak | cards=kq | cards=qa):TRUE;
+            (player1.ACT=check) & (cards=ak | cards=kq | cards=qa):TRUE;
 esac;
 
 AGENT Agent(innerwin)

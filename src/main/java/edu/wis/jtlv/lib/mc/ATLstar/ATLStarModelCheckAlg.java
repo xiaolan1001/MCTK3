@@ -17,8 +17,11 @@ import net.sf.javabdd.BDDVarSet;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import org.graphstream.ui.spriteManager.Sprite;
+import swing.Statistic;
 
 import java.util.*;
+
+import static swing.MCTKFrame.statistic;
 
 /**
  * ATL*模型检测算法
@@ -42,6 +45,8 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
     private int createdPathNumber = 0; //当前创建路径的数量
     private final Vector<NodePath> trunkNodePaths = new Vector<>();
     private BDD feasibleStatesForWitnessE = null;
+
+    public static Statistic statistic= null;
 
     //无参构造
     public ATLStarModelCheckAlg() {
@@ -2143,6 +2148,8 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
     @Override
     public AlgResultI doAlgorithm() throws AlgExceptionI, ModelCheckException, ModuleException, SMVParseException, SpecException {
         LoggerUtil.info("model checking ATL*K property: {}", this.property);
+        if(statistic==null) statistic=new Statistic();
+        else statistic.beginStatistic(true,false);
         if(this.property.isStateSpec()) { //断言也属于状态公式
             //规约为状态公式, 例如ATL*SPEC  <dc2> (BF 6..13 dc2.paid );
             this.checkProp = SpecUtil.NNF(new SpecExp(Operator.NOT, this.property)); //checkProp = !property
@@ -2169,6 +2176,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
 
         if(result.isZero()) {
             //result = false, 即D满足\phi
+            LoggerUtil.info(statistic.getUsedInfo(true,true,true,true));
             return new AlgResultString(true, "*** Property is TRUE ***");
         } else {
             //否则D不满足\phi
@@ -2176,6 +2184,7 @@ public class ATLStarModelCheckAlg extends ModelCheckAlgI {
             if(checkProp.hasATLsPathOperators() || checkProp.hasObsEpistemicOperators()
                     || checkProp.hasSynEpistemicOperators()) {
                 String returnMsg = "";
+                LoggerUtil.info(statistic.getUsedInfo(true,true,true,true));
                 returnMsg = "*** Property is NOT VALID ***\n ";
                 return new AlgResultString(false, returnMsg);
             }

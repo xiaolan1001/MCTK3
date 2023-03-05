@@ -8,8 +8,12 @@ import edu.wis.jtlv.lib.mc.ATLsK.ATLsK_ModelCheckAlg;
 import edu.wis.jtlv.lib.mc.ATLstar.ATLStarModelCheckAlg;
 import edu.wis.jtlv.lib.mc.ATLstar.LoggerUtil;
 import org.junit.Test;
+import swing.Statistic;
+
+import static swing.MCTKFrame.statistic;
 
 public class ATLStarModelCheckAlgTest {
+    //public static Statistic statistic= null;
     /**
      * 使用RTATL*模型检测算法验证LTL公式(testcases/mwOven.smv)
      * @throws Exception 异常处理
@@ -310,7 +314,7 @@ public class ATLStarModelCheckAlgTest {
         //toParse += "RTCTL*SPEC A G((s.bit=1 & s.ack) -> (s KNOW (r.state=r0)));";  //done MCMAS:false
         //************KNOW算子****************/
 
-        //toParse += "RTCTL*SPEC  <s, r> G((r.state=r0 | r.state=r1) -> A F s.ack);";       //invalid true MCMAS:true
+        toParse += "RTCTL*SPEC  <s, r> G((r.state=r0 | r.state=r1) -> A F s.ack);";       //invalid true MCMAS:true
         //toParse += "RTCTL*SPEC  <s, r, main> G((r.state=r0 | r.state=r1) -> A F s.ack);"; //done    true
 
         //toParse += "RTCTL*SPEC  <s, r> ((r.state=r0 | r.state=r1) -> A F s.ack);";        //invalid true MCMAS不能验证ATL*公式
@@ -475,17 +479,53 @@ public class ATLStarModelCheckAlgTest {
         main.setFullPrintingMode(true);
 
         String toParse = "";
-        //本单元测试中带有路径量词的验证存在异常, 初步怀疑是建模问题, 在testRTCTLsCheck4()中,
-        //采用原来建模语言, 验证结果均正常准确.
-        //toParse += "RTCTL*SPEC  <bob, alice> F(bob.count=10);";                    //done true MCMAS:true
+//        preface + "." + namemain.alice.ACT
+//        preface + "." + namemain.bob.ACT
+//                -------------------------------------------------
+//                main.alice's visible variables:
+//        1. main.alice.ACT
+//        2. main.alice.count
+//        main.alice's invisible variables:
+//                -------------------------------------------------
+//                main.bob's visible variables:
+//        1. main.bob.ACT
+//        2. main.bob.count
+//        main.bob's invisible variables:
+//                -------------------------------------------------
+//                main's visible variables:
+//        1. main.alice.ACT
+//        2. main.alice.count
+//        3. main.bob.ACT
+//        4. main.bob.count
+//        main's invisible variables:
+        //[bob,alice] [FALSE R main.bob.count!=10]
+        //toParse += "RTCTL*SPEC  <bob, alice> F(bob.count=10);";                    //done true MCMAS:true Time used: 0.044s Memory used: 1910.921875KB Number of BDD variables used: 20 Number of BDD nodes used: 4354
+        //<main> [FALSE R main.bob.count!=10] Time used: 0.037s 3198.5625KB Number of BDD variables used: 20 Number of BDD nodes used: 4871
         //toParse += "RTCTL*SPEC  [main] F(bob.count=10);";                          //done true
+        //<> [FALSE R main.bob.count!=10] Time used: 0.042s 3185.5703125KB 20 4871
         //toParse += "RTCTL*SPEC  [] F(bob.count=10);";                              //done true
+        //[bob,alice,main] [FALSE R main.bob.count!=10] Time used: 0.044s 3186.046875KB 20 4354
         //toParse += "RTCTL*SPEC  <bob, alice, main> F(bob.count=10);";              //done true
+//        The negative propperty: A[FALSE R bob.count!=10]
+//        Variable Tester1->X is created for TRUE U bob.count=10
+//                *** Property is TRUE ***
+//        Time used: 0.098s
+//        Memory used: 2679.109375KB
+//        Number of BDD variables used: 22
+//        Number of BDD nodes used: 4058
         //toParse += "RTCTL*SPEC  E F(bob.count=10);";                               //done true MCMAS:true
 
+        //E[FALSE R bob.count!=10]
+//        Time used: 0.161s
+//        Memory used: 4656.4296875KB
+//        Number of BDD variables used: 22
+//        Number of BDD nodes used: 3377
         //toParse += "RTCTL*SPEC  A F(bob.count=10);";                               //invalid false MCAMS:false
-        //toParse += "RTCTL*SPEC  <> F(bob.count=10);";                              //invalid false
+        //[] [FALSE R main.bob.count!=10] Time used: 0.04s 3185.6015625KB 20 3374
+        toParse += "RTCTL*SPEC  <> F(bob.count=10);";                              //invalid false
+        //<bob,alice,main> [FALSE R main.bob.count!=10] 0.041s 3185.5625KB 20 4327
         //toParse += "RTCTL*SPEC  [bob,alice,main] F(bob.count=10);";                //invalid false
+        //<bob,alice> [FALSE R main.bob.count!=10] 0.041s 3211.4140625KB 20 4327
         //toParse += "RTCTL*SPEC  [bob,alice] F(bob.count=10);";                     //invalid false
 
         //toParse += "RTCTL*SPEC  <bob, alice> G(alice.count=10);";                  //invalid false MCAMAS:false
@@ -528,10 +568,88 @@ public class ATLStarModelCheckAlgTest {
 
         //toParse += "RTCTL*SPEC  [bob, alice] (bob.count=11);";                     //invalid false
 
+        //toParse += "RTCTL*SPEC  <bob, alice> (bob.count=10 | alice.count=10);";
+        //toParse += "RTCTL*SPEC  <bob, alice, main> (bob.count=0 | alice.count=10);";
+        //toParse += "RTCTL*SPEC  alice.count=0 U <bob, alice, main> F (bob.count=10);";
+
         //**********************************认知算子**********************************/
         //toParse += "RTCTL*SPEC  <bob, alice> (bob K bob.count=9);";
         //toParse += "RTCTL*SPEC  (bob K bob.count=9);";                             //invalid MCMAS:false
         //***************************************************************************/
+
+        Spec[] specs = Env.loadSpecString(toParse);
+
+        //if(statistic==null) statistic=new Statistic();
+        //else statistic.beginStatistic(true,false);
+
+        assert (specs != null) && (specs.length > 0);
+        for (Spec spec : specs) {
+            if (spec.getLanguage() == InternalSpecLanguage.RTCTLs) {
+                ATLStarModelCheckAlg checker = new ATLStarModelCheckAlg(main, spec);
+                checker.preAlgorithm();
+                LoggerUtil.info(checker.doAlgorithm().resultString());
+                checker.postAlgorithm();
+            }
+        }
+        //LoggerUtil.info(statistic.getUsedInfo(true,true,true,true));
+    }
+
+    @Test
+    public void testATLsCheck2() throws Exception {
+        //通过文件名加载module
+        Env.loadModule("testcases/card_games.smv");
+        SMVModule main = (SMVModule) Env.getModule("main");
+        //为toString程序设置打印模式
+        main.setFullPrintingMode(true);
+
+        String toParse = "";
+        //toParse += "RTCTL*SPEC  A F(win=TRUE);";              //invalid false MCMAS:false
+        //toParse += "RTCTL*SPEC  <> F(win=TRUE);";             //invalid false
+        //toParse += "RTCTL*SPEC  F(win=TRUE);";                //invalid false
+        //toParse += "RTCTL*SPEC  [player1,main] F(win=TRUE);"; //invalid    false MCMAS:false
+        //toParse += "RTCTL*SPEC  [player1] F(win=TRUE);";      //invalid    false MCMAS:false
+        //toParse += "RTCTL*SPEC <main> F(win=TRUE);";          //true true  MCMAS:false
+
+        //toParse += "RTCTL*SPEC  <player1> F(win=FALSE);";      //done true  MCMAS:true
+        //toParse += "RTCTL*SPEC  [main] F(win=TRUE);";         //done    false MCMAS:true
+        //toParse += "RTCTL*SPEC  !<main> G!(win=TRUE);";       //done    false MCMAS:true
+        //toParse += "RTCTL*SPEC  <player1,main> F(win=TRUE);"; //invalid true  MCMAS:true
+        //toParse += "RTCTL*SPEC  [] F(win=TRUE);";             //done    true
+        //toParse += "RTCTL*SPEC  E F(win=TRUE);";              //done    true
+
+        toParse += "RTCTL*SPEC  [player1] G(win=FALSE);";          //false false MCMAS:false
+        //toParse += "RTCTL*SPEC  !<player1> F(win=TRUE);";          //done false MCMAS:false
+
+        //toParse += "RTCTL*SPEC  <player1,main> G(win=FALSE);";
+
+
+        //toParse += "RTCTL*SPEC  FALSE;";                      //invalid false
+
+        Spec[] specs = Env.loadSpecString(toParse);
+
+        assert (specs != null) && (specs.length > 0);
+        for (Spec spec : specs) {
+            if (spec.getLanguage() == InternalSpecLanguage.RTCTLs) {
+                ATLStarModelCheckAlg checker = new ATLStarModelCheckAlg(main, spec);
+                checker.preAlgorithm();
+                LoggerUtil.info(checker.doAlgorithm().resultString());
+                checker.postAlgorithm();
+            }
+        }
+
+    }
+
+    @Test
+    public void testATLsCheck3() throws Exception {
+        //通过文件名加载module
+        Env.loadModule("testcases/dc3_act.smv");
+        SMVModule main = (SMVModule) Env.getModule("main");
+        //为toString程序设置打印模式
+        main.setFullPrintingMode(true);
+
+        String toParse = "";
+
+        toParse += "RTCTL*SPEC  <dc1,dc2,dc3>F(number=0 -> (dc1.paid | dc2.paid | dc3.paid));";
 
         Spec[] specs = Env.loadSpecString(toParse);
 
@@ -547,33 +665,241 @@ public class ATLStarModelCheckAlgTest {
     }
 
     @Test
-    public void testATLsCheck2() throws Exception {
+    public void testATLsCheck4() throws Exception {
         //通过文件名加载module
-        Env.loadModule("testcases/card_games.smv");
+        Env.loadModule("testcases/dc4.smv");
         SMVModule main = (SMVModule) Env.getModule("main");
         //为toString程序设置打印模式
         main.setFullPrintingMode(true);
 
         String toParse = "";
-        //toParse += "RTCTL*SPEC  A F(win=TRUE);";              //invalid false MCMAS:false
-        //toParse += "RTCTL*SPEC  <> F(win=TRUE);";             //invalid false
-        //toParse += "RTCTL*SPEC  F(win=TRUE);";                //invalid false
-        //toParse += "RTCTL*SPEC  [player1,main] F(win=TRUE);"; //done    false MCMAS:false
-        //toParse += "RTCTL*SPEC  [player1] F(win=TRUE);";      //done    false MCMAS:false
-        //toParse += "RTCTL*SPEC <main> F(win=TRUE);";          //invalid true  MCMAS:false
 
-        //toParse += "RTCTL*SPEC  <player1> F(win=TRUE);";      //invalid true  MCMAS:true
-        //toParse += "RTCTL*SPEC  [main] F(win=TRUE);";         //done    false MCMAS:true
-        //toParse += "RTCTL*SPEC  !<main> G!(win=TRUE);";       //done    false MCMAS:true
-        //toParse += "RTCTL*SPEC  <player1,main> F(win=TRUE);"; //invalid true  MCMAS:true
-        //toParse += "RTCTL*SPEC  [] F(win=TRUE);";             //done    true
-        //toParse += "RTCTL*SPEC  E F(win=TRUE);";              //done    true
+        toParse += "RTCTL*SPEC  <dc1,dc2,dc3,dc4>F(number=0 -> (dc1.paid | dc2.paid | dc3.paid | dc4.paid));";
 
-        //toParse += "RTCTL*SPEC  [player1] G(win=FALSE);";          //done false MCMAS:false
-        //toParse += "RTCTL*SPEC  !<player1> F(win=TRUE);";          //done false MCMAS:false
+        Spec[] specs = Env.loadSpecString(toParse);
 
+        assert (specs != null) && (specs.length > 0);
+        for (Spec spec : specs) {
+            if (spec.getLanguage() == InternalSpecLanguage.RTCTLs) {
+                ATLStarModelCheckAlg checker = new ATLStarModelCheckAlg(main, spec);
+                checker.preAlgorithm();
+                LoggerUtil.info(checker.doAlgorithm().resultString());
+                checker.postAlgorithm();
+            }
+        }
+    }
 
-        //toParse += "RTCTL*SPEC  FALSE;";                      //invalid false
+    @Test
+    public void testATLsCheck5() throws Exception {
+        //通过文件名加载module
+        Env.loadModule("testcases/dc5.smv");
+        SMVModule main = (SMVModule) Env.getModule("main");
+        //为toString程序设置打印模式
+        main.setFullPrintingMode(true);
+
+        String toParse = "";
+
+        toParse += "RTCTL*SPEC  <dc1,dc2,dc3,dc4,dc5>F(number=0 -> (dc1.paid | dc2.paid | dc3.paid | dc4.paid | dc5.paid));";
+
+        Spec[] specs = Env.loadSpecString(toParse);
+
+        assert (specs != null) && (specs.length > 0);
+        for (Spec spec : specs) {
+            if (spec.getLanguage() == InternalSpecLanguage.RTCTLs) {
+                ATLStarModelCheckAlg checker = new ATLStarModelCheckAlg(main, spec);
+                checker.preAlgorithm();
+                LoggerUtil.info(checker.doAlgorithm().resultString());
+                checker.postAlgorithm();
+            }
+        }
+    }
+
+    @Test
+    public void testATLsCheck6() throws Exception {
+        //通过文件名加载module
+        Env.loadModule("testcases/dc6.smv");
+        SMVModule main = (SMVModule) Env.getModule("main");
+        //为toString程序设置打印模式
+        main.setFullPrintingMode(true);
+
+        String toParse = "";
+
+        toParse += "RTCTL*SPEC  <dc1,dc2,dc3,dc4,dc5,dc6>F(number=0 -> (dc1.paid | dc2.paid | dc3.paid | dc4.paid | dc5.paid | dc6.paid));";
+
+        Spec[] specs = Env.loadSpecString(toParse);
+
+        assert (specs != null) && (specs.length > 0);
+        for (Spec spec : specs) {
+            if (spec.getLanguage() == InternalSpecLanguage.RTCTLs) {
+                ATLStarModelCheckAlg checker = new ATLStarModelCheckAlg(main, spec);
+                checker.preAlgorithm();
+                LoggerUtil.info(checker.doAlgorithm().resultString());
+                checker.postAlgorithm();
+            }
+        }
+    }
+
+    @Test
+    public void testATLsCheck7() throws Exception {
+        //通过文件名加载module
+        Env.loadModule("testcases/dc7.smv");
+        SMVModule main = (SMVModule) Env.getModule("main");
+        //为toString程序设置打印模式
+        main.setFullPrintingMode(true);
+
+        String toParse = "";
+
+        toParse += "RTCTL*SPEC  <dc1,dc2,dc3,dc4,dc5,dc6,dc7>F(number=0 -> (dc1.paid | dc2.paid | dc3.paid | dc4.paid | dc5.paid | dc6.paid | dc7.paid));";
+
+        Spec[] specs = Env.loadSpecString(toParse);
+
+        assert (specs != null) && (specs.length > 0);
+        for (Spec spec : specs) {
+            if (spec.getLanguage() == InternalSpecLanguage.RTCTLs) {
+                ATLStarModelCheckAlg checker = new ATLStarModelCheckAlg(main, spec);
+                checker.preAlgorithm();
+                LoggerUtil.info(checker.doAlgorithm().resultString());
+                checker.postAlgorithm();
+            }
+        }
+    }
+
+    @Test
+    public void testATLsCheck8() throws Exception {
+        //通过文件名加载module
+        Env.loadModule("testcases/dc8.smv");
+        SMVModule main = (SMVModule) Env.getModule("main");
+        //为toString程序设置打印模式
+        main.setFullPrintingMode(true);
+
+        String toParse = "";
+
+        toParse += "RTCTL*SPEC  <dc1,dc2,dc3,dc4,dc5,dc6,dc7,dc8>F(number=0 -> (dc1.paid | dc2.paid | dc3.paid | dc4.paid | dc5.paid | dc6.paid | dc7.paid | dc8.paid));";
+
+        Spec[] specs = Env.loadSpecString(toParse);
+
+        assert (specs != null) && (specs.length > 0);
+        for (Spec spec : specs) {
+            if (spec.getLanguage() == InternalSpecLanguage.RTCTLs) {
+                ATLStarModelCheckAlg checker = new ATLStarModelCheckAlg(main, spec);
+                checker.preAlgorithm();
+                LoggerUtil.info(checker.doAlgorithm().resultString());
+                checker.postAlgorithm();
+            }
+        }
+    }
+
+    @Test
+    public void testATLsCheck9() throws Exception {
+        //通过文件名加载module
+        Env.loadModule("testcases/dc9.smv");
+        SMVModule main = (SMVModule) Env.getModule("main");
+        //为toString程序设置打印模式
+        main.setFullPrintingMode(true);
+
+        String toParse = "";
+
+        toParse += "RTCTL*SPEC  <dc1,dc2,dc3,dc4,dc5,dc6,dc7,dc8,dc9>F(number=0 -> (dc1.paid | dc2.paid | dc3.paid | dc4.paid | dc5.paid | dc6.paid | dc7.paid | dc8.paid | dc9.paid));";
+
+        Spec[] specs = Env.loadSpecString(toParse);
+
+        assert (specs != null) && (specs.length > 0);
+        for (Spec spec : specs) {
+            if (spec.getLanguage() == InternalSpecLanguage.RTCTLs) {
+                ATLStarModelCheckAlg checker = new ATLStarModelCheckAlg(main, spec);
+                checker.preAlgorithm();
+                LoggerUtil.info(checker.doAlgorithm().resultString());
+                checker.postAlgorithm();
+            }
+        }
+    }
+
+    @Test
+    public void testATLsCheck10() throws Exception {
+        //通过文件名加载module
+        Env.loadModule("testcases/dc10.smv");
+        SMVModule main = (SMVModule) Env.getModule("main");
+        //为toString程序设置打印模式
+        main.setFullPrintingMode(true);
+
+        String toParse = "";
+
+        toParse += "RTCTL*SPEC  <dc1,dc2,dc3,dc4,dc5,dc6,dc7,dc8,dc9,dc10>F(number=0 -> (dc1.paid | dc2.paid | dc3.paid | dc4.paid | dc5.paid | dc6.paid | dc7.paid | dc8.paid | dc9.paid | dc10.paid));";
+
+        Spec[] specs = Env.loadSpecString(toParse);
+
+        assert (specs != null) && (specs.length > 0);
+        for (Spec spec : specs) {
+            if (spec.getLanguage() == InternalSpecLanguage.RTCTLs) {
+                ATLStarModelCheckAlg checker = new ATLStarModelCheckAlg(main, spec);
+                checker.preAlgorithm();
+                LoggerUtil.info(checker.doAlgorithm().resultString());
+                checker.postAlgorithm();
+            }
+        }
+    }
+
+    @Test
+    public void testATLsCheck11() throws Exception {
+        //通过文件名加载module
+        Env.loadModule("testcases/dc11.smv");
+        SMVModule main = (SMVModule) Env.getModule("main");
+        //为toString程序设置打印模式
+        main.setFullPrintingMode(true);
+
+        String toParse = "";
+
+        toParse += "RTCTL*SPEC  <dc1,dc2,dc3,dc4,dc5,dc6,dc7,dc8,dc9,dc10,dc11>F(number=0 -> (dc1.paid | dc2.paid | dc3.paid | dc4.paid | dc5.paid | dc6.paid | dc7.paid | dc8.paid | dc9.paid | dc10.paid | dc11.paid));";
+
+        Spec[] specs = Env.loadSpecString(toParse);
+
+        assert (specs != null) && (specs.length > 0);
+        for (Spec spec : specs) {
+            if (spec.getLanguage() == InternalSpecLanguage.RTCTLs) {
+                ATLStarModelCheckAlg checker = new ATLStarModelCheckAlg(main, spec);
+                checker.preAlgorithm();
+                LoggerUtil.info(checker.doAlgorithm().resultString());
+                checker.postAlgorithm();
+            }
+        }
+    }
+
+    @Test
+    public void testATLsCheck12() throws Exception {
+        //通过文件名加载module
+        Env.loadModule("testcases/dc12.smv");
+        SMVModule main = (SMVModule) Env.getModule("main");
+        //为toString程序设置打印模式
+        main.setFullPrintingMode(true);
+
+        String toParse = "";
+
+        toParse += "RTCTL*SPEC  <dc1,dc2,dc3,dc4,dc5,dc6,dc7,dc8,dc9,dc10,dc11,dc12>F(number=0 -> (dc1.paid | dc2.paid | dc3.paid | dc4.paid | dc5.paid | dc6.paid | dc7.paid | dc8.paid | dc9.paid | dc10.paid | dc11.paid | dc12.paid));";
+
+        Spec[] specs = Env.loadSpecString(toParse);
+
+        assert (specs != null) && (specs.length > 0);
+        for (Spec spec : specs) {
+            if (spec.getLanguage() == InternalSpecLanguage.RTCTLs) {
+                ATLStarModelCheckAlg checker = new ATLStarModelCheckAlg(main, spec);
+                checker.preAlgorithm();
+                LoggerUtil.info(checker.doAlgorithm().resultString());
+                checker.postAlgorithm();
+            }
+        }
+    }
+
+    @Test
+    public void testATLsCheck13() throws Exception {
+        //通过文件名加载module
+        Env.loadModule("testcases/dc13.smv");
+        SMVModule main = (SMVModule) Env.getModule("main");
+        //为toString程序设置打印模式
+        main.setFullPrintingMode(true);
+
+        String toParse = "";
+
+        toParse += "RTCTL*SPEC  <dc1,dc2,dc3,dc4,dc5,dc6,dc7,dc8,dc9,dc10,dc11,dc12,dc13>F(number=0 -> (dc1.paid | dc2.paid | dc3.paid | dc4.paid | dc5.paid | dc6.paid | dc7.paid | dc8.paid | dc9.paid | dc10.paid | dc11.paid | dc12.paid | dc13.paid));";
 
         Spec[] specs = Env.loadSpecString(toParse);
 

@@ -6,6 +6,7 @@ import edu.wis.jtlv.env.module.ModuleException;
 import edu.wis.jtlv.env.module.SMVModule;
 import edu.wis.jtlv.env.spec.Spec;
 import edu.wis.jtlv.env.spec.SpecException;
+import edu.wis.jtlv.lib.mc.ATLstar.ATLStarModelCheckAlg;
 import edu.wis.jtlv.lib.mc.ModelCheckAlgException;
 import edu.wis.jtlv.lib.mc.RTCDLs_old.RTCDLs_ModelCheckAlg;
 import edu.wis.jtlv.lib.mc.RTCTLs.RTCTLs_ModelCheckAlg;
@@ -472,6 +473,7 @@ public class MCTKFrame extends JFrame implements MouseListener, ActionListener, 
 		JComboBox logicComboBox = new JComboBox();
 		logicComboBox.addItem("RTCTL*");
 		logicComboBox.addItem("RTCDL*");
+		logicComboBox.addItem("ATL*");
 		c.setCellEditor(new DefaultCellEditor(logicComboBox));
 
 		setColumnSize(specsTable,colSpec,1000,30,3000);

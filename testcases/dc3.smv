@@ -6,7 +6,7 @@ VAR
   dc1 : DC(coin1, coin2, dc2.said, dc3.said);
   dc2 : DC(coin2, coin3, dc1.said, dc3.said);
   dc3 : DC(coin3, coin1, dc1.said, dc2.said);
-  INIT (dc1.paid + dc2.paid + dc3.paid)<=1   ;
+  INIT (dc1.paid + dc2.paid + dc3.paid)<=1;
   --INIT (!dc1.paid & !dc2.paid & !dc3.paid)|(dc1.paid & !dc2.paid & !dc3.paid)
     --  |(!dc1.paid & dc2.paid & !dc3.paid)|(!dc1.paid & dc2.paid & !dc3.paid);
   TRANS next(coin1)=coin1 &
